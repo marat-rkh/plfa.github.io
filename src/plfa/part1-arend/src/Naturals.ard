@@ -1,0 +1,34 @@
+\module custom-naturals \where {
+  \data Nat
+    | zero
+    | suc Nat
+
+  -- | Exercise seven (practice)
+  -- | Write out 7 in longhand.
+  \func seven : Nat => suc (suc (suc (suc (suc (suc (suc zero))))))
+}
+
+\module custom-plus \where {
+  \func \infixl 6 + (n m : Nat) : Nat \elim n
+    | zero => m
+    | suc n => suc (n + m)
+}
+
+\open Nat (+)
+\import Paths (==<, qed)
+
+-- TODO type inference doesn't work without explicit signatures
+\func \infixr 2 ==[] {A : \Type} (a : A) {a' : A} (p : a = a') : a = a' => a ==< p
+\func \fix 3 qed' {A : \Type} (a : A) : a = a => qed a
+
+\func f : 2 + 3 = 5 =>
+  2 + 3
+    ==[]
+  suc (1 + 3)
+    ==[]
+  suc (suc (0 + 3))
+    ==[]
+  suc (suc 3)
+    ==[]
+  5
+    `qed
