@@ -35,3 +35,6 @@ auto/
 out/
 *.zip
 versions/plfa.github.io-web-*/
+
+# Arend bin files
+*.arc
