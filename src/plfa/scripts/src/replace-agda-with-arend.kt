@@ -48,13 +48,7 @@ private fun replace(agdaFilesPath: Path, arendFilesPath: Path) {
         val parsedPairs = parsedEntries.filterNotNull()
         var agdaFileText = Files.readString(agda)
         parsedPairs.forEach { (key, arendCode) ->
-            agdaFileText = agdaFileText.replaceFirst("""```
-                |$key
-                |```
-            """.trimMargin(), """```
-                |$arendCode
-                |```
-            """.trimMargin())
+            agdaFileText = agdaFileText.replaceFirst("```\n$key\n```", "```\n$arendCode\n```")
         }
         Files.writeString(agda, agdaFileText)
         println("INFO: replaced $agda")
