@@ -20,14 +20,8 @@ open Eq using (_≡_; refl)
 open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _∎)
 Agda-}
 
-\import Paths (==<, qed)
-
--- TODO type inference doesn't work without explicit signatures
--- TODO extract these to a separate package
-
-\func \infixr 2 ==<> {A : \Type} (a : A) {a' : A} (p : a = a') : a = a' => a ==< p
-
-\func \fix 3 qed' {A : \Type} (a : A) : a = a => qed a
+\import Paths (qed)
+\import util.Paths (==<>)
 
 {-Agda
 _+_ : ℕ → ℕ → ℕ

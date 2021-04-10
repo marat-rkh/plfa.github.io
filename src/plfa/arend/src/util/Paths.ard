@@ -1,0 +1,3 @@
+\import Paths (==<)
+
+\func \infixr 2 ==<> {A : \Type} (a : A) {a' : A} (p : a = a') : a = a' => a ==< p
