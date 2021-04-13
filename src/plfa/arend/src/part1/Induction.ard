@@ -10,3 +10,65 @@ Agda-}
 \import Paths (==<, >==, qed)
 \open Nat (+, *)
 \import Arith.Nat (-')
+
+{-Agda
+_ : (3 + 4) + 5 ≡ 3 + (4 + 5)
+_ =
+  begin
+    (3 + 4) + 5
+  ≡⟨⟩
+    7 + 5
+  ≡⟨⟩
+    12
+  ≡⟨⟩
+    3 + 9
+  ≡⟨⟩
+    3 + (4 + 5)
+  ∎
+Agda-}
+
+\func assoc-example : (3 + 4) + 5 = 3 + (4 + 5) =>
+  (3 + 4) + 5 ==<>
+  7 + 5 ==<>
+  12 ==<>
+  3 + 9 ==<>
+  3 + (4 + 5) `qed
+
+{-Agda
++-assoc : ∀ (m n p : ℕ) → (m + n) + p ≡ m + (n + p)
++-assoc zero n p =
+  begin
+    (zero + n) + p
+  ≡⟨⟩
+    n + p
+  ≡⟨⟩
+    zero + (n + p)
+  ∎
++-assoc (suc m) n p =
+  begin
+    (suc m + n) + p
+  ≡⟨⟩
+    suc (m + n) + p
+  ≡⟨⟩
+    suc ((m + n) + p)
+  ≡⟨ cong suc (+-assoc m n p) ⟩
+    suc (m + (n + p))
+  ≡⟨⟩
+    suc m + (n + p)
+  ∎
+Agda-}
+
+-- In constract to Agda, '+' in Arend is defined by eliminating the second argument.
+-- This is why we eliminate 'p' here, not 'm'.
+
+\func +-assoc (m n p : Nat) : (m + n) + p = m + (n + p) \elim p
+  | 0 =>
+    (m + n) + 0 ==<>
+    m + n ==<>
+    m + (n + 0) `qed
+  | suc p =>
+    (m + n) + suc p ==<>
+    suc ((m + n) + p) ==< pmap suc (+-assoc m n p) >==
+    suc (m + (n + p)) ==<>
+    m + suc (n + p) ==<>
+    m + (n + suc p) `qed
