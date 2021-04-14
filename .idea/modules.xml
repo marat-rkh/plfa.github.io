@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/src/plfa/arend/arend.iml" filepath="$PROJECT_DIR$/src/plfa/arend/arend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/plfa/plfa-arend/arend/arend.iml" filepath="$PROJECT_DIR$/src/plfa/plfa-arend/arend/arend.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/plfa.github.io.iml" filepath="$PROJECT_DIR$/.idea/plfa.github.io.iml" />
-      <module fileurl="file://$PROJECT_DIR$/src/plfa/scripts/scripts.iml" filepath="$PROJECT_DIR$/src/plfa/scripts/scripts.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/plfa/plfa-arend/scripts/scripts.iml" filepath="$PROJECT_DIR$/src/plfa/plfa-arend/scripts/scripts.iml" />
     </modules>
   </component>
 </project>
