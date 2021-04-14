@@ -58,7 +58,7 @@ Agda-}
   ∎
 Agda-}
 
--- In constract to Agda, '+' in Arend is defined by eliminating the second argument.
+-- In constract to Agda, '+' in Arend is defined by eliminating the second parameter.
 -- This is why we eliminate 'p' here, not 'm'.
 
 \func +-assoc (m n p : Nat) : (m + n) + p = m + (n + p) \elim p
@@ -72,3 +72,172 @@ Agda-}
     suc (m + (n + p)) ==<>
     m + suc (n + p) ==<>
     m + (n + suc p) `qed
+
+{-Agda
++-assoc-2 : ∀ (n p : ℕ) → (2 + n) + p ≡ 2 + (n + p)
++-assoc-2 n p =
+  begin
+    (2 + n) + p
+  ≡⟨⟩
+    suc (1 + n) + p
+  ≡⟨⟩
+    suc ((1 + n) + p)
+  ≡⟨ cong suc (+-assoc-1 n p) ⟩
+    suc (1 + (n + p))
+  ≡⟨⟩
+    2 + (n + p)
+  ∎
+  where
+  +-assoc-1 : ∀ (n p : ℕ) → (1 + n) + p ≡ 1 + (n + p)
+  +-assoc-1 n p =
+    begin
+      (1 + n) + p
+    ≡⟨⟩
+      suc (0 + n) + p
+    ≡⟨⟩
+      suc ((0 + n) + p)
+    ≡⟨ cong suc (+-assoc-0 n p) ⟩
+      suc (0 + (n + p))
+    ≡⟨⟩
+      1 + (n + p)
+    ∎
+    where
+    +-assoc-0 : ∀ (n p : ℕ) → (0 + n) + p ≡ 0 + (n + p)
+    +-assoc-0 n p =
+      begin
+        (0 + n) + p
+      ≡⟨⟩
+        n + p
+      ≡⟨⟩
+        0 + (n + p)
+      ∎
+Agda-}
+
+\func +-assoc-2 (m n : Nat) : (m + n) + 2 = m + (n + 2) =>
+  (m + n) + 2 ==<>
+  suc ((m + n) + 1) ==< pmap suc (+-assoc-1 m n) >==
+  suc (m + (n + 1)) ==<>
+  m + suc (n + 1) ==<>
+  m + (n + 2) `qed
+  \where {
+    \func +-assoc-1 (m n : Nat) : (m + n) + 1 = m + (n + 1) =>
+      (m + n) + 1 ==<>
+      suc ((m + n) + 0) ==< pmap suc (+-assoc-0 m n) >==
+      suc (m + (n + 0)) ==<>
+      m + suc (n + 0) ==<>
+      m + (n + 1) `qed
+
+    \func +-assoc-0 (m n : Nat) : (m + n) + 0 = m + (n + 0) =>
+      (m + n) + 0 ==<>
+      m + n ==<>
+      m + (n + 0) `qed
+  }
+
+{-Agda
++-identityʳ : ∀ (m : ℕ) → m + zero ≡ m
++-identityʳ zero =
+  begin
+    zero + zero
+  ≡⟨⟩
+    zero
+  ∎
++-identityʳ (suc m) =
+  begin
+    suc m + zero
+  ≡⟨⟩
+    suc (m + zero)
+  ≡⟨ cong suc (+-identityʳ m) ⟩
+    suc m
+  ∎
+Agda-}
+
+-- We prove left idenitity as '+' is defined by eliminating the second parameter, right identity is trivial for it.
+
+\func +-identity-left (m : Nat) : 0 + m = m
+  | 0 => 0 + 0 ==<> 0 `qed
+  | suc m =>
+    0 + suc m ==<>
+    suc (0 + m) ==< pmap suc (+-identity-left m) >==
+    suc m `qed
+
+-- TODO Does it mean Arend's type checker is "smarter" than Agda's one?
+\func +-identity-left' (m : Nat) : 0 + m = m => idp
+
+{-Agda
++-suc : ∀ (m n : ℕ) → m + suc n ≡ suc (m + n)
++-suc zero n =
+  begin
+    zero + suc n
+  ≡⟨⟩
+    suc n
+  ≡⟨⟩
+    suc (zero + n)
+  ∎
++-suc (suc m) n =
+  begin
+    suc m + suc n
+  ≡⟨⟩
+    suc (m + suc n)
+  ≡⟨ cong suc (+-suc m n) ⟩
+    suc (suc (m + n))
+  ≡⟨⟩
+    suc (suc m + n)
+  ∎
+Agda-}
+
+\func +-suc (m n : Nat) : suc m + n = suc (m + n) \elim n
+  | 0 =>
+    suc m + 0 ==<>
+    suc m ==<>
+    suc (m + 0) `qed
+  | suc n =>
+    suc m + suc n ==<>
+    suc (suc m + n) ==< pmap suc (+-suc m n) >==
+    suc (suc (m + n)) ==<>
+    suc (m + suc n) `qed
+
+\func +-suc' (m n : Nat) : suc m + n = suc (m + n) => idp
+
+{-Agda
++-comm : ∀ (m n : ℕ) → m + n ≡ n + m
++-comm m zero =
+  begin
+    m + zero
+  ≡⟨ +-identityʳ m ⟩
+    m
+  ≡⟨⟩
+    zero + m
+  ∎
++-comm m (suc n) =
+  begin
+    m + suc n
+  ≡⟨ +-suc m n ⟩
+    suc (m + n)
+  ≡⟨ cong suc (+-comm m n) ⟩
+    suc (n + m)
+  ≡⟨⟩
+    suc n + m
+  ∎
+Agda-}
+
+\func +-comm (m n : Nat) : m + n = n + m \elim m
+  | 0 =>
+    0 + n ==< +-identity-left n >==
+    n ==<>
+    n + 0 `qed
+  | suc m =>
+    suc m + n ==< +-suc m n >==
+    suc (m + n) ==< pmap suc (+-comm m n) >==
+    suc (n + m) ==<>
+    n + suc m `qed
+
+\func +-comm' (m n : Nat) : m + n = n + m \elim m
+  | 0 =>
+    0 + n ==<>
+    n ==<>
+    n + 0 `qed
+  | suc m =>
+    suc m + n ==<>
+    suc (m + n) ==< pmap suc (+-comm m n) >==
+    suc (n + m) ==<>
+    n + suc m `qed
