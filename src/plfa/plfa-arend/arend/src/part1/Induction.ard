@@ -6,7 +6,7 @@ open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
 Agda-}
 
 \import Paths (pmap, inv)
-\import util.Paths (==<>)
+\import util.Paths (=<>=)
 \import Paths (==<, >==, qed)
 \open Nat (+, *)
 \import Arith.Nat (-')
@@ -28,10 +28,10 @@ _ =
 Agda-}
 
 \func assoc-example : (3 + 4) + 5 = 3 + (4 + 5) =>
-  (3 + 4) + 5 ==<>
-  7 + 5 ==<>
-  12 ==<>
-  3 + 9 ==<>
+  (3 + 4) + 5 =<>=
+  7 + 5 =<>=
+  12 =<>=
+  3 + 9 =<>=
   3 + (4 + 5) `qed
 
 {-Agda
@@ -63,14 +63,14 @@ Agda-}
 
 \func +-assoc (m n p : Nat) : (m + n) + p = m + (n + p) \elim p
   | 0 =>
-    (m + n) + 0 ==<>
-    m + n ==<>
+    (m + n) + 0 =<>=
+    m + n =<>=
     m + (n + 0) `qed
   | suc p =>
-    (m + n) + suc p ==<>
+    (m + n) + suc p =<>=
     suc ((m + n) + p) ==< pmap suc (+-assoc m n p) >==
-    suc (m + (n + p)) ==<>
-    m + suc (n + p) ==<>
+    suc (m + (n + p)) =<>=
+    m + suc (n + p) =<>=
     m + (n + suc p) `qed
 
 {-Agda
@@ -114,22 +114,22 @@ Agda-}
 Agda-}
 
 \func +-assoc-2 (m n : Nat) : (m + n) + 2 = m + (n + 2) =>
-  (m + n) + 2 ==<>
+  (m + n) + 2 =<>=
   suc ((m + n) + 1) ==< pmap suc (+-assoc-1 m n) >==
-  suc (m + (n + 1)) ==<>
-  m + suc (n + 1) ==<>
+  suc (m + (n + 1)) =<>=
+  m + suc (n + 1) =<>=
   m + (n + 2) `qed
   \where {
     \func +-assoc-1 (m n : Nat) : (m + n) + 1 = m + (n + 1) =>
-      (m + n) + 1 ==<>
+      (m + n) + 1 =<>=
       suc ((m + n) + 0) ==< pmap suc (+-assoc-0 m n) >==
-      suc (m + (n + 0)) ==<>
-      m + suc (n + 0) ==<>
+      suc (m + (n + 0)) =<>=
+      m + suc (n + 0) =<>=
       m + (n + 1) `qed
 
     \func +-assoc-0 (m n : Nat) : (m + n) + 0 = m + (n + 0) =>
-      (m + n) + 0 ==<>
-      m + n ==<>
+      (m + n) + 0 =<>=
+      m + n =<>=
       m + (n + 0) `qed
   }
 
@@ -154,13 +154,14 @@ Agda-}
 -- We prove left idenitity as '+' is defined by eliminating the second parameter, right identity is trivial for it.
 
 \func +-identity-left (m : Nat) : 0 + m = m
-  | 0 => 0 + 0 ==<> 0 `qed
+  | 0 => 0 + 0 =<>= 0 `qed
   | suc m =>
-    0 + suc m ==<>
+    0 + suc m =<>=
     suc (0 + m) ==< pmap suc (+-identity-left m) >==
     suc m `qed
 
 -- TODO Does it mean Arend's type checker is "smarter" than Agda's one?
+
 \func +-identity-left' (m : Nat) : 0 + m = m => idp
 
 {-Agda
@@ -187,13 +188,13 @@ Agda-}
 
 \func +-suc (m n : Nat) : suc m + n = suc (m + n) \elim n
   | 0 =>
-    suc m + 0 ==<>
-    suc m ==<>
+    suc m + 0 =<>=
+    suc m =<>=
     suc (m + 0) `qed
   | suc n =>
-    suc m + suc n ==<>
+    suc m + suc n =<>=
     suc (suc m + n) ==< pmap suc (+-suc m n) >==
-    suc (suc (m + n)) ==<>
+    suc (suc (m + n)) =<>=
     suc (m + suc n) `qed
 
 \func +-suc' (m n : Nat) : suc m + n = suc (m + n) => idp
@@ -223,21 +224,21 @@ Agda-}
 \func +-comm (m n : Nat) : m + n = n + m \elim m
   | 0 =>
     0 + n ==< +-identity-left n >==
-    n ==<>
+    n =<>=
     n + 0 `qed
   | suc m =>
     suc m + n ==< +-suc m n >==
     suc (m + n) ==< pmap suc (+-comm m n) >==
-    suc (n + m) ==<>
+    suc (n + m) =<>=
     n + suc m `qed
 
 \func +-comm' (m n : Nat) : m + n = n + m \elim m
   | 0 =>
-    0 + n ==<>
-    n ==<>
+    0 + n =<>=
+    n =<>=
     n + 0 `qed
   | suc m =>
-    suc m + n ==<>
+    suc m + n =<>=
     suc (m + n) ==< pmap suc (+-comm m n) >==
-    suc (n + m) ==<>
+    suc (n + m) =<>=
     n + suc m `qed
