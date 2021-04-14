@@ -242,3 +242,70 @@ Agda-}
     suc (m + n) ==< pmap suc (+-comm m n) >==
     suc (n + m) =<>=
     n + suc m `qed
+
+{-Agda
++-rearrange : ∀ (m n p q : ℕ) → (m + n) + (p + q) ≡ m + (n + p) + q
++-rearrange m n p q =
+  begin
+    (m + n) + (p + q)
+  ≡⟨ +-assoc m n (p + q) ⟩
+    m + (n + (p + q))
+  ≡⟨ cong (m +_) (sym (+-assoc n p q)) ⟩
+    m + ((n + p) + q)
+  ≡⟨ sym (+-assoc m (n + p) q) ⟩
+    (m + (n + p)) + q
+  ∎
+Agda-}
+
+\func +-rearrange (m n p q : Nat) : (m + n) + (p + q) = m + (n + p) + q =>
+  (m + n) + (p + q) ==< +-assoc m n (p + q) >==
+  m + (n + (p + q)) ==< pmap (m +) (inv (+-assoc n p q)) >==
+  m + ((n + p) + q) ==< inv (+-assoc m (n + p) q) >==
+  (m + (n + p)) + q `qed
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+{-Agda
++-assoc′ : ∀ (m n p : ℕ) → (m + n) + p ≡ m + (n + p)
++-assoc′ zero    n p                          =  refl
++-assoc′ (suc m) n p  rewrite +-assoc′ m n p  =  refl
+Agda-}
+
+\import Paths.Meta (rewrite)
+\import Function.Meta ($)
+
+\func +-assoc' (m n p : Nat) : (m + n) + p = m + (n + p) \elim p
+  | 0 => idp
+  | suc p => rewrite (+-assoc' m n p) idp
+
+{-Agda
++-identity′ : ∀ (n : ℕ) → n + zero ≡ n
++-identity′ zero = refl
++-identity′ (suc n) rewrite +-identity′ n = refl
+
++-suc′ : ∀ (m n : ℕ) → m + suc n ≡ suc (m + n)
++-suc′ zero n = refl
++-suc′ (suc m) n rewrite +-suc′ m n = refl
+
++-comm′ : ∀ (m n : ℕ) → m + n ≡ n + m
++-comm′ m zero rewrite +-identity′ m = refl
++-comm′ m (suc n) rewrite +-suc′ m n | +-comm′ m n = refl
+Agda-}
+
+\func +-identity-left'' (n : Nat) : 0 + n = n \elim n
+  | 0 => idp
+  | suc n => rewrite (+-identity-left'' n) idp
+
+\func +-suc'' (m n : Nat) : m + suc n = suc (m + n) \elim n
+  | 0 => idp
+  | suc n => rewrite (+-suc'' m n) idp
+
+\func +-comm'' (m n : Nat) : m + n = n + m \elim m
+  | 0 => rewrite (+-identity-left'' n) idp
+  | suc m => rewrite (+-suc'' m n) $ rewrite (+-comm'' m n) idp
+
+\func +-comm''' (m n : Nat) : m + n = n + m \elim m
+  | 0 => idp
+  | suc m => rewrite (+-comm'' m n) idp
