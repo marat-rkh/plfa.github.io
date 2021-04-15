@@ -267,6 +267,8 @@ Agda-}
 -- Your code goes here
 Agda-}
 
+-- TODO
+
 {-Agda
 +-assoc′ : ∀ (m n p : ℕ) → (m + n) + p ≡ m + (n + p)
 +-assoc′ zero    n p                          =  refl
@@ -309,3 +311,13 @@ Agda-}
 \func +-comm''' (m n : Nat) : m + n = n + m \elim m
   | 0 => idp
   | suc m => rewrite (+-comm'' m n) idp
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func +-swap (m n p : Nat) : m + (n + p) = n + (m + p) =>
+  m + (n + p) ==< (inv $ +-assoc m n p) >==
+  (m + n) + p ==< (pmap (`+ p) $ +-comm m n) >==
+  (n + m) + p ==< +-assoc n m p >==
+  n + (m + p) `qed
