@@ -321,3 +321,45 @@ Agda-}
   (m + n) + p ==< (pmap (`+ p) $ +-comm m n) >==
   (n + m) + p ==< +-assoc n m p >==
   n + (m + p) `qed
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func *-distrib-+ (m n p : Nat) : p * (m + n) = p * m + p * n \elim n
+  | 0 => idp
+  | suc n =>
+    p * (m + n) + p ==< pmap (`+ p) (*-distrib-+ m n p) >==
+    p * m + p * n + p ==< +-assoc (p * m) (p * n) p >==
+    p * m + (p * n + p) `qed
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func *-assoc (m n p : Nat) : (m * n) * p = m * (n * p) \elim p
+  | 0 => idp
+  | suc p => rewrite (*-distrib-+ (n * p) n m) $ rewrite (*-assoc m n p) idp
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func *-comm (m n : Nat) : m * n = n * m
+  | 0, n => *-left-0 n
+  | suc m, 0 => inv $ *-left-0 m
+  | suc m, suc n =>
+    pmap suc (
+      suc m * n + m  ==< pmap (`+ m) (*-comm (suc m) n) >==
+      n * m + n + m ==< pmap (\lam x => x + n + m) (inv $ *-comm m n) >==
+      m * n + n + m ==< +-assoc (m * n) n m >==
+      m * n + (n + m) ==< pmap (m * n +) (+-comm n m) >==
+      m * n + (m + n) ==< (inv $ +-assoc (m * n) m n) >==
+      m * n + m + n ==< pmap (`+ n) (*-comm m (suc n)) >==
+      suc n * m + n `qed
+    )
+  \where {
+    \func *-left-0 (n : Nat) : 0 * n = 0
+      | 0 => idp
+      | suc n => *-left-0 n
+  }
