@@ -366,3 +366,25 @@ Agda-}
       | 0 => idp
       | suc n => *-left-0 n
   }
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func [0-'n=0] (n : Nat) : 0 -' n = 0 => idp
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func -'+assoc (m n p : Nat): m -' n -' p = m -' (n + p)
+  | m, n, 0 => [n-'0=n] (m -' n)
+  | m, 0, p => rewrite {1} ([n-'0=n] m) idp
+  | 0, n, p => idp
+  | suc m, suc n, p => -'+assoc m n p
+
+  \where {
+    \func [n-'0=n] (n : Nat) : n -' 0 = n
+      | 0 => idp
+      | suc n => idp
+  }
