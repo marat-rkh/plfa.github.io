@@ -388,3 +388,31 @@ Agda-}
       | 0 => idp
       | suc n => idp
   }
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\import util.Nat (^)
+
+\func ^-distrib-left-+ (m n p : Nat) : m ^ (n + p) = (m ^ n) * (m ^ p) \elim n, p
+  | n, 0 => idp
+  | 0, suc p => rewrite {1} (*-comm 1 (m * m ^ p)) idp
+  | suc n, suc p =>
+    m * (m * m ^ (n + p)) ==< rewrite {1} (*-comm m (m ^ (n + p))) idp >==
+    m * (m ^ (n + p) * m) ==< rewrite {1} (^-distrib-left-+ m n p) idp >==
+    m * (m ^ n * m ^ p * m) ==< rewrite {1} (*-assoc (m ^ n) (m ^ p) m) idp >==
+    m * (m ^ n * (m ^ p * m)) ==< rewrite {1} (*-comm (m ^ p) m) idp >==
+    m * (m ^ n * (m * m ^ p)) ==< rewrite {1} (inv $ *-assoc m (m ^ n) (m * m ^ p)) idp >==
+    (m * m ^ n) * (m * m ^ p) `qed
+
+\func ^-distrib-right-* (m n p : Nat) : (m * n) ^ p = (m ^ p) * (n ^ p) \elim p
+  | 0 => idp
+  | suc p =>
+    m * n * (m * n) ^ p ==< rewrite {1} (*-assoc m n ((m * n) ^ p)) idp >==
+    m * (n * (m * n) ^ p) ==< rewrite {1} (*-comm n ((m * n) ^ p)) idp >==
+    m * ((m * n) ^ p * n) ==< rewrite {1} (^-distrib-right-* m n p) idp >==
+    m * (m ^ p * n ^ p * n) ==< rewrite {1} (*-assoc (m ^ p) (n ^ p) n) idp >==
+    m * (m ^ p * (n ^ p * n)) ==< rewrite {1} (*-comm (n ^ p) n) idp >==
+    m * (m ^ p * (n * n ^ p)) ==< rewrite {1} (inv $ *-assoc m (m ^ p) (n * n ^ p)) idp >==
+    m * m ^ p * (n * n ^ p) `qed

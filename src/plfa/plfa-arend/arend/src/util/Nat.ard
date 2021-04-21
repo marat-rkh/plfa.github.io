@@ -1,0 +1,5 @@
+\open Nat (*)
+
+\func \infixr 8 ^ (m n : Nat) : Nat \elim n
+  | 0 => 1
+  | suc y => m * m ^ y
