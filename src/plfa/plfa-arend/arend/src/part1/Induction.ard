@@ -416,3 +416,11 @@ Agda-}
     m * (m ^ p * (n ^ p * n)) ==< rewrite {1} (*-comm (n ^ p) n) idp >==
     m * (m ^ p * (n * n ^ p)) ==< rewrite {1} (inv $ *-assoc m (m ^ p) (n * n ^ p)) idp >==
     m * m ^ p * (n * n ^ p) `qed
+
+\func ^-*-assoc (m n p : Nat) : (m ^ n) ^ p = m ^ (n * p) \elim p
+  | 0 => idp
+  | suc p =>
+    m ^ n * (m ^ n) ^ p ==< rewrite {1} (^-*-assoc m n p) idp >==
+    m ^ n * m ^ (n * p) ==< rewrite {1} (inv $ ^-distrib-left-+ m n (n * p)) idp >==
+    m ^ (n + n * p) ==< rewrite {1} (+-comm n (n * p)) idp >==
+    m ^ (n * p + n) `qed
