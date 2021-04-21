@@ -1,0 +1,21 @@
+\open Nat (+, *)
+
+\data Bin
+  | <>
+  | O Bin
+  | I Bin
+  \where {
+    \func inc (_ : Bin) : Bin
+      | <> => I <>
+      | O b => I b
+      | I b => O (inc b)
+
+    \func to (_ : Nat) : Bin
+      | 0 => <> `O
+      | suc n => inc (to n)
+
+    \func from (_ : Bin) : Nat
+      | <> => 0
+      | O b => 0 + 2 * from b
+      | I b => 1 + 2 * from b
+  }
