@@ -88,3 +88,58 @@ Agda-}
 
 \func inv-z<=n {m : Nat} (p : m <= 0) : m = 0 \elim m
   | 0 => idp
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+-- Your code goes here
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+-- Your code goes here
+
+{-Agda
+≤-refl : ∀ {n : ℕ}
+    -----
+  → n ≤ n
+≤-refl {zero} = z≤n
+≤-refl {suc n} = s≤s ≤-refl
+Agda-}
+
+\func <=-refl {n : Nat} : n <= n
+  | {0} => z<=n
+  | {suc n} => s<=s <=-refl
+
+{-Agda
+≤-trans : ∀ {m n p : ℕ}
+  → m ≤ n
+  → n ≤ p
+    -----
+  → m ≤ p
+≤-trans z≤n       _          =  z≤n
+≤-trans (s≤s m≤n) (s≤s n≤p)  =  s≤s (≤-trans m≤n n≤p)
+Agda-}
+
+-- TODO Agda can pattern match on constructors directly here, Arend cannot.
+-- Moreover, this way of proving is refered as "immensely valuable, and one that we use often".
+
+\func <=-trans {m n p : Nat} (m<=n : m <= n) (n<=p : n <= p) : m <= p
+  | {0}, _, _ => z<=n
+  | {suc m}, {suc n}, {suc p}, s<=s m<=n, s<=s n<=p => s<=s (<=-trans m<=n n<=p)
+
+{-Agda
+≤-trans′ : ∀ (m n p : ℕ)
+  → m ≤ n
+  → n ≤ p
+    -----
+  → m ≤ p
+≤-trans′ zero    _       _       z≤n       _          =  z≤n
+≤-trans′ (suc m) (suc n) (suc p) (s≤s m≤n) (s≤s n≤p)  =  s≤s (≤-trans′ m n p m≤n n≤p)
+Agda-}
+
+\func <=-trans' (m n p : Nat) (m<=n : m <= n) (n<=p : n <= p) : m <= p
+  | 0 , _, _, _, _ => z<=n
+  | suc m, suc n, suc p, s<=s m<=n, s<=s n<=p => s<=s (<=-trans m<=n n<=p)
