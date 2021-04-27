@@ -143,3 +143,115 @@ Agda-}
 \func <=-trans' (m n p : Nat) (m<=n : m <= n) (n<=p : n <= p) : m <= p
   | 0 , _, _, _, _ => z<=n
   | suc m, suc n, suc p, s<=s m<=n, s<=s n<=p => s<=s (<=-trans m<=n n<=p)
+
+{-Agda
+≤-antisym : ∀ {m n : ℕ}
+  → m ≤ n
+  → n ≤ m
+    -----
+  → m ≡ n
+≤-antisym z≤n       z≤n        =  refl
+≤-antisym (s≤s m≤n) (s≤s n≤m)  =  cong suc (≤-antisym m≤n n≤m)
+Agda-}
+
+\func <=-antisym {m n : Nat} (m<=n : m <= n) (n<=m : n <= m) : m = n
+  | {0}, {0}, z<=n, z<=n => idp
+  | {suc n}, {suc m}, s<=s m<=n, s<=s n<=m => pmap suc (<=-antisym m<=n n<=m)
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+-- Your code goes here
+
+{-Agda
+data Total (m n : ℕ) : Set where
+
+  forward :
+      m ≤ n
+      ---------
+    → Total m n
+
+  flipped :
+      n ≤ m
+      ---------
+    → Total m n
+Agda-}
+
+-- TODO It seems like Arend doesn't have a distinction between 'parameters' and 'indices',
+-- all data types are indexed (in Agda terms).
+
+\data Total (m n : Nat)
+  | forward (m <= n)
+  | flipped (n <= m)
+
+{-Agda
+data Total′ : ℕ → ℕ → Set where
+
+  forward′ : ∀ {m n : ℕ}
+    → m ≤ n
+      ----------
+    → Total′ m n
+
+  flipped′ : ∀ {m n : ℕ}
+    → n ≤ m
+      ----------
+    → Total′ m n
+Agda-}
+
+-- Same in Arend.
+
+{-Agda
+≤-total : ∀ (m n : ℕ) → Total m n
+≤-total zero    n                         =  forward z≤n
+≤-total (suc m) zero                      =  flipped z≤n
+≤-total (suc m) (suc n) with ≤-total m n
+...                        | forward m≤n  =  forward (s≤s m≤n)
+...                        | flipped n≤m  =  flipped (s≤s n≤m)
+Agda-}
+
+\func <=-total (m n : Nat) : Total m n
+  | 0, n => forward z<=n
+  | suc m, 0 => flipped z<=n
+  | suc m, suc n => \case <=-total m n \with {
+    | forward m<=n => forward (s<=s m<=n)
+    | flipped n<=m => flipped (s<=s n<=m)
+  }
+
+{-Agda
+≤-total′ : ∀ (m n : ℕ) → Total m n
+≤-total′ zero    n        =  forward z≤n
+≤-total′ (suc m) zero     =  flipped z≤n
+≤-total′ (suc m) (suc n)  =  helper (≤-total′ m n)
+  where
+  helper : Total m n → Total (suc m) (suc n)
+  helper (forward m≤n)  =  forward (s≤s m≤n)
+  helper (flipped n≤m)  =  flipped (s≤s n≤m)
+Agda-}
+
+\func <=-total' (m n : Nat) : Total m n
+  | 0, n => forward z<=n
+  | suc m, 0 => flipped z<=n
+  | suc m, suc n => helper (<=-total' m n)
+  \where {
+    \func helper {m n : Nat} (t : Total m n) : Total (suc m) (suc n) \elim t
+      | forward m<=n => forward (s<=s m<=n)
+      | flipped n<=m => flipped (s<=s n<=m)
+  }
+
+{-Agda
+≤-total″ : ∀ (m n : ℕ) → Total m n
+≤-total″ m       zero                      =  flipped z≤n
+≤-total″ zero    (suc n)                   =  forward z≤n
+≤-total″ (suc m) (suc n) with ≤-total″ m n
+...                        | forward m≤n   =  forward (s≤s m≤n)
+...                        | flipped n≤m   =  flipped (s≤s n≤m)
+Agda-}
+
+\func <=-total'' (m n : Nat) : Total m n
+  | m, 0 => flipped z<=n
+  | 0, suc n => forward z<=n
+  | suc m, suc n => \case <=-total'' m n \with {
+    | forward m<=n => forward (s<=s m<=n)
+    | flipped n<=m => flipped (s<=s n<=m)
+  }
