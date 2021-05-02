@@ -18,7 +18,7 @@ Agda-}
 
 -- Note that each constructor has `m` and `n` as implicit parameters.
 
-\data \infix 4 <= (m n : Nat) \with
+\data \infix 4 <= Nat Nat \with
   | 0, _ => z<=n
   | suc m, suc n => s<=s (m <= n)
 
@@ -328,7 +328,7 @@ data _<_ : ℕ → ℕ → Set where
     → suc m < suc n
 Agda-}
 
-\data \infix 4 < (m n : Nat) \with
+\data \infix 4 < Nat Nat \with
   | 0, suc n => z<s
   | suc m, suc n => s<s (m<n : m < n)
 
