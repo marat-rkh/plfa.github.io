@@ -430,8 +430,41 @@ Agda-}
 -- we would need to refer to them as `even.suc` and `even.odd`.
 
 \data even Nat : \Type \with
-  | 0 => zero
-  | suc n => suc-odd (odd n)
+  | 0 => zero-even
+  | suc n => suc-even (odd n)
 
 \data odd Nat : \Type \with
-  | suc n => suc-even (even n)
+  | suc n => suc-odd (even n)
+
+{-Agda
+e+e≡e : ∀ {m n : ℕ}
+  → even m
+  → even n
+    ------------
+  → even (m + n)
+
+o+e≡o : ∀ {m n : ℕ}
+  → odd m
+  → even n
+    -----------
+  → odd (m + n)
+
+e+e≡e zero     en  =  en
+e+e≡e (suc om) en  =  suc (o+e≡o om en)
+
+o+e≡o (suc em) en  =  suc (e+e≡e em en)
+Agda-}
+
+\func e+e=e {m n : Nat} (em : even m) (en : even n) : even (m + n) \elim m, em
+  | 0, zero-even => en
+  | suc m, suc-even om => suc-even $ o+e=o om en
+
+\func o+e=o {m n : Nat} (om : odd m) (en : even n) : odd (m + n) \elim m, om
+  | suc m, suc-odd em => suc-odd $ e+e=e em en
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func o+o=e {m n : Nat} (om : odd m) (on : odd n) : even (m + n)
+  | {suc m}, {suc n}, suc-odd em, suc-odd en => suc-even $ suc-odd $ e+e=e em en
