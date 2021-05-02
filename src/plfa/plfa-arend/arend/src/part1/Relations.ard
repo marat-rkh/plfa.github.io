@@ -402,3 +402,36 @@ Agda-}
       | {0}, {suc n}, _ => z<s
       | {suc m}, {suc n}, s<s sm<n => s<s $ <-decr-left sm<n
   }
+
+{-Agda
+data even : ℕ → Set
+data odd  : ℕ → Set
+
+data even where
+
+  zero :
+      ---------
+      even zero
+
+  suc  : ∀ {n : ℕ}
+    → odd n
+      ------------
+    → even (suc n)
+
+data odd where
+
+  suc  : ∀ {n : ℕ}
+    → even n
+      -----------
+    → odd (suc n)
+Agda-}
+
+-- Arend does not support overloaded constructors. If we used `suc` instead of `suc-odd` and `suc-even`,
+-- we would need to refer to them as `even.suc` and `even.odd`.
+
+\data even Nat : \Type \with
+  | 0 => zero
+  | suc n => suc-odd (odd n)
+
+\data odd Nat : \Type \with
+  | suc n => suc-even (even n)
