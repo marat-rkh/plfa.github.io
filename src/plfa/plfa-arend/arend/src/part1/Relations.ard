@@ -255,3 +255,150 @@ Agda-}
     | forward m<=n => forward (s<=s m<=n)
     | flipped n<=m => flipped (s<=s n<=m)
   }
+
+{-Agda
++-monoʳ-≤ : ∀ (n p q : ℕ)
+  → p ≤ q
+    -------------
+  → n + p ≤ n + q
++-monoʳ-≤ zero    p q p≤q  =  p≤q
++-monoʳ-≤ (suc n) p q p≤q  =  s≤s (+-monoʳ-≤ n p q p≤q)
+Agda-}
+
+\func +-mono-right-<= (n p q : Nat) (p<=q : p <= q) : n + p <= n + q \elim n
+  | 0 => p<=q
+  | suc n => s<=s (+-mono-right-<= n p q p<=q)
+
+{-Agda
++-monoˡ-≤ : ∀ (m n p : ℕ)
+  → m ≤ n
+    -------------
+  → m + p ≤ n + p
++-monoˡ-≤ m n p m≤n  rewrite +-comm m p | +-comm n p  = +-monoʳ-≤ p m n m≤n
+Agda-}
+
+\import Function.Meta ($)
+\import Paths.Meta (rewrite)
+
+\func +-mono-left-<= (m n p : Nat) (m<=n : m <= n) : m + p <= n + p =>
+  rewrite (+-comm {m} {p}) $ rewrite (+-comm {n} {p}) $ +-mono-right-<= p m n m<=n
+
+{-Agda
++-mono-≤ : ∀ (m n p q : ℕ)
+  → m ≤ n
+  → p ≤ q
+    -------------
+  → m + p ≤ n + q
++-mono-≤ m n p q m≤n p≤q  =  ≤-trans (+-monoˡ-≤ m n p m≤n) (+-monoʳ-≤ n p q p≤q)
+Agda-}
+
+\func +-mono-<= (m n p q : Nat) (m<=n : m <= n) (p<=q : p <= q) : m + p <= n + q =>
+  <=-trans (+-mono-left-<= m n p m<=n) (+-mono-right-<= n p q p<=q)
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\open Nat (*)
+\open NatSemiring (*-comm)
+
+\func *-mono-<= (m n p q : Nat) (m<=n : m <= n) (p<=q : p <= q) : m * p <= n * q =>
+  <=-trans (*-mono-left-<= m n p m<=n) (*-mono-right-<= n p q p<=q)
+  \where {
+    \func *-mono-right-<= (n p q : Nat) (p<=q : p <= q) : n * p <= n * q \elim p, q, p<=q
+      | 0, _, _ => z<=n
+      | suc p, suc q, s<=s p<=q => +-mono-left-<= (n * p) (n * q) n (*-mono-right-<= n p q p<=q)
+
+    \func *-mono-left-<= (m n p : Nat) (m<=n : m <= n) : m * p <= n * p =>
+      rewrite (*-comm {m} {p}) $ rewrite (*-comm {n} {p}) $ *-mono-right-<= p m n m<=n
+  }
+
+{-Agda
+infix 4 _<_
+
+data _<_ : ℕ → ℕ → Set where
+
+  z<s : ∀ {n : ℕ}
+      ------------
+    → zero < suc n
+
+  s<s : ∀ {m n : ℕ}
+    → m < n
+      -------------
+    → suc m < suc n
+Agda-}
+
+\data \infix 4 < (m n : Nat) \with
+  | 0, suc n => z<s
+  | suc m, suc n => s<s (m<n : m < n)
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func <-trans {m n p : Nat} (m<n : m < n) (n<p : n < p) : m < p
+  | {0}, {suc n}, {suc p}, _, _ => z<s
+  | {suc m}, {suc n}, {suc p}, s<s m<n, s<s n<p => s<s (<-trans m<n n<p)
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\data Trichotomy (m n : Nat)
+  | less (m < n)
+  | eq (m = n)
+  | greater (n < m)
+
+\func <-trichotomy (m n : Nat) : Trichotomy m n
+  | 0, 0 => eq idp
+  | 0, suc n => less z<s
+  | suc m, 0 => greater z<s
+  | suc m, suc n => \case <-trichotomy m n \with {
+    | less m<n => less (s<s m<n)
+    | eq m=n => eq $ pmap suc m=n
+    | greater m>n => greater (s<s m>n)
+  }
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func +-mono-< (m n p q : Nat) (m<n : m < n) (p<q : p < q) : m + p < n + q =>
+  <-trans (+-mono-left-< m n p m<n) (+-mono-right-< n p q p<q)
+  \where {
+    \func +-mono-right-< (n p q : Nat) (p<q : p < q) : n + p < n + q \elim n
+      | 0 => p<q
+      | suc n => s<s (+-mono-right-< n p q p<q)
+
+    \func +-mono-left-< (m n p : Nat) (m<n : m < n) : m + p < n + p =>
+      rewrite (+-comm {m} {p}) $ rewrite (+-comm {n} {p}) $ +-mono-right-< p m n m<n
+  }
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func <=-implies-< {m n : Nat} (sm<=n : suc m <= n) : m < n
+  | {0}, {suc n}, _ => z<s
+  | {suc m}, {suc n}, s<=s sm<=n => s<s $ <=-implies-< sm<=n
+
+\func <-implies-<= {m n : Nat} (m<n : m < n) : suc m <= n
+  | {0}, {suc n}, z<s => s<=s z<=n
+  | {suc m}, {suc n}, s<s m<n => s<=s $ <-implies-<= m<n
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func <-trans-revisited {m n p : Nat} (m<n : m < n) (n<p : n < p) : m < p =>
+  \let
+    | ssm<=n => s<=s $ <-implies-<= m<n
+    | sn<=p => <-implies-<= n<p
+    | ssm<=p => <=-trans ssm<=n sn<=p
+    | sm<p => <=-implies-< ssm<=p
+  \in <-decr-left sm<p
+  \where {
+    \func <-decr-left {m n : Nat} (sm<n : suc m < n) : m < n
+      | {0}, {suc n}, _ => z<s
+      | {suc m}, {suc n}, s<s sm<n => s<s $ <-decr-left sm<n
+  }
