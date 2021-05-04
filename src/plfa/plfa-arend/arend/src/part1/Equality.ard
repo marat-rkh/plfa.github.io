@@ -1,0 +1,29 @@
+{-Agda
+data _≡_ {A : Set} (x : A) : A → Set where
+  refl : x ≡ x
+Agda-}
+
+-- Arend is based on HoTT, and equality is not that simple here. See `=` in Prelude.ard.
+
+{-Agda
+sym : ∀ {A : Set} {x y : A}
+  → x ≡ y
+    -----
+  → y ≡ x
+sym refl = refl
+Agda-}
+
+\func sym {A : \Type} {x y : A} (x=y : x = y) : y = x
+  | idp => idp
+
+{-Agda
+trans : ∀ {A : Set} {x y z : A}
+  → x ≡ y
+  → y ≡ z
+    -----
+  → x ≡ z
+trans refl refl  =  refl
+Agda-}
+
+\func trans {A : \Type} {x y z : A} (x=y : x = y) (y=z : y = z) : x = z
+  | idp, idp => idp
