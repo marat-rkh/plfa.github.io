@@ -468,3 +468,52 @@ Agda-}
 
 \func o+o=e {m n : Nat} (om : odd m) (on : odd n) : even (m + n)
   | {suc m}, {suc n}, suc-odd em, suc-odd en => suc-even $ suc-odd $ e+e=e em en
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\import util.Arith.Bin
+\open Bin
+
+\data Can Bin \with
+  | O <> => zero-can
+  | b => one-can (One b)
+
+\data One Bin \with
+  | I <> => one
+  | O b => O-one (One b)
+  | I b => I-one (One b)
+
+\func inc-can {b : Bin} (cn : Can b) : Can (inc b)
+  | {O <>}, zero-can => one-can one
+  | one-can ob => one-can $ inc-one ob
+  \where {
+    \func inc-one {b : Bin} (ob : One b) : One $ inc b
+      | {I <>}, one => O-one one
+      | {O b}, O-one ob => I-one ob
+      | {I b}, I-one ob => O-one $ inc-one ob
+  }
+
+\func to-can {n : Nat} : Can (to n)
+  | {0} => zero-can
+  | {suc n} => inc-can to-can
+
+\func can-to-from-id {b : Bin} (cb : Can b) : to (from b) = b
+  | {O <>}, zero-can => idp
+  | one-can ob => one-to-from-id ob
+  \where {
+    \func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b
+      | {I <>}, one => idp
+      | {O b}, O-one ob => {?}
+      | {I b}, I-one ob => {?}
+
+    \func to-2*sn {n : Nat} : to (2 * suc n) = O (to (suc n))
+      | {0} => idp
+      | {suc n} => rewrite to-2*sn idp
+
+    \func one-from-suc {b : Bin} (ob : One b) : \Sigma (n : Nat) (from b = suc n)
+      | {I <>}, one => (0, idp)
+      | {O b}, O-one ob => {?}
+      | {I b}, I-one ob => {?}
+  }
