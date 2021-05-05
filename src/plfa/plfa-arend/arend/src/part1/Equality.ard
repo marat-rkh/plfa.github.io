@@ -27,3 +27,49 @@ Agda-}
 
 \func trans {A : \Type} {x y z : A} (x=y : x = y) (y=z : y = z) : x = z
   | idp, idp => idp
+
+{-Agda
+cong : ∀ {A B : Set} (f : A → B) {x y : A}
+  → x ≡ y
+    ---------
+  → f x ≡ f y
+cong f refl  =  refl
+Agda-}
+
+\func cong {A B : \Type} (f : A -> B) {x y : A} (x=y : x = y) : f x = f y \elim x=y
+  | idp => idp
+
+{-Agda
+cong₂ : ∀ {A B C : Set} (f : A → B → C) {u x : A} {v y : B}
+  → u ≡ x
+  → v ≡ y
+    -------------
+  → f u v ≡ f x y
+cong₂ f refl refl  =  refl
+Agda-}
+
+\func cong2 {A B C : \Type} (f : A -> B -> C) {u x : A} {v y : B} (u=x : u = x) (v=y : v = y) : f u v = f x y
+\elim u=x, v=y
+  | idp, idp => idp
+
+{-Agda
+cong-app : ∀ {A B : Set} {f g : A → B}
+  → f ≡ g
+    ---------------------
+  → ∀ (x : A) → f x ≡ g x
+cong-app refl x = refl
+Agda-}
+
+\func cong-app {A B : \Type} {f g : A -> B} (f=g : f = g) (x : A) : f x = g x \elim f=g
+  | idp => idp
+
+{-Agda
+subst : ∀ {A : Set} {x y : A} (P : A → Set)
+  → x ≡ y
+    ---------
+  → P x → P y
+subst P refl px = px
+Agda-}
+
+\func subst {A : \Type} {x y : A} (P : A -> \Type) (x=y : x = y) (px : P x) : P y \elim x=y
+  | idp => px
