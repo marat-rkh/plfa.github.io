@@ -73,3 +73,145 @@ Agda-}
 
 \func subst {A : \Type} {x y : A} (P : A -> \Type) (x=y : x = y) (px : P x) : P y \elim x=y
   | idp => px
+
+{-Agda
+module ≡-Reasoning {A : Set} where
+
+  infix  1 begin_
+  infixr 2 _≡⟨⟩_ _≡⟨_⟩_
+  infix  3 _∎
+
+  begin_ : ∀ {x y : A}
+    → x ≡ y
+      -----
+    → x ≡ y
+  begin x≡y  =  x≡y
+
+  _≡⟨⟩_ : ∀ (x : A) {y : A}
+    → x ≡ y
+      -----
+    → x ≡ y
+  x ≡⟨⟩ x≡y  =  x≡y
+
+  _≡⟨_⟩_ : ∀ (x : A) {y z : A}
+    → x ≡ y
+    → y ≡ z
+      -----
+    → x ≡ z
+  x ≡⟨ x≡y ⟩ y≡z  =  trans x≡y y≡z
+
+  _∎ : ∀ (x : A)
+      -----
+    → x ≡ x
+  x ∎  =  refl
+
+open ≡-Reasoning
+Agda-}
+
+-- TODO is there an analogue of module parameters in Arend?
+
+\module =-Reasoning \where {
+  -- TODO this is a hack that emulates prefix unary operator in operator sequence
+  -- This doesn't work: \func \fix 1 begin {A : \Type} {x y : A} (x=y : x = y) : x = y
+
+  \func \infix 10 begin => ()
+
+  \func \infix 1 with {A : \Type} {x y : A} (_ : \Sigma) (x=y : x = y) : x = y => x=y
+
+  \func \infixr 2 =<>= {A : \Type} (x : A) {y : A} (x=y : x = y) : x = y => x=y
+
+  \func \infix 3 ==< {A : \Type} (x : A) {y : A} (x=y : x = y) : x = y => x=y
+
+  \func \infixr 2 >== {A : \Type} {x y z : A} (x=y : x = y) (y=z : y = z) : x = z => trans x=y y=z
+
+  \func \fix 3 qed {A : \Type} (x : A) : x = x => idp
+}
+
+\open =-Reasoning
+
+{-Agda
+trans′ : ∀ {A : Set} {x y z : A}
+  → x ≡ y
+  → y ≡ z
+    -----
+  → x ≡ z
+trans′ {A} {x} {y} {z} x≡y y≡z =
+  begin
+    x
+  ≡⟨ x≡y ⟩
+    y
+  ≡⟨ y≡z ⟩
+    z
+  ∎
+Agda-}
+
+\func trans' {A : \Type} {x y z : A} (x=y : x = y) (y=z : y = z) : x = z =>
+  begin with
+  x ==< x=y >==
+  y ==< y=z >==
+  z `qed
+
+-- We will not use `begin with` below, it doesn't add much.
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+-- Your code goes here
+
+{-Agda
+data ℕ : Set where
+  zero : ℕ
+  suc  : ℕ → ℕ
+
+_+_ : ℕ → ℕ → ℕ
+zero    + n  =  n
+(suc m) + n  =  suc (m + n)
+Agda-}
+
+-- As we use standard equality here, we can simply import definitions.
+
+\open Nat (+)
+
+{-Agda
+postulate
+  +-identity : ∀ (m : ℕ) → m + zero ≡ m
+  +-suc : ∀ (m n : ℕ) → m + suc n ≡ suc (m + n)
+Agda-}
+
+-- Arend doesn't have this. And we don't need them because the typechecker is smart enough.
+
+-- TODO We can write `\open NatSemiring (+-assoc)` but not `\open NatSemiring (zro-left)`. Why?
+
+{-Agda
++-comm : ∀ (m n : ℕ) → m + n ≡ n + m
++-comm m zero =
+  begin
+    m + zero
+  ≡⟨ +-identity m ⟩
+    m
+  ≡⟨⟩
+    zero + m
+  ∎
++-comm m (suc n) =
+  begin
+    m + suc n
+  ≡⟨ +-suc m n ⟩
+    suc (m + n)
+  ≡⟨ cong suc (+-comm m n) ⟩
+    suc (n + m)
+  ≡⟨⟩
+    suc n + m
+  ∎
+Agda-}
+
+\func +-comm (m n : Nat) : m + n = n + m \elim n
+  | 0 =>
+    m + 0 =<>=
+    m =<>=
+    0 + m `qed
+  | suc n =>
+    m + suc n =<>=
+    suc (m + n) ==< cong suc (+-comm m n) >==
+    suc (n + m) =<>=
+    suc n + m `qed
