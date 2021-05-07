@@ -215,3 +215,49 @@ Agda-}
     suc (m + n) ==< cong suc (+-comm m n) >==
     suc (n + m) =<>=
     suc n + m `qed
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\import Order.PartialOrder (Preorder)
+\open Preorder (<=, <=-reflexive, <=-transitive)
+
+\module <=-Reasoning \where {
+  \func \infixr 2 <=[] {A : Preorder} (x : A) {y : A} (x<=y : x <= y) : x <= y => x<=y
+
+  \func \infix 3 <=[ {A : Preorder} (x : A) {y : A} (x<=y : x <= y) : x <= y => x<=y
+
+  \func \infixr 2 ]<= {A : Preorder} {x y z : A} (x<=y : x <= y) (y<=z : y <= z) : x <= z => <=-transitive x<=y y<=z
+
+  \func \fix 3 <=qed {A : Preorder} (x : A) : x <= x => <=-reflexive
+}
+
+\import Arith.Nat (NatLE)
+\open Nat.<=
+\open <=-Reasoning
+\import Function.Meta ($)
+\import Paths.Meta (rewrite)
+
+\func +-mono-right-<= (n p q : Nat) (p<=q : p <= q) : n + p <= n + q \elim n
+  | 0 =>
+    0 + p <=[]
+    p <=[ p<=q ]<=
+    q <=[]
+    0 + q `<=qed
+  | suc n =>
+    suc n + p <=[]
+    suc (n + p) <=[ suc<=suc (+-mono-right-<= n p q p<=q) ]<=
+    suc (n + q) <=[]
+    suc n + q `<=qed
+
+\func +-mono-left-<= (m n p : Nat) (m<=n : m <= n) : m + p <= n + p =>
+  rewrite (+-comm m p) $
+  rewrite (+-comm n p) $
+  p + m <=[ +-mono-right-<= p m n m<=n ]<=
+  p + n `<=qed
+
+\func +-mono-<= (m n p q : Nat) (m<=n : m <= n) (p<=q : p <= q) : m + p <= n + q =>
+  m + p <=[ +-mono-left-<= m n p m<=n ]<=
+  n + p <=[ +-mono-right-<= n p q p<=q ]<=
+  n + q `<=qed
