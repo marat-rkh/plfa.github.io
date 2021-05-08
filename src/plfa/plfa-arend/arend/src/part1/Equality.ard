@@ -261,3 +261,83 @@ Agda-}
   m + p <=[ +-mono-left-<= m n p m<=n ]<=
   n + p <=[ +-mono-right-<= n p q p<=q ]<=
   n + q `<=qed
+
+{-Agda
+data even : ℕ → Set
+data odd  : ℕ → Set
+
+data even where
+
+  even-zero : even zero
+
+  even-suc : ∀ {n : ℕ}
+    → odd n
+      ------------
+    → even (suc n)
+
+data odd where
+  odd-suc : ∀ {n : ℕ}
+    → even n
+      -----------
+    → odd (suc n)
+Agda-}
+
+\data even Nat : \Type \with
+  | 0 => zero-even
+  | suc n => suc-even (odd n)
+
+\data odd Nat : \Type \with
+  | suc n => suc-odd (even n)
+
+{-Agda
+{-# BUILTIN EQUALITY _≡_ #-}
+Agda-}
+
+-- We already use the builtin equality.
+
+{-Agda
+even-comm : ∀ (m n : ℕ)
+  → even (m + n)
+    ------------
+  → even (n + m)
+even-comm m n ev  rewrite +-comm n m  =  ev
+Agda-}
+
+\func even-comm (m n : Nat) (e : even (m + n)) : even (n + m) => rewrite (+-comm n m) e
+
+{-Agda
++-comm′ : ∀ (m n : ℕ) → m + n ≡ n + m
++-comm′ zero    n  rewrite +-identity n             =  refl
++-comm′ (suc m) n  rewrite +-suc n m | +-comm′ m n  =  refl
+Agda-}
+
+\func +-comm' (m n : Nat) : m + n = n + m \elim m
+  | 0 => idp
+  | suc m => rewrite (+-comm' m n) idp
+
+{-Agda
+even-comm′ : ∀ (m n : ℕ)
+  → even (m + n)
+    ------------
+  → even (n + m)
+even-comm′ m n ev with   m + n  | +-comm m n
+...                  | .(n + m) | refl       = ev
+Agda-}
+
+-- TODO it would be nice if the IDE can generate the "signature" of \case when one writes `\case p \with | idp =>`
+-- It could generate `\case a \as x, b \as y, p : x = y \return {?}` for `p : a = b`.
+
+\func even-comm' (m n : Nat) (e : even (m + n)) : even (n + m) =>
+  \case n + m \as x, +-comm m n : m + n = x \return even x \with {
+    | _, idp => e
+  }
+
+{-Agda
+even-comm″ : ∀ (m n : ℕ)
+  → even (m + n)
+    ------------
+  → even (n + m)
+even-comm″ m n  =  subst even (+-comm m n)
+Agda-}
+
+\func even-comm'' (m n : Nat) : even (m + n) -> even (n + m) => subst even (+-comm m n)
