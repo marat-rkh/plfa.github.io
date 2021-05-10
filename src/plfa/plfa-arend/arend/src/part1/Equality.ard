@@ -4,6 +4,7 @@ data _≡_ {A : Set} (x : A) : A → Set where
 Agda-}
 
 -- Arend is based on HoTT, and equality is not that simple here. See `=` in Prelude.ard.
+-- We will use it here.
 
 {-Agda
 sym : ∀ {A : Set} {x y : A}
@@ -425,3 +426,56 @@ Agda-}
     | Qx : Q x => idp
     | Qy : Q y => x=y Q Qx
   \in Qy
+
+{-Agda
+open import Level using (Level; _⊔_) renaming (zero to lzero; suc to lsuc)
+Agda-}
+
+-- Arend uses keywords for the same purposes: \lp, 0, \suc l, \max l1 l2.
+-- See: https://arend-lang.github.io/documentation/language-reference/expressions/universes#level-polymorphism
+
+{-Agda
+data _≡′_ {ℓ : Level} {A : Set ℓ} (x : A) : A → Set ℓ where
+  refl′ : x ≡′ x
+Agda-}
+
+-- We use a builtin equality, it is also universe polymorphic.
+
+{-Agda
+sym′ : ∀ {ℓ : Level} {A : Set ℓ} {x y : A}
+  → x ≡′ y
+    ------
+  → y ≡′ x
+sym′ refl′ = refl′
+Agda-}
+
+-- Our definition of the `sym` above is already polymorphic, the level is inferred automatically.
+-- The definition below is equivalent to the original one.
+
+\func sym' {A : \Type \lp} {x y : A} (x=y : x = y) : y = x
+  | idp => idp
+
+{-Agda
+_≐′_ : ∀ {ℓ : Level} {A : Set ℓ} (x y : A) → Set (lsuc ℓ)
+_≐′_ {ℓ} {A} x y = ∀ (P : A → Set ℓ) → P x → P y
+Agda-}
+
+\func \infix 1 ='=' {A : \Type \lp} (x y : A) : \Type (\suc \lp) =>
+  \Pi (P : A -> \Type \lp) -> P x -> P y
+
+{-Agda
+_∘_ : ∀ {ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set ℓ₁} {B : Set ℓ₂} {C : Set ℓ₃}
+  → (B → C) → (A → B) → A → C
+(g ∘ f) x  =  g (f x)
+Agda-}
+
+\func \infixr 8 o {A B C : \Type} (g : B -> C) (f : A -> B) : A -> C =>
+  \lam x => g (f x)
+
+{-Agda
+-- import Relation.Binary.PropositionalEquality as Eq
+-- open Eq using (_≡_; refl; trans; sym; cong; cong-app; subst)
+-- open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
+Agda-}
+
+-- \import Paths (*>, inv, pmap, transport, ==<, >==, qed)
