@@ -392,3 +392,36 @@ Agda-}
       | Qx : Q x => refl-='= P
       | Qy : Q y => x=y Q Qx
     \in Qy
+
+{-Agda
+≡-implies-≐ : ∀ {A : Set} {x y : A}
+  → x ≡ y
+    -----
+  → x ≐ y
+≡-implies-≐ x≡y P  =  subst P x≡y
+Agda-}
+
+\func =-implies-='= {A : \Type0} {x y : A} (x=y : x = y) : x ='= y =>
+  \lam P => subst P x=y
+
+{-Agda
+≐-implies-≡ : ∀ {A : Set} {x y : A}
+  → x ≐ y
+    -----
+  → x ≡ y
+≐-implies-≡ {A} {x} {y} x≐y  =  Qy
+  where
+    Q : A → Set
+    Q z = x ≡ z
+    Qx : Q x
+    Qx = refl
+    Qy : Q y
+    Qy = x≐y Q Qx
+Agda-}
+
+\func ='=-implies-= {A : \Type0} {x y : A} (x=y : x ='= y) : x = y =>
+  \let
+    | Q : A -> \Type0 => \lam z => x = z
+    | Qx : Q x => idp
+    | Qy : Q y => x=y Q Qx
+  \in Qy
