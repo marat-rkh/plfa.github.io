@@ -47,9 +47,28 @@ private fun replace(agdaFilesPath: Path, arendFilesPath: Path) {
         }
         val parsedPairs = parsedEntries.filterNotNull()
         val agdaFileText = Files.readString(agda)
-        val updatedFileText = parsedPairs.fold(agdaFileText) { fileText, (key, arendCode) ->
-            fileText.replaceFirst("```\n$key\n```", "```\n$arendCode\n```")
-        }
+        val (updatedFileText, _) =
+                parsedPairs.fold(agdaFileText to 0) { (fileText, offset), (key, arendCode) ->
+                    val agdaCode = "```\n$key\n```"
+                    val replacement = """<details><summary>Agda</summary>
+
+```
+$key
+```
+</details>
+
+```
+$arendCode
+```"""
+                    val startOffset = fileText.indexOf(agdaCode, offset)
+                    if (startOffset == -1) {
+                        println("WARNING: the following Agda snippet is not found in $agda:")
+                        println(key)
+                        return@fold fileText to offset
+                    }
+                    val endOffset = startOffset + agdaCode.length
+                    fileText.replaceRange(startOffset, endOffset, replacement) to endOffset
+                }
         Files.writeString(agda, updatedFileText)
         println("INFO: replaced $agda")
     }
