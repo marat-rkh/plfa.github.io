@@ -160,7 +160,7 @@ Agda-}
     suc (0 + m) ==< pmap suc (+-identity-left m) >==
     suc m `qed
 
--- Note that Arend has some additional rules for reduction, and we can simplify the proof to a trivial one.
+-- (!) Note that Arend has some additional rules for reduction, and we can simplify the proof to a trivial one.
 
 \func +-identity-left' (m : Nat) : 0 + m = m => idp
 

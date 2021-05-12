@@ -348,7 +348,7 @@ _≐_ : ∀ {A : Set} (x y : A) → Set₁
 _≐_ {A} x y = ∀ (P : A → Set) → P x → P y
 Agda-}
 
--- Levels are inferred automatically, so we can actually write \Type everywhere.
+-- (!) Levels are inferred automatically, so we can actually write \Type everywhere.
 
 \func \infix 1 ='= {A : \Type0} (x y : A) : \Type1 =>
   \Pi (P : A -> \Type0) -> P x -> P y

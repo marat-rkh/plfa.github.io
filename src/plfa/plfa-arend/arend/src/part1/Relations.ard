@@ -426,7 +426,7 @@ data odd where
     → odd (suc n)
 Agda-}
 
--- Arend does not support overloaded constructors. If we used `suc` instead of `suc-odd` and `suc-even`,
+-- (!) Arend does not support overloaded constructors. If we used `suc` instead of `suc-odd` and `suc-even`,
 -- we would need to refer to them as `even.suc` and `even.odd`.
 
 \data even Nat : \Type \with
