@@ -1,0 +1,94 @@
+{-Agda
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl; cong; cong-app)
+open Eq.≡-Reasoning
+open import Data.Nat using (ℕ; zero; suc; _+_)
+open import Data.Nat.Properties using (+-comm)
+Agda-}
+
+\import Paths (pmap, ==<, >==, qed)
+\open Nat (+)
+\import Arith.Nat (NatSemiring)
+\open NatSemiring (+-comm)
+
+{-Agda
+_∘_ : ∀ {A B C : Set} → (B → C) → (A → B) → (A → C)
+(g ∘ f) x  = g (f x)
+Agda-}
+
+\func \infixr 8 o {A B C : \Type} (g : B -> C) (f : A -> B) (x : A) : C =>
+  g (f x)
+
+\func \infixr 8 o' {A B C : \Type} (g : B -> C) (f : A -> B) : A -> C =>
+  \lam x => g (f x)
+
+{-Agda
+postulate
+  extensionality : ∀ {A B : Set} {f g : A → B}
+    → (∀ (x : A) → f x ≡ g x)
+      -----------------------
+    → f ≡ g
+Agda-}
+
+-- (!) In Arend, we can prove functional extensionality. Informally, it works like this:
+-- 1. `=` is a special case of a type `Path` that has a `path` constructor.
+-- `=` can be viewed as a path between values considered equal.
+-- 2. `path` accepts a function from a special type `I` to the type of values considered equal.
+-- In our case this is `I -> (A -> B)`. The type `I` is an interval that has `left` and `right` contructors.
+-- When we prove equality, we need to provide a function that computes to `f` on the `left`,
+-- and to `g` on the `right`.
+-- 3. Operator `@` computes a path on `I`. For `f x = g x` it computes to `f x` on the `left`,
+-- and to `g x` on the `right`. As a result, `\lam x => (eq x) @ i` is `\lam x => f x` on the `left`,
+-- and `\lam x => g x` on the `right`.
+
+\func extensionality {A B : \Type} {f g : A -> B} (eq : \Pi (x : A) -> f x = g x) : f = g =>
+  path (\lam i => \lam x => (eq x) @ i)
+
+{-Agda
+_+′_ : ℕ → ℕ → ℕ
+m +′ zero  = m
+m +′ suc n = suc (m +′ n)
+Agda-}
+
+-- Builtin `+` is defined by eliminatng the second parameter, so we eliminate the first here.
+
+\func \infixl 6 +' (m n : Nat) : Nat \elim m
+  | 0 => n
+  | suc m => suc (m +' n)
+
+{-Agda
+same-app : ∀ (m n : ℕ) → m +′ n ≡ m + n
+same-app m n rewrite +-comm m n = helper m n
+  where
+  helper : ∀ (m n : ℕ) → m +′ n ≡ n + m
+  helper m zero    = refl
+  helper m (suc n) = cong suc (helper m n)
+Agda-}
+
+\import Paths.Meta (rewrite)
+
+\func same-app (m n : Nat) : m +' n = m + n => rewrite +-comm (helper m n)
+  \where {
+    \func helper (m n : Nat) : m +' n = n + m \elim m
+      | 0 => idp
+      | suc m => pmap suc (helper m n)
+  }
+
+{-Agda
+same : _+′_ ≡ _+_
+same = extensionality (λ m → extensionality (λ n → same-app m n))
+Agda-}
+
+\func same : (+') = (+) => extensionality (\lam m => extensionality (\lam n => same-app m n))
+
+{-Agda
+postulate
+  ∀-extensionality : ∀ {A : Set} {B : A → Set} {f g : ∀(x : A) → B x}
+    → (∀ (x : A) → f x ≡ g x)
+      -----------------------
+    → f ≡ g
+Agda-}
+
+\func Pi-extensionality {A : \Type} {B : A -> \Type} {f g : \Pi (x : A) -> B x}
+                        (eq : \Pi (x : A) -> f x = g x) : f = g =>
+  path (\lam i => \lam x => (eq x) @ i)
