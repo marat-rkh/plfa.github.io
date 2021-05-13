@@ -17,6 +17,7 @@
         <option name="showTypesInLambda" value="true" />
       </ArendPrintingOptions>
     </option>
+    <option name="hierarchyViewType" value="Supertypes of {0}" />
     <option name="librariesRoot" value="$USER_HOME$/.arend/libs" />
   </component>
   <component name="ProjectRootManager">
