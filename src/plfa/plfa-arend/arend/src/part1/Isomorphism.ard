@@ -7,6 +7,7 @@ open import Data.Nat.Properties using (+-comm)
 Agda-}
 
 \import Paths (pmap, ==<, >==, qed)
+\import util.Paths (=<>=)
 \open Nat (+)
 \import Arith.Nat (NatSemiring)
 \open NatSemiring (+-comm)
@@ -133,3 +134,98 @@ to∘from′ (mk-≃′ f g g∘f f∘g) = f∘g
 Agda-}
 
 -- TODO
+
+{-Agda
+≃-refl : ∀ {A : Set}
+    -----
+  → A ≃ A
+≃-refl =
+  record
+    { to      = λ{x → x}
+    ; from    = λ{y → y}
+    ; from∘to = λ{x → refl}
+    ; to∘from = λ{y → refl}
+    }
+Agda-}
+
+\func =~-refl {A : \Type} : A =~ A \cowith
+  | to x => x
+  | from x => x
+  | from-to x => idp
+  | to-from x => idp
+
+-- Alternative syntax with \new:
+
+\func =~-refl' {A : \Type} : A =~ A => \new =~ {
+  | to x => x
+  | from x => x
+  | from-to x => idp
+  | to-from x => idp
+}
+
+{-Agda
+≃-sym : ∀ {A B : Set}
+  → A ≃ B
+    -----
+  → B ≃ A
+≃-sym A≃B =
+  record
+    { to      = from A≃B
+    ; from    = to   A≃B
+    ; from∘to = to∘from A≃B
+    ; to∘from = from∘to A≃B
+    }
+Agda-}
+
+\func =~-sym {A B : \Type} (A=~B : A =~ B) : B =~ A \cowith
+  | to => A=~B.from
+  | from => A=~B.to
+  | from-to => A=~B.to-from
+  | to-from => A=~B.from-to
+
+{-Agda
+≃-trans : ∀ {A B C : Set}
+  → A ≃ B
+  → B ≃ C
+    -----
+  → A ≃ C
+≃-trans A≃B B≃C =
+  record
+    { to       = to   B≃C ∘ to   A≃B
+    ; from     = from A≃B ∘ from B≃C
+    ; from∘to  = λ{x →
+        begin
+          (from A≃B ∘ from B≃C) ((to B≃C ∘ to A≃B) x)
+        ≡⟨⟩
+          from A≃B (from B≃C (to B≃C (to A≃B x)))
+        ≡⟨ cong (from A≃B) (from∘to B≃C (to A≃B x)) ⟩
+          from A≃B (to A≃B x)
+        ≡⟨ from∘to A≃B x ⟩
+          x
+        ∎}
+    ; to∘from = λ{y →
+        begin
+          (to B≃C ∘ to A≃B) ((from A≃B ∘ from B≃C) y)
+        ≡⟨⟩
+          to B≃C (to A≃B (from A≃B (from B≃C y)))
+        ≡⟨ cong (to B≃C) (to∘from A≃B (from B≃C y)) ⟩
+          to B≃C (from B≃C y)
+        ≡⟨ to∘from B≃C y ⟩
+          y
+        ∎}
+     }
+Agda-}
+
+\func =~-trans {A B C : \Type} (A=~B : A =~ B) (B=~C : B =~ C) : A =~ C \cowith
+  | to => B=~C.to o A=~B.to
+  | from => A=~B.from o B=~C.from
+  | from-to x =>
+    (A=~B.from o B=~C.from) ((B=~C.to o A=~B.to) x) =<>=
+    A=~B.from (B=~C.from (B=~C.to (A=~B.to x))) ==< pmap A=~B.from (B=~C.from-to (A=~B.to x)) >==
+    A=~B.from (A=~B.to x) ==< A=~B.from-to x >==
+    x `qed
+  | to-from x =>
+    (B=~C.to o A=~B.to) ((A=~B.from o B=~C.from) x) =<>=
+    B=~C.to (A=~B.to (A=~B.from (B=~C.from x))) ==< pmap B=~C.to (A=~B.to-from (B=~C.from x)) >==
+    B=~C.to (B=~C.from x) ==< B=~C.to-from x >==
+    x `qed
