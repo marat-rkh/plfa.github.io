@@ -310,7 +310,7 @@ Agda-}
 
 \func +-comm''' (m n : Nat) : m + n = n + m \elim m
   | 0 => idp
-  | suc m => rewrite (+-comm'' m n) idp
+  | suc m => rewrite (+-comm''' m n) idp
 
 {-Agda
 -- Your code goes here
