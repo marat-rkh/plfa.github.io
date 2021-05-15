@@ -1,3 +1,6 @@
 \import Paths (==<)
 
 \func \infixr 1 =<>= {A : \Type} (a : A) {a' : A} (p : a = a') : a = a' => a ==< p
+
+\func pmap-app {A B : \Type} {f g : A -> B} (f=g : f = g) (x : A) : f x = g x \elim f=g
+  | idp => idp
