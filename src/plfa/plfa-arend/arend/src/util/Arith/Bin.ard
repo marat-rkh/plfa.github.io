@@ -1,3 +1,6 @@
+\import Paths
+\import Paths.Meta
+\import util.Paths
 \open Nat (+, *)
 
 \data Bin
@@ -18,4 +21,19 @@
       | <> => 0
       | O b => 0 + 2 * from b
       | I b => 1 + 2 * from b
+
+    \func from-inc=suc-from (b : Bin) : from (inc b) = suc (from b)
+      | <> => idp
+      | O b => idp
+      | I b =>
+        2 * from (inc b) ==< rewrite {1} (from-inc=suc-from b) idp >==
+        2 * (1 + (from b)) =<>=
+        2 + (2 * from b) `qed
+
+    \func from-to-id (n : Nat) : from (to n) = n
+      | 0 => idp
+      | suc n =>
+        from (inc (to n)) ==< rewrite {1} (from-inc=suc-from (to n)) idp >==
+        suc (from (to n)) ==< rewrite {1} (from-to-id n) idp >==
+        suc n `qed
   }

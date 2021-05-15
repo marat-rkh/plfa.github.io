@@ -401,3 +401,60 @@ Agda-}
 }
 
 \open <~-Reasoning
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func =~-implies-<~ {A B : \Type} (A=~B : A =~ B) : A <~ B \cowith
+  | to => A=~B.to
+  | from => A=~B.from
+  | from-to => A=~B.from-to
+
+{-Agda
+record _⇔_ (A B : Set) : Set where
+  field
+    to   : A → B
+    from : B → A
+Agda-}
+
+\record \infix 1 <=> (A B : \Type) {
+  | to : A -> B
+  | from : B -> A
+}
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\func <=>-refl {A : \Type} : A <=> A \cowith
+  | to a => a
+  | from a => a
+
+\func <=>-sym {A B : \Type} (A<=>B : A <=> B) : B <=> A \cowith
+  | to => A<=>B.from
+  | from => A<=>B.to
+
+\func <=>-trans {A B C : \Type} (A<=>B : A <=> B) (B<=>C : B <=> C) : A <=> C \cowith
+  | to => B<=>C.to o A<=>B.to
+  | from => A<=>B.from o B<=>C.from
+
+{-Agda
+-- Your code goes here
+Agda-}
+
+\import util.Arith.Bin
+
+\func Bin-embeds-Nat : Nat <~ Bin \cowith
+  | to => Bin.to
+  | from => Bin.from
+  | from-to => Bin.from-to-id
+
+{-Agda
+import Function using (_∘_)
+import Function.Inverse using (_↔_)
+import Function.LeftInverse using (_↞_)
+Agda-}
+
+-- \import Function (o)
+-- \import Equiv (QEquiv, >->)
