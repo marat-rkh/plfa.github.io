@@ -8,8 +8,8 @@ const val specialCommentStart = "{-Agda"
 const val specialCommentEnd = "Agda-}"
 
 fun main() {
-    assert(System.getProperty("user.dir")?.endsWith("plfa/plfa-arend/scripts") ?: false)
-    replace(Path.of("..", "..", "part1"), Path.of("..", "arend/src/part1"))
+    assert(System.getProperty("user.dir")?.endsWith("src/plfa-arend/scripts") ?: false)
+    replace(Path.of("..", "..", "plfa", "part1"), Path.of("..", "arend", "src", "part1"))
 }
 
 private fun replace(agdaFilesPath: Path, arendFilesPath: Path) {
