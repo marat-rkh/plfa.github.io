@@ -7,3 +7,85 @@ Agda-}
 -- one element types correspond to true propositions.
 -- https://arend-lang.github.io/documentation/language-reference/expressions/universes
 -- https://ncatlab.org/nlab/show/propositions+as+types#PropositionsAsSomeTypes
+
+{-Agda
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl)
+open Eq.≡-Reasoning
+open import Data.Nat using (ℕ)
+open import Function using (_∘_)
+open import plfa.part1.Isomorphism using (_≃_; _≲_; extensionality)
+open plfa.part1.Isomorphism.≃-Reasoning
+Agda-}
+
+\import Paths (==<, >==, qed)
+\import Function (o)
+\import util.Equiv (=~, =~-Reasoning)
+\open =~-Reasoning
+\import Equiv (>->)
+\import util.Function (extensionality)
+
+{-Agda
+data _×_ (A B : Set) : Set where
+
+  ⟨_,_⟩ :
+      A
+    → B
+      -----
+    → A × B
+Agda-}
+
+\data \infixr 2 && (A B : \Prop)
+  | both A B
+
+{-Agda
+proj₁ : ∀ {A B : Set}
+  → A × B
+    -----
+  → A
+proj₁ ⟨ x , y ⟩ = x
+
+proj₂ : ∀ {A B : Set}
+  → A × B
+    -----
+  → B
+proj₂ ⟨ x , y ⟩ = y
+Agda-}
+
+\func proj1 {A B : \Prop} (AB : A && B) : A
+  | both a b => a
+
+\func proj2 {A B : \Prop} (AB : A && B) : B
+  | both a b => b
+
+{-Agda
+η-× : ∀ {A B : Set} (w : A × B) → ⟨ proj₁ w , proj₂ w ⟩ ≡ w
+η-× ⟨ x , y ⟩ = refl
+Agda-}
+
+\func eta-&& {A B : \Prop} (w : A && B) : both (proj1 w) (proj2 w) = w
+  | both a b => idp
+
+{-Agda
+record _×′_ (A B : Set) : Set where
+  constructor ⟨_,_⟩′
+  field
+    proj₁′ : A
+    proj₂′ : B
+open _×′_
+Agda-}
+
+\record \infixr 2 &&' (A B : \Prop)
+  | proj1' : A
+  | proj2' : B
+
+\func \infixr 2 &' {A B : \Prop} (a : A) (b : B) : A &&' B \cowith
+  | proj1' => a
+  | proj2' => b
+
+{-Agda
+η-×′ : ∀ {A B : Set} (w : A ×′ B) → ⟨ proj₁′ w , proj₂′ w ⟩′ ≡ w
+η-×′ w = refl
+Agda-}
+
+\func eta-&&' {A B : \Prop} (w : A &&' B) : w.proj1' &' w.proj2' = w => idp

@@ -1,0 +1,11 @@
+\import Equiv
+
+\func \infix 1 =~ (A B : \Type) : \Type => QEquiv {A} {B}
+
+\module =~-Reasoning \where {
+  \func \infix 3 =~< (A : \Type) {B : \Type} (A=~B : QEquiv {A} {B}) : A =~ B => A=~B
+
+  \func \infixr 2 >=~ {A B C : \Type} (A=~B : A =~ B) (B=~C : B =~ C) : A =~ C => transQEquiv A=~B B=~C
+
+  \func \fix 3 =~-qed (A : \Type) : A =~ A => idEquiv
+}
