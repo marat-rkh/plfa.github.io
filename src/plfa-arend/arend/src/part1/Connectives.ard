@@ -1,0 +1,9 @@
+{-Agda
+module plfa.part1.Connectives where
+Agda-}
+
+-- Arend uses a "propositions as some types" aproach to encode logic. There is as a special universe '\Prop'
+-- of types that has at most one element. Empty types correspond to false propositions,
+-- one element types correspond to true propositions.
+-- https://arend-lang.github.io/documentation/language-reference/expressions/universes
+-- https://ncatlab.org/nlab/show/propositions+as+types#PropositionsAsSomeTypes
