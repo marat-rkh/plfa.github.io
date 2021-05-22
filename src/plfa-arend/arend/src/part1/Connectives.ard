@@ -35,8 +35,12 @@ data _×_ (A B : Set) : Set where
     → A × B
 Agda-}
 
-\data \infixr 2 && (A B : \Prop)
-  | both A B
+\data \infixr 2 x (A B : \Type)
+  | prod A B
+
+-- Conjunction is a product over '\Prop'
+
+\func \infixr 2 && (A B : \Prop) : \Prop => A x B
 
 {-Agda
 proj₁ : ∀ {A B : Set}
@@ -52,19 +56,19 @@ proj₂ : ∀ {A B : Set}
 proj₂ ⟨ x , y ⟩ = y
 Agda-}
 
-\func proj1 {A B : \Prop} (AB : A && B) : A
-  | both a b => a
+\func proj1 {A B : \Type} (w : A x B) : A
+  | prod a b => a
 
-\func proj2 {A B : \Prop} (AB : A && B) : B
-  | both a b => b
+\func proj2 {A B : \Type} (w : A x B) : B
+  | prod a b => b
 
 {-Agda
 η-× : ∀ {A B : Set} (w : A × B) → ⟨ proj₁ w , proj₂ w ⟩ ≡ w
 η-× ⟨ x , y ⟩ = refl
 Agda-}
 
-\func eta-&& {A B : \Prop} (w : A && B) : both (proj1 w) (proj2 w) = w
-  | both a b => idp
+\func eta-x {A B : \Type} (w : A x B) : prod (proj1 w) (proj2 w) = w
+  | prod a b => idp
 
 {-Agda
 record _×′_ (A B : Set) : Set where
@@ -75,11 +79,11 @@ record _×′_ (A B : Set) : Set where
 open _×′_
 Agda-}
 
-\record \infixr 2 &&' (A B : \Prop)
+\record \infixr 2 x' (A B : \Type)
   | proj1' : A
   | proj2' : B
 
-\func \infixr 2 &' {A B : \Prop} (a : A) (b : B) : A &&' B \cowith
+\func \infixr 2 prod' {A B : \Type} (a : A) (b : B) : A x' B \cowith
   | proj1' => a
   | proj2' => b
 
@@ -88,4 +92,4 @@ Agda-}
 η-×′ w = refl
 Agda-}
 
-\func eta-&&' {A B : \Prop} (w : A &&' B) : w.proj1' &' w.proj2' = w => idp
+\func eta-&&' {A B : \Type} (w : A x' B) : w.proj1' prod' w.proj2' = w => idp
