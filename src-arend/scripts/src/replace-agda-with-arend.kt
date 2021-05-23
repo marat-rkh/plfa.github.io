@@ -52,12 +52,12 @@ private fun replace(agdaFilesPath: Path, arendFilesPath: Path) {
                     val agdaCode = "```\n$key\n```"
                     val replacement = """<details><summary>Agda</summary>
 
-```{Agda}
+```agda
 $key
 ```
 </details>
 
-```
+```tex
 $arendCode
 ```"""
                     val startOffset = fileText.indexOf(agdaCode, offset)
