@@ -1,10 +1,10 @@
-{-Agda
+{-Agda-
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; cong; cong-app)
 open Eq.≡-Reasoning
 open import Data.Nat using (ℕ; zero; suc; _+_)
 open import Data.Nat.Properties using (+-comm)
-Agda-}
+-Agda-}
 
 \import Paths (pmap, ==<, >==, qed)
 \import util.Paths (=<>=, pmap-app)
@@ -12,10 +12,10 @@ Agda-}
 \import Arith.Nat (NatSemiring)
 \open NatSemiring (+-comm)
 
-{-Agda
+{-Agda-
 _∘_ : ∀ {A B C : Set} → (B → C) → (A → B) → (A → C)
 (g ∘ f) x  = g (f x)
-Agda-}
+-Agda-}
 
 \func \infixr 8 o {A B C : \Type} (g : B -> C) (f : A -> B) (x : A) : C =>
   g (f x)
@@ -23,13 +23,13 @@ Agda-}
 \func \infixr 8 o' {A B C : \Type} (g : B -> C) (f : A -> B) : A -> C =>
   \lam x => g (f x)
 
-{-Agda
+{-Agda-
 postulate
   extensionality : ∀ {A B : Set} {f g : A → B}
     → (∀ (x : A) → f x ≡ g x)
       -----------------------
     → f ≡ g
-Agda-}
+-Agda-}
 
 -- (!) In Arend, we can prove functional extensionality. Informally, it works like this:
 -- 1. `=` is a special case of a type `Path` that has a `path` constructor.
@@ -45,11 +45,11 @@ Agda-}
 \func extensionality {A B : \Type} {f g : A -> B} (eq : \Pi (x : A) -> f x = g x) : f = g =>
   path (\lam i => \lam x => (eq x) @ i)
 
-{-Agda
+{-Agda-
 _+′_ : ℕ → ℕ → ℕ
 m +′ zero  = m
 m +′ suc n = suc (m +′ n)
-Agda-}
+-Agda-}
 
 -- Builtin `+` is defined by eliminatng the second parameter, so we eliminate the first here.
 
@@ -57,14 +57,14 @@ Agda-}
   | 0 => n
   | suc m => suc (m +' n)
 
-{-Agda
+{-Agda-
 same-app : ∀ (m n : ℕ) → m +′ n ≡ m + n
 same-app m n rewrite +-comm m n = helper m n
   where
   helper : ∀ (m n : ℕ) → m +′ n ≡ n + m
   helper m zero    = refl
   helper m (suc n) = cong suc (helper m n)
-Agda-}
+-Agda-}
 
 \import Paths.Meta (rewrite)
 
@@ -75,26 +75,26 @@ Agda-}
       | suc m => pmap suc (helper m n)
   }
 
-{-Agda
+{-Agda-
 same : _+′_ ≡ _+_
 same = extensionality (λ m → extensionality (λ n → same-app m n))
-Agda-}
+-Agda-}
 
 \func same : (+') = (+) => extensionality (\lam m => extensionality (\lam n => same-app m n))
 
-{-Agda
+{-Agda-
 postulate
   ∀-extensionality : ∀ {A : Set} {B : A → Set} {f g : ∀(x : A) → B x}
     → (∀ (x : A) → f x ≡ g x)
       -----------------------
     → f ≡ g
-Agda-}
+-Agda-}
 
 \func Pi-extensionality {A : \Type} {B : A -> \Type} {f g : \Pi (x : A) -> B x}
                         (eq : \Pi (x : A) -> f x = g x) : f = g =>
   path (\lam i => \lam x => (eq x) @ i)
 
-{-Agda
+{-Agda-
 infix 0 _≃_
 record _≃_ (A B : Set) : Set where
   field
@@ -103,7 +103,7 @@ record _≃_ (A B : Set) : Set where
     from∘to : ∀ (x : A) → from (to x) ≡ x
     to∘from : ∀ (y : B) → to (from y) ≡ y
 open _≃_
-Agda-}
+-Agda-}
 
 \record \infix 1 =~ (A B : \Type) {
   | to : A -> B
@@ -112,7 +112,7 @@ Agda-}
   | to-from : \Pi (y : B) -> to (from y) = y
 }
 
-{-Agda
+{-Agda-
 data _≃′_ (A B : Set): Set where
   mk-≃′ : ∀ (to : A → B) →
           ∀ (from : B → A) →
@@ -131,11 +131,11 @@ from∘to′ (mk-≃′ f g g∘f f∘g) = g∘f
 
 to∘from′ : ∀ {A B : Set} → (A≃B : A ≃′ B) → (∀ (y : B) → to′ A≃B (from′ A≃B y) ≡ y)
 to∘from′ (mk-≃′ f g g∘f f∘g) = f∘g
-Agda-}
+-Agda-}
 
 -- TODO
 
-{-Agda
+{-Agda-
 ≃-refl : ∀ {A : Set}
     -----
   → A ≃ A
@@ -146,7 +146,7 @@ Agda-}
     ; from∘to = λ{x → refl}
     ; to∘from = λ{y → refl}
     }
-Agda-}
+-Agda-}
 
 \func =~-refl {A : \Type} : A =~ A \cowith
   | to x => x
@@ -163,7 +163,7 @@ Agda-}
   | to-from x => idp
 }
 
-{-Agda
+{-Agda-
 ≃-sym : ∀ {A B : Set}
   → A ≃ B
     -----
@@ -175,7 +175,7 @@ Agda-}
     ; from∘to = to∘from A≃B
     ; to∘from = from∘to A≃B
     }
-Agda-}
+-Agda-}
 
 \func =~-sym {A B : \Type} (A=~B : A =~ B) : B =~ A \cowith
   | to => A=~B.from
@@ -183,7 +183,7 @@ Agda-}
   | from-to => A=~B.to-from
   | to-from => A=~B.from-to
 
-{-Agda
+{-Agda-
 ≃-trans : ∀ {A B C : Set}
   → A ≃ B
   → B ≃ C
@@ -214,7 +214,7 @@ Agda-}
           y
         ∎}
      }
-Agda-}
+-Agda-}
 
 \func =~-trans {A B C : \Type} (A=~B : A =~ B) (B=~C : B =~ C) : A =~ C \cowith
   | to => B=~C.to o A=~B.to
@@ -230,7 +230,7 @@ Agda-}
     B=~C.to (B=~C.from x) ==< B=~C.to-from x >==
     x `qed
 
-{-Agda
+{-Agda-
 module ≃-Reasoning where
 
   infix  1 ≃-begin_
@@ -256,7 +256,7 @@ module ≃-Reasoning where
   A ≃-∎ = ≃-refl
 
 open ≃-Reasoning
-Agda-}
+-Agda-}
 
 \module =~-Reasoning \where {
   \func \infix 3 =~< (A : \Type) {B : \Type} (A=~B : A =~ B) : A =~ B => A=~B
@@ -268,7 +268,7 @@ Agda-}
 
 \open =~-Reasoning
 
-{-Agda
+{-Agda-
 infix 0 _≲_
 record _≲_ (A B : Set) : Set where
   field
@@ -276,7 +276,7 @@ record _≲_ (A B : Set) : Set where
     from    : B → A
     from∘to : ∀ (x : A) → from (to x) ≡ x
 open _≲_
-Agda-}
+-Agda-}
 
 \record \infix 1 <~ (A B : \Type) {
   | to : A -> B
@@ -284,7 +284,7 @@ Agda-}
   | from-to : \Pi (x : A) -> from (to x) = x
 }
 
-{-Agda
+{-Agda-
 ≲-refl : ∀ {A : Set} → A ≲ A
 ≲-refl =
   record
@@ -307,7 +307,7 @@ Agda-}
           x
         ∎}
      }
-Agda-}
+-Agda-}
 
 \func <~-refl {A : \Type} : A <~ A \cowith
   | to x => x
@@ -323,7 +323,7 @@ Agda-}
     A<~B.from (A<~B.to x) ==< A<~B.from-to x >==
     x `qed
 
-{-Agda
+{-Agda-
 ≲-antisym : ∀ {A B : Set}
   → (A≲B : A ≲ B)
   → (B≲A : B ≲ A)
@@ -347,7 +347,7 @@ Agda-}
           y
         ∎}
     }
-Agda-}
+-Agda-}
 
 \func <~-antisym {A B : \Type}
                  (A<~B : A <~ B)
@@ -364,7 +364,7 @@ Agda-}
       B<~A.from (B<~A.to y) ==< B<~A.from-to y >==
       y `qed
 
-{-Agda
+{-Agda-
 module ≲-Reasoning where
 
   infix  1 ≲-begin_
@@ -390,7 +390,7 @@ module ≲-Reasoning where
   A ≲-∎ = ≲-refl
 
 open ≲-Reasoning
-Agda-}
+-Agda-}
 
 \module <~-Reasoning \where {
   \func \infix 3 <~[ (A : \Type) {B : \Type} (A<~B : A <~ B) : A <~ B => A<~B
@@ -402,30 +402,30 @@ Agda-}
 
 \open <~-Reasoning
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func =~-implies-<~ {A B : \Type} (A=~B : A =~ B) : A <~ B \cowith
   | to => A=~B.to
   | from => A=~B.from
   | from-to => A=~B.from-to
 
-{-Agda
+{-Agda-
 record _⇔_ (A B : Set) : Set where
   field
     to   : A → B
     from : B → A
-Agda-}
+-Agda-}
 
 \record \infix 1 <=> (A B : \Type) {
   | to : A -> B
   | from : B -> A
 }
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func <=>-refl {A : \Type} : A <=> A \cowith
   | to a => a
@@ -439,9 +439,9 @@ Agda-}
   | to => B<=>C.to o A<=>B.to
   | from => A<=>B.from o B<=>C.from
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \import util.Arith.Bin
 
@@ -450,11 +450,11 @@ Agda-}
   | from => Bin.from
   | from-to => Bin.from-to-id
 
-{-Agda
+{-Agda-
 import Function using (_∘_)
 import Function.Inverse using (_↔_)
 import Function.LeftInverse using (_↞_)
-Agda-}
+-Agda-}
 
 -- \import Function (o)
 -- \import Equiv (QEquiv, >->)

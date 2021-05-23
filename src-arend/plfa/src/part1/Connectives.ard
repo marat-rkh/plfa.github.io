@@ -1,6 +1,6 @@
-{-Agda
+{-Agda-
 module plfa.part1.Connectives where
-Agda-}
+-Agda-}
 
 -- Arend uses a "propositions as some types" aproach to encode logic. There is as a special universe '\Prop'
 -- of types that has at most one element. Empty types correspond to false propositions,
@@ -8,7 +8,7 @@ Agda-}
 -- https://arend-lang.github.io/documentation/language-reference/expressions/universes
 -- https://ncatlab.org/nlab/show/propositions+as+types#PropositionsAsSomeTypes
 
-{-Agda
+{-Agda-
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl)
 open Eq.≡-Reasoning
@@ -16,7 +16,7 @@ open import Data.Nat using (ℕ)
 open import Function using (_∘_)
 open import plfa.part1.Isomorphism using (_≃_; _≲_; extensionality)
 open plfa.part1.Isomorphism.≃-Reasoning
-Agda-}
+-Agda-}
 
 \import Paths (==<, >==, qed)
 \import Function (o)
@@ -25,7 +25,7 @@ Agda-}
 \import Equiv (>->)
 \import util.Function (extensionality)
 
-{-Agda
+{-Agda-
 data _×_ (A B : Set) : Set where
 
   ⟨_,_⟩ :
@@ -33,7 +33,7 @@ data _×_ (A B : Set) : Set where
     → B
       -----
     → A × B
-Agda-}
+-Agda-}
 
 \data \infixr 2 x (A B : \Type)
   | prod A B
@@ -42,7 +42,7 @@ Agda-}
 
 \func \infixr 2 && (A B : \Prop) : \Prop => A x B
 
-{-Agda
+{-Agda-
 proj₁ : ∀ {A B : Set}
   → A × B
     -----
@@ -54,7 +54,7 @@ proj₂ : ∀ {A B : Set}
     -----
   → B
 proj₂ ⟨ x , y ⟩ = y
-Agda-}
+-Agda-}
 
 \func proj1 {A B : \Type} (w : A x B) : A
   | prod a b => a
@@ -62,22 +62,22 @@ Agda-}
 \func proj2 {A B : \Type} (w : A x B) : B
   | prod a b => b
 
-{-Agda
+{-Agda-
 η-× : ∀ {A B : Set} (w : A × B) → ⟨ proj₁ w , proj₂ w ⟩ ≡ w
 η-× ⟨ x , y ⟩ = refl
-Agda-}
+-Agda-}
 
 \func eta-x {A B : \Type} (w : A x B) : prod (proj1 w) (proj2 w) = w
   | prod a b => idp
 
-{-Agda
+{-Agda-
 record _×′_ (A B : Set) : Set where
   constructor ⟨_,_⟩′
   field
     proj₁′ : A
     proj₂′ : B
 open _×′_
-Agda-}
+-Agda-}
 
 \record \infixr 2 x' (A B : \Type)
   | proj1' : A
@@ -87,14 +87,14 @@ Agda-}
   | proj1' => a
   | proj2' => b
 
-{-Agda
+{-Agda-
 η-×′ : ∀ {A B : Set} (w : A ×′ B) → ⟨ proj₁′ w , proj₂′ w ⟩′ ≡ w
 η-×′ w = refl
-Agda-}
+-Agda-}
 
 \func eta-&&' {A B : \Type} (w : A x' B) : w.proj1' prod' w.proj2' = w => idp
 
-{-Agda
+{-Agda-
 data Bool : Set where
   true  : Bool
   false : Bool
@@ -103,13 +103,13 @@ data Tri : Set where
   aa : Tri
   bb : Tri
   cc : Tri
-Agda-}
+-Agda-}
 
 \data Bool | true | false
 
 \data Tri | aa | bb | cc
 
-{-Agda
+{-Agda-
 ×-count : Bool × Tri → ℕ
 ×-count ⟨ true  , aa ⟩  =  1
 ×-count ⟨ true  , bb ⟩  =  2
@@ -117,7 +117,7 @@ Agda-}
 ×-count ⟨ false , aa ⟩  =  4
 ×-count ⟨ false , bb ⟩  =  5
 ×-count ⟨ false , cc ⟩  =  6
-Agda-}
+-Agda-}
 
 \func x-count (bt : Bool x Tri) : Nat
   | prod true aa => 1
@@ -127,7 +127,7 @@ Agda-}
   | prod false bb => 5
   | prod false cc => 6
 
-{-Agda
+{-Agda-
 ×-comm : ∀ {A B : Set} → A × B ≃ B × A
 ×-comm =
   record
@@ -136,7 +136,7 @@ Agda-}
     ; from∘to  =  λ{ ⟨ x , y ⟩ → refl }
     ; to∘from  =  λ{ ⟨ y , x ⟩ → refl }
     }
-Agda-}
+-Agda-}
 
 \func x-comm {A B : \Type} : A x B =~ B x A \cowith
   | f (p : A x B) : B x A \with {
@@ -165,7 +165,7 @@ Agda-}
 
 \func x-comm'' {A B : \Type} : A x B = B x A => equiv= x-comm
 
-{-Agda
+{-Agda-
 ×-assoc : ∀ {A B C : Set} → (A × B) × C ≃ A × (B × C)
 ×-assoc =
   record
@@ -174,7 +174,7 @@ Agda-}
     ; from∘to = λ{ ⟨ ⟨ x , y ⟩ , z ⟩ → refl }
     ; to∘from = λ{ ⟨ x , ⟨ y , z ⟩ ⟩ → refl }
     }
-Agda-}
+-Agda-}
 
 \func x-assoc {A B C : \Type} : (A x B) x C =~ A x (B x C) \cowith
   | f (p : (A x B) x C) : A x (B x C) \with {

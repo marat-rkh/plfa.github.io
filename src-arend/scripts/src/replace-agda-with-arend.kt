@@ -4,8 +4,8 @@ import kotlin.streams.*
 
 const val agdaMarkdownExt = ".lagda.md"
 const val arendExt = ".ard"
-const val specialCommentStart = "{-Agda"
-const val specialCommentEnd = "Agda-}"
+const val specialCommentStart = "{-Agda-"
+const val specialCommentEnd = "-Agda-}"
 
 fun main() {
     assert(System.getProperty("user.dir")?.endsWith("src-arend/scripts") ?: false)

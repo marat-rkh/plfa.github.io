@@ -1,45 +1,45 @@
-{-Agda
+{-Agda-
 data ℕ : Set where
   zero : ℕ
   suc  : ℕ → ℕ
-Agda-}
+-Agda-}
 
 \data Nat'
   | zero'
   | suc' Nat'
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func seven : Nat' => suc' (suc' (suc' (suc' (suc' (suc' (suc' zero'))))))
 
-{-Agda
+{-Agda-
 {-# BUILTIN NATURAL ℕ #-}
-Agda-}
+-Agda-}
 
 -- Arend doesn't have this. We will use builtin Nat type below, its definition is equivalent to Nat'
 
-{-Agda
+{-Agda-
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl)
 open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _∎)
-Agda-}
+-Agda-}
 
 \import Paths (qed)
 \import util.Paths (=<>=)
 
-{-Agda
+{-Agda-
 _+_ : ℕ → ℕ → ℕ
 zero + n = n
 (suc m) + n = suc (m + n)
-Agda-}
+-Agda-}
 
 \func \infixl 6 + (m n : Nat) : Nat \elim m
   | zero => n
   | suc m => suc (m + n)
 
-{-Agda
+{-Agda-
 _ : 2 + 3 ≡ 5
 _ =
   begin
@@ -55,7 +55,7 @@ _ =
   ≡⟨⟩    -- is longhand for
     5
   ∎
-Agda-}
+-Agda-}
 
 \func [2+3=5] : 2 + 3 = 5 =>
   2 + 3 =<>=
@@ -65,7 +65,7 @@ Agda-}
   suc (suc (suc (suc (suc zero)))) =<>=
   5 `qed
 
-{-Agda
+{-Agda-
 _ : 2 + 3 ≡ 5
 _ =
   begin
@@ -79,7 +79,7 @@ _ =
   ≡⟨⟩
     5
   ∎
-Agda-}
+-Agda-}
 
 \func [2+3=5]' : 2 + 3 = 5 =>
   2 + 3 =<>=
@@ -88,16 +88,16 @@ Agda-}
   suc (suc 3) =<>=
   5 `qed
 
-{-Agda
+{-Agda-
 _ : 2 + 3 ≡ 5
 _ = refl
-Agda-}
+-Agda-}
 
 \func [2+3=5]'' : 2 + 3 = 5 => idp
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func [3+4=7] : 3 + 4 = 7 =>
   3 + 4 =<>=
@@ -107,17 +107,17 @@ Agda-}
   suc (suc (suc 4)) =<>=
   7 `qed
 
-{-Agda
+{-Agda-
 _*_ : ℕ → ℕ → ℕ
 zero    * n  =  zero
 (suc m) * n  =  n + (m * n)
-Agda-}
+-Agda-}
 
 \func \infixl 7 * (m n : Nat) : Nat \elim m
   | 0 => 0
   | suc m => n + (m * n)
 
-{-Agda
+{-Agda-
 _ =
   begin
     2 * 3
@@ -130,7 +130,7 @@ _ =
   ≡⟨⟩    -- simplify
     6
   ∎
-Agda-}
+-Agda-}
 
 \func [2*3=6] : 2 * 3 = 6 =>
   2 * 3 =<>=
@@ -139,9 +139,9 @@ Agda-}
   3 + (3 + 0) =<>=
   6 `qed
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func [3*4=12] : 3 * 4 = 12 =>
   3 * 4 =<>=
@@ -151,9 +151,9 @@ Agda-}
   4 + (4 + (4 + 0)) =<>=
   12 `qed
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func \infixr 8 ^ (m n : Nat) : Nat \elim n
   | 0 => 1
@@ -168,19 +168,19 @@ Agda-}
   3 * 3 * 3 * 3 * 1 =<>=
   81 `qed
 
-{-Agda
+{-Agda-
 _∸_ : ℕ → ℕ → ℕ
 m     ∸ zero   =  m
 zero  ∸ suc n  =  zero
 suc m ∸ suc n  =  m ∸ n
-Agda-}
+-Agda-}
 
 \func \infixl 6 -' (_ _ : Nat) : Nat
   | m, 0 => m
   | 0, suc n => 0
   | suc m, suc n => m -' n
 
-{-Agda
+{-Agda-
 _ =
   begin
     3 ∸ 2
@@ -191,7 +191,7 @@ _ =
   ≡⟨⟩
     1
   ∎
-Agda-}
+-Agda-}
 
 \func [3-'2=1] : 3 -' 2 = 1 =>
   3 -' 2 =<>=
@@ -199,7 +199,7 @@ Agda-}
   1 -' 0 =<>=
   1 `qed
 
-{-Agda
+{-Agda-
 _ =
   begin
     2 ∸ 3
@@ -210,7 +210,7 @@ _ =
   ≡⟨⟩
     0
   ∎
-Agda-}
+-Agda-}
 
 \func [2-'3=0] : 2 -' 3 = 0 =>
   2 -' 3 =<>=
@@ -218,9 +218,9 @@ Agda-}
   0 -' 1 =<>=
   0 `qed
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func [5-'3=2] : 5 -' 3 = 2 =>
   5 -' 3 =<>=
@@ -236,36 +236,36 @@ Agda-}
   0 -' 2 =<>=
   0 `qed
 
-{-Agda
+{-Agda-
 infixl 6  _+_  _∸_
 infixl 7  _*_
-Agda-}
+-Agda-}
 
 -- In Arend the precedence and associativity is included in the declarations of infix operators, as we have seen above.
 
-{-Agda
+{-Agda-
 {-# BUILTIN NATPLUS _+_ #-}
 {-# BUILTIN NATTIMES _*_ #-}
 {-# BUILTIN NATMINUS _∸_ #-}
-Agda-}
+-Agda-}
 
 -- Arend doesn't have this.
 
-{-Agda
+{-Agda-
 data Bin : Set where
   ⟨⟩ : Bin
   _O : Bin → Bin
   _I : Bin → Bin
-Agda-}
+-Agda-}
 
 \data Bin
   | <>
   | O Bin
   | I Bin
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func inc (_ : Bin) : Bin
   | <> => I <>
@@ -311,9 +311,9 @@ Agda-}
 
 \func from100=4 : from (<> `I `O `O) = 4 => idp
 
-{-Agda
+{-Agda-
 -- import Data.Nat using (ℕ; zero; suc; _+_; _*_; _^_; _∸_)
-Agda-}
+-Agda-}
 
 -- \open Nat (+, *)
 -- \import Arith.Nat (-')

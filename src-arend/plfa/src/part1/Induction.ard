@@ -1,9 +1,9 @@
-{-Agda
+{-Agda-
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; cong; sym)
 open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
-Agda-}
+-Agda-}
 
 \import Paths (pmap, inv)
 \import util.Paths (=<>=)
@@ -11,7 +11,7 @@ Agda-}
 \open Nat (+, *)
 \import Arith.Nat (-')
 
-{-Agda
+{-Agda-
 _ : (3 + 4) + 5 ≡ 3 + (4 + 5)
 _ =
   begin
@@ -25,7 +25,7 @@ _ =
   ≡⟨⟩
     3 + (4 + 5)
   ∎
-Agda-}
+-Agda-}
 
 \func assoc-example : (3 + 4) + 5 = 3 + (4 + 5) =>
   (3 + 4) + 5 =<>=
@@ -34,7 +34,7 @@ Agda-}
   3 + 9 =<>=
   3 + (4 + 5) `qed
 
-{-Agda
+{-Agda-
 +-assoc : ∀ (m n p : ℕ) → (m + n) + p ≡ m + (n + p)
 +-assoc zero n p =
   begin
@@ -56,7 +56,7 @@ Agda-}
   ≡⟨⟩
     suc m + (n + p)
   ∎
-Agda-}
+-Agda-}
 
 -- In constract to Agda, '+' in Arend is defined by eliminating the second parameter.
 -- This is why we eliminate 'p' here, not 'm'.
@@ -73,7 +73,7 @@ Agda-}
     m + suc (n + p) =<>=
     m + (n + suc p) `qed
 
-{-Agda
+{-Agda-
 +-assoc-2 : ∀ (n p : ℕ) → (2 + n) + p ≡ 2 + (n + p)
 +-assoc-2 n p =
   begin
@@ -111,7 +111,7 @@ Agda-}
       ≡⟨⟩
         0 + (n + p)
       ∎
-Agda-}
+-Agda-}
 
 \func +-assoc-2 (m n : Nat) : (m + n) + 2 = m + (n + 2) =>
   (m + n) + 2 =<>=
@@ -133,7 +133,7 @@ Agda-}
       m + (n + 0) `qed
   }
 
-{-Agda
+{-Agda-
 +-identityʳ : ∀ (m : ℕ) → m + zero ≡ m
 +-identityʳ zero =
   begin
@@ -149,7 +149,7 @@ Agda-}
   ≡⟨ cong suc (+-identityʳ m) ⟩
     suc m
   ∎
-Agda-}
+-Agda-}
 
 -- We prove left idenitity as '+' is defined by eliminating the second parameter, right identity is trivial for it.
 
@@ -164,7 +164,7 @@ Agda-}
 
 \func +-identity-left' (m : Nat) : 0 + m = m => idp
 
-{-Agda
+{-Agda-
 +-suc : ∀ (m n : ℕ) → m + suc n ≡ suc (m + n)
 +-suc zero n =
   begin
@@ -184,7 +184,7 @@ Agda-}
   ≡⟨⟩
     suc (suc m + n)
   ∎
-Agda-}
+-Agda-}
 
 \func +-suc (m n : Nat) : suc m + n = suc (m + n) \elim n
   | 0 =>
@@ -199,7 +199,7 @@ Agda-}
 
 \func +-suc' (m n : Nat) : suc m + n = suc (m + n) => idp
 
-{-Agda
+{-Agda-
 +-comm : ∀ (m n : ℕ) → m + n ≡ n + m
 +-comm m zero =
   begin
@@ -219,7 +219,7 @@ Agda-}
   ≡⟨⟩
     suc n + m
   ∎
-Agda-}
+-Agda-}
 
 \func +-comm (m n : Nat) : m + n = n + m \elim m
   | 0 =>
@@ -243,7 +243,7 @@ Agda-}
     suc (n + m) =<>=
     n + suc m `qed
 
-{-Agda
+{-Agda-
 +-rearrange : ∀ (m n p q : ℕ) → (m + n) + (p + q) ≡ m + (n + p) + q
 +-rearrange m n p q =
   begin
@@ -255,7 +255,7 @@ Agda-}
   ≡⟨ sym (+-assoc m (n + p) q) ⟩
     (m + (n + p)) + q
   ∎
-Agda-}
+-Agda-}
 
 \func +-rearrange (m n p q : Nat) : (m + n) + (p + q) = m + (n + p) + q =>
   (m + n) + (p + q) ==< +-assoc m n (p + q) >==
@@ -263,17 +263,17 @@ Agda-}
   m + ((n + p) + q) ==< inv (+-assoc m (n + p) q) >==
   (m + (n + p)) + q `qed
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 -- TODO
 
-{-Agda
+{-Agda-
 +-assoc′ : ∀ (m n p : ℕ) → (m + n) + p ≡ m + (n + p)
 +-assoc′ zero    n p                          =  refl
 +-assoc′ (suc m) n p  rewrite +-assoc′ m n p  =  refl
-Agda-}
+-Agda-}
 
 \import Paths.Meta (rewrite)
 \import Function.Meta ($)
@@ -282,7 +282,7 @@ Agda-}
   | 0 => idp
   | suc p => rewrite (+-assoc' m n p) idp
 
-{-Agda
+{-Agda-
 +-identity′ : ∀ (n : ℕ) → n + zero ≡ n
 +-identity′ zero = refl
 +-identity′ (suc n) rewrite +-identity′ n = refl
@@ -294,7 +294,7 @@ Agda-}
 +-comm′ : ∀ (m n : ℕ) → m + n ≡ n + m
 +-comm′ m zero rewrite +-identity′ m = refl
 +-comm′ m (suc n) rewrite +-suc′ m n | +-comm′ m n = refl
-Agda-}
+-Agda-}
 
 \func +-identity-left'' (n : Nat) : 0 + n = n \elim n
   | 0 => idp
@@ -312,9 +312,9 @@ Agda-}
   | 0 => idp
   | suc m => rewrite (+-comm''' m n) idp
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func +-swap (m n p : Nat) : m + (n + p) = n + (m + p) =>
   m + (n + p) ==< (inv $ +-assoc m n p) >==
@@ -322,9 +322,9 @@ Agda-}
   (n + m) + p ==< +-assoc n m p >==
   n + (m + p) `qed
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func *-distrib-+ (p m n : Nat) : p * (m + n) = p * m + p * n \elim n
   | 0 => idp
@@ -333,9 +333,9 @@ Agda-}
     p * m + p * n + p ==< +-assoc (p * m) (p * n) p >==
     p * m + (p * n + p) `qed
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func *-assoc (m n p : Nat) : (m * n) * p = m * (n * p) \elim p
   | 0 => idp
@@ -344,9 +344,9 @@ Agda-}
     m * (n * p) + m * n ==< (inv $ *-distrib-+ m (n * p) n) >==
     m * (n * p + n) `qed
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func *-comm (m n : Nat) : m * n = n * m
   | 0, n => *-left-0 n
@@ -367,15 +367,15 @@ Agda-}
       | suc n => *-left-0 n
   }
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func [0-'n=0] (n : Nat) : 0 -' n = 0 => idp
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \func -'+assoc (m n p : Nat): m -' n -' p = m -' (n + p)
   | m, n, 0 => [n-'0=n] (m -' n)
@@ -389,9 +389,9 @@ Agda-}
       | suc n => idp
   }
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \import util.Nat (^)
 
@@ -425,9 +425,9 @@ Agda-}
     m ^ (n + n * p) ==< rewrite {1} (+-comm n (n * p)) idp >==
     m ^ (n * p + n) `qed
 
-{-Agda
+{-Agda-
 -- Your code goes here
-Agda-}
+-Agda-}
 
 \import util.Arith.Bin
 \open Bin
