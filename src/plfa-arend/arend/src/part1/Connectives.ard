@@ -93,3 +93,68 @@ Agda-}
 Agda-}
 
 \func eta-&&' {A B : \Type} (w : A x' B) : w.proj1' prod' w.proj2' = w => idp
+
+{-Agda
+data Bool : Set where
+  true  : Bool
+  false : Bool
+
+data Tri : Set where
+  aa : Tri
+  bb : Tri
+  cc : Tri
+Agda-}
+
+\data Bool | true | false
+
+\data Tri | aa | bb | cc
+
+{-Agda
+×-count : Bool × Tri → ℕ
+×-count ⟨ true  , aa ⟩  =  1
+×-count ⟨ true  , bb ⟩  =  2
+×-count ⟨ true  , cc ⟩  =  3
+×-count ⟨ false , aa ⟩  =  4
+×-count ⟨ false , bb ⟩  =  5
+×-count ⟨ false , cc ⟩  =  6
+Agda-}
+
+\func x-count (bt : Bool x Tri) : Nat
+  | prod true aa => 1
+  | prod true bb => 2
+  | prod true cc => 3
+  | prod false aa => 4
+  | prod false bb => 5
+  | prod false cc => 6
+
+{-Agda
+×-comm : ∀ {A B : Set} → A × B ≃ B × A
+×-comm =
+  record
+    { to       =  λ{ ⟨ x , y ⟩ → ⟨ y , x ⟩ }
+    ; from     =  λ{ ⟨ y , x ⟩ → ⟨ x , y ⟩ }
+    ; from∘to  =  λ{ ⟨ x , y ⟩ → refl }
+    ; to∘from  =  λ{ ⟨ y , x ⟩ → refl }
+    }
+Agda-}
+
+\func x-comm {A B : \Type} : A x B =~ B x A \cowith
+  | f (p : A x B) : B x A \with {
+    | prod x y => prod y x
+  }
+  | ret (p : B x A) : A x B \with {
+    | prod y x => prod x y
+  }
+  | ret_f (p : A x B) : ret (f p) = p \with {
+    | prod x y => idp
+  }
+  | f_sec (p : B x A) : f (ret p) = p \with {
+    | prod y x => idp
+  }
+
+-- (!) In Arend, we can prove that product is purely commutative (without isomorphism).
+-- The proof uses builtin function `iso`, which basically states that isomorphism implies equality
+-- (or, better read, equivalence implies identity). This is called the univalence principle.
+
+\func x-comm' {A B : \Type} : A x B = B x A =>
+  path (iso x-comm.f x-comm.ret x-comm.ret_f x-comm.f_sec)
