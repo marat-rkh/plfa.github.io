@@ -158,3 +158,36 @@ Agda-}
 
 \func x-comm' {A B : \Type} : A x B = B x A =>
   path (iso x-comm.f x-comm.ret x-comm.ret_f x-comm.f_sec)
+
+-- The same using a library function `equiv=`
+
+\import Equiv.Sigma (equiv=)
+
+\func x-comm'' {A B : \Type} : A x B = B x A => equiv= x-comm
+
+{-Agda
+×-assoc : ∀ {A B C : Set} → (A × B) × C ≃ A × (B × C)
+×-assoc =
+  record
+    { to      = λ{ ⟨ ⟨ x , y ⟩ , z ⟩ → ⟨ x , ⟨ y , z ⟩ ⟩ }
+    ; from    = λ{ ⟨ x , ⟨ y , z ⟩ ⟩ → ⟨ ⟨ x , y ⟩ , z ⟩ }
+    ; from∘to = λ{ ⟨ ⟨ x , y ⟩ , z ⟩ → refl }
+    ; to∘from = λ{ ⟨ x , ⟨ y , z ⟩ ⟩ → refl }
+    }
+Agda-}
+
+\func x-assoc {A B C : \Type} : (A x B) x C =~ A x (B x C) \cowith
+  | f (p : (A x B) x C) : A x (B x C) \with {
+    | prod (prod a b) c => prod a (prod b c)
+  }
+  | ret (p : A x (B x C)) : (A x B) x C \with {
+    | prod a (prod b c) => prod (prod a b) c
+  }
+  | ret_f (p : (A x B) x C) : ret (f p) = p \with {
+    | prod (prod a b) c => idp
+  }
+  | f_sec (p : A x (B x C)) : f (ret p) = p \with {
+    | prod a (prod b c) => idp
+  }
+
+\func x-assoc' {A B C : \Type} : (A x B) x C = A x (B x C) => equiv= x-assoc
