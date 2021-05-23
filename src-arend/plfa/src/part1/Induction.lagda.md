@@ -1213,27 +1213,6 @@ Show the following three laws
 
 for all `m`, `n`, and `p`.
 
-
-#### Exercise `Bin-laws` (stretch) {name=Bin-laws}
-
-Recall that
-Exercise [Bin](/Naturals/#Bin)
-defines a datatype `Bin` of bitstrings representing natural numbers,
-and asks you to define functions
-
-    inc   : Bin → Bin
-    to    : ℕ → Bin
-    from  : Bin → ℕ
-
-Consider the following laws, where `n` ranges over naturals and `b`
-over bitstrings:
-
-    from (inc b) ≡ suc (from b)
-    to (from b) ≡ b
-    from (to n) ≡ n
-
-For each law: if it holds, prove; if not, give a counterexample.
-
 <details><summary>Agda</summary>
 
 ```agda
@@ -1273,6 +1252,55 @@ For each law: if it holds, prove; if not, give a counterexample.
     m ^ n * m ^ (n * p) ==< rewrite {1} (inv $ ^-distrib-left-+ m n (n * p)) idp >==
     m ^ (n + n * p) ==< rewrite {1} (+-comm n (n * p)) idp >==
     m ^ (n * p + n) `qed
+```
+
+#### Exercise `Bin-laws` (stretch) {name=Bin-laws}
+
+Recall that
+Exercise [Bin](/Naturals/#Bin)
+defines a datatype `Bin` of bitstrings representing natural numbers,
+and asks you to define functions
+
+    inc   : Bin → Bin
+    to    : ℕ → Bin
+    from  : Bin → ℕ
+
+Consider the following laws, where `n` ranges over naturals and `b`
+over bitstrings:
+
+    from (inc b) ≡ suc (from b)
+    to (from b) ≡ b
+    from (to n) ≡ n
+
+For each law: if it holds, prove; if not, give a counterexample.
+
+<details><summary>Agda</summary>
+
+```agda
+-- Your code goes here
+```
+</details>
+
+```tex
+\import util.Arith.Bin
+\open Bin
+
+\func from-inc=suc-from (b : Bin) : from (inc b) = suc (from b)
+  | <> => idp
+  | O b => idp
+  | I b =>
+    2 * from (inc b) ==< rewrite {1} (from-inc=suc-from b) idp >==
+    2 * (1 + (from b)) =<>=
+    2 + (2 * from b) `qed
+
+\func to-from-00-is-0 : to (from (<> `O `O)) = <> `O => idp
+
+\func from-to-id (n : Nat) : from (to n) = n
+  | 0 => idp
+  | suc n =>
+    from (inc (to n)) ==< rewrite {1} (from-inc=suc-from (to n)) idp >==
+    suc (from (to n)) ==< rewrite {1} (from-to-id n) idp >==
+    suc n `qed
 ```
 
 

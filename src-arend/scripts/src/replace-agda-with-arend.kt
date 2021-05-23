@@ -64,6 +64,9 @@ $arendCode
                     if (startOffset == -1) {
                         println("WARNING: the following Agda snippet is not found in $agda:")
                         println(key)
+                        println("Corresponding Arend code snippet:")
+                        println("Corresponding Arend code snippet:")
+                        println(arendCode)
                         return@fold fileText to offset
                     }
                     val endOffset = startOffset + agdaCode.length
