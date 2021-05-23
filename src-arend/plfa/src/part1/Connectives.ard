@@ -191,3 +191,20 @@ data Tri : Set where
   }
 
 \func x-assoc' {A B C : \Type} : (A x B) x C = A x (B x C) => equiv= x-assoc
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import part1.Isomorphism (<=>)
+
+\func <=>=~x {A B : \Type} : (A <=> B) =~ (A -> B) x (B -> A) \cowith
+  | f (A<=>B : A <=> B) : (A -> B) x (B -> A) => prod A<=>B.to A<=>B.from
+  | ret (AxB : (A -> B) x (B -> A)) : A <=> B \cowith {
+    | to => proj1 AxB
+    | from => proj2 AxB
+  }
+  | ret_f (A<=>B : A <=> B) => idp
+  | f_sec (AxB : (A -> B) x (B -> A)) : f (ret AxB) = AxB \with {
+    | prod AB BA => idp
+  }
