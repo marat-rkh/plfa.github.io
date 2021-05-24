@@ -208,3 +208,88 @@ data Tri : Set where
   | f_sec (AxB : (A -> B) x (B -> A)) : f (ret AxB) = AxB \with {
     | prod AB BA => idp
   }
+
+{-Agda-
+data ⊤ : Set where
+
+  tt :
+    --
+    ⊤
+-Agda-}
+
+\data Top | tt
+
+{-Agda-
+η-⊤ : ∀ (w : ⊤) → tt ≡ w
+η-⊤ tt = refl
+-Agda-}
+
+\func eta-Top (w : Top) : tt = w
+  | tt => idp
+
+{-Agda-
+record ⊤′ : Set where
+  constructor tt′
+-Agda-}
+
+\record Top'
+
+\func tt' : Top' \cowith
+
+{-Agda-
+η-⊤′ : ∀ (w : ⊤′) → tt′ ≡ w
+η-⊤′ w = refl
+-Agda-}
+
+\func eta-Top' (w : Top') : tt' = w => idp
+
+{-Agda-
+truth′ : ⊤′
+truth′ = _
+-Agda-}
+
+-- Arend doesn't have this.
+
+{-Agda-
+⊤-count : ⊤ → ℕ
+⊤-count tt = 1
+-Agda-}
+
+\func Top-count (w : Top) : Nat
+  | tt => 1
+
+{-Agda-
+⊤-identityˡ : ∀ {A : Set} → ⊤ × A ≃ A
+⊤-identityˡ =
+  record
+    { to      = λ{ ⟨ tt , x ⟩ → x }
+    ; from    = λ{ x → ⟨ tt , x ⟩ }
+    ; from∘to = λ{ ⟨ tt , x ⟩ → refl }
+    ; to∘from = λ{ x → refl }
+    }
+-Agda-}
+
+\func Top-identity-left {A : \Type} : Top x A =~ A \cowith
+  | f => \lam p => proj2 p
+  | ret => \lam a => prod tt a
+  | ret_f (p : Top x A) : prod tt (proj2 p) = p \with {
+    | prod tt a => idp
+  }
+  | f_sec => \lam a => idp
+
+{-Agda-
+⊤-identityʳ : ∀ {A : Set} → (A × ⊤) ≃ A
+⊤-identityʳ {A} =
+  ≃-begin
+    (A × ⊤)
+  ≃⟨ ×-comm ⟩
+    (⊤ × A)
+  ≃⟨ ⊤-identityˡ ⟩
+    A
+  ≃-∎
+-Agda-}
+
+\func Top-identity-right {A : \Type} : A x Top =~ A =>
+  (A x Top) =~< x-comm >=~
+  (Top x A) =~< Top-identity-left >=~
+  A `=~-qed
