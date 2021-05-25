@@ -293,3 +293,129 @@ truth′ = _
   (A x T) =~< x-comm >=~
   (T x A) =~< T-identity-left >=~
   A `=~-qed
+
+{-Agda-
+data _⊎_ (A B : Set) : Set where
+
+  inj₁ :
+      A
+      -----
+    → A ⊎ B
+
+  inj₂ :
+      B
+      -----
+    → A ⊎ B
+-Agda-}
+
+\data \infixr 1 u (A B : \Type)
+  | inj1 A
+  | inj2 B
+
+-- (!) Note that `u` is not in `\Prop`: even if `A` and `B` are in `\Prop`, `A u B` can have
+-- more than one element. So, we cannot use `u` to encode disjunction in Arend. To fix this,
+-- we can enforce a data definition to be in `\Prop` by using `\truncated` keyword
+-- and explicit `: \Prop` annotation:
+
+\truncated \data \infixr 1 || (A B : \Prop) : \Prop
+  | byLeft A
+  | byRight B
+
+-- Truncating a data has one crucial consequence: any function defined by recursion over a truncated data
+-- must have the codomain lying in the universe of the data. In our case, functions over `A || B`
+-- can only return types in `\Prop`.
+-- See: https://arend-lang.github.io/documentation/language-reference/definitions/data#truncation
+
+{-Agda-
+case-⊎ : ∀ {A B C : Set}
+  → (A → C)
+  → (B → C)
+  → A ⊎ B
+    -----------
+  → C
+case-⊎ f g (inj₁ x) = f x
+case-⊎ f g (inj₂ y) = g y
+-Agda-}
+
+\func case-u {A B C : \Type} (f : A -> C) (g : B -> C) (w : A u B) : C \elim w
+  | inj1 x => f x
+  | inj2 y => g y
+
+{-Agda-
+η-⊎ : ∀ {A B : Set} (w : A ⊎ B) → case-⊎ inj₁ inj₂ w ≡ w
+η-⊎ (inj₁ x) = refl
+η-⊎ (inj₂ y) = refl
+-Agda-}
+
+\func eta-u {A B : \Type} (w : A u B) : case-u inj1 inj2 w = w
+  | inj1 x => idp
+  | inj2 y => idp
+
+{-Agda-
+uniq-⊎ : ∀ {A B C : Set} (h : A ⊎ B → C) (w : A ⊎ B) →
+  case-⊎ (h ∘ inj₁) (h ∘ inj₂) w ≡ h w
+uniq-⊎ h (inj₁ x) = refl
+uniq-⊎ h (inj₂ y) = refl
+-Agda-}
+
+\func uniq-u {A B C : \Type} (h : A u B -> C) (w : A u B) : case-u (h o inj1) (h o inj2) w = h w \elim w
+  | inj1 x => idp
+  | inj2 y => idp
+
+{-Agda-
+⊎-count : Bool ⊎ Tri → ℕ
+⊎-count (inj₁ true)   =  1
+⊎-count (inj₁ false)  =  2
+⊎-count (inj₂ aa)     =  3
+⊎-count (inj₂ bb)     =  4
+⊎-count (inj₂ cc)     =  5
+-Agda-}
+
+\func u-count (w : Bool u Tri) : Nat
+  | inj1 true => 1
+  | inj1 false => 2
+  | inj2 aa => 3
+  | inj2 bb => 4
+  | inj2 cc => 5
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func u-comm {A B : \Type} : (A u B) =~ (B u A) \cowith
+  | f => \lam w => case-u inj2 inj1 w
+  | ret => \lam w => case-u inj2 inj1 w
+  | ret_f (w : A u B) : case-u inj2 inj1 (case-u inj2 inj1 w) = w \with {
+    | inj1 a => idp
+    | inj2 b => idp
+  }
+  | f_sec (w : B u A) : case-u inj2 inj1 (case-u inj2 inj1 w) = w \with {
+    | inj1 a => idp
+    | inj2 b => idp
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func u-assoc {A B C : \Type} : ((A u B) u C) =~ (A u (B u C)) \cowith
+  | f (w : (A u B) u C) : A u B u C \with {
+    | inj1 (inj1 a) => inj1 a
+    | inj1 (inj2 b) => inj2 (inj1 b)
+    | inj2 c => inj2 (inj2 c)
+  }
+  | ret (w : A u B u C) : (A u B) u C \with {
+    | inj1 a => inj1 (inj1 a)
+    | inj2 (inj1 b) => inj1 (inj2 b)
+    | inj2 (inj2 c) => inj2 c
+  }
+  | ret_f (w : (A u B) u C) : ret (f w) = w \with {
+    | inj1 (inj1 a) => idp
+    | inj1 (inj2 b) => idp
+    | inj2 c => idp
+  }
+  | f_sec (w : A u B u C) : f (ret w) = w \with {
+    | inj1 a => idp
+    | inj2 (inj1 b) => idp
+    | inj2 (inj2 c) => idp
+  }
