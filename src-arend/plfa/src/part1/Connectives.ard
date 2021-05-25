@@ -217,14 +217,14 @@ data ⊤ : Set where
     ⊤
 -Agda-}
 
-\data Top | tt
+\data T | tt
 
 {-Agda-
 η-⊤ : ∀ (w : ⊤) → tt ≡ w
 η-⊤ tt = refl
 -Agda-}
 
-\func eta-Top (w : Top) : tt = w
+\func eta-T (w : T) : tt = w
   | tt => idp
 
 {-Agda-
@@ -232,16 +232,16 @@ record ⊤′ : Set where
   constructor tt′
 -Agda-}
 
-\record Top'
+\record T'
 
-\func tt' : Top' \cowith
+\func tt' : T' \cowith
 
 {-Agda-
 η-⊤′ : ∀ (w : ⊤′) → tt′ ≡ w
 η-⊤′ w = refl
 -Agda-}
 
-\func eta-Top' (w : Top') : tt' = w => idp
+\func eta-T' (w : T') : tt' = w => idp
 
 {-Agda-
 truth′ : ⊤′
@@ -255,7 +255,7 @@ truth′ = _
 ⊤-count tt = 1
 -Agda-}
 
-\func Top-count (w : Top) : Nat
+\func T-count (w : T) : Nat
   | tt => 1
 
 {-Agda-
@@ -269,10 +269,10 @@ truth′ = _
     }
 -Agda-}
 
-\func Top-identity-left {A : \Type} : Top x A =~ A \cowith
+\func T-identity-left {A : \Type} : T x A =~ A \cowith
   | f => \lam p => proj2 p
   | ret => \lam a => prod tt a
-  | ret_f (p : Top x A) : prod tt (proj2 p) = p \with {
+  | ret_f (p : T x A) : prod tt (proj2 p) = p \with {
     | prod tt a => idp
   }
   | f_sec => \lam a => idp
@@ -289,7 +289,7 @@ truth′ = _
   ≃-∎
 -Agda-}
 
-\func Top-identity-right {A : \Type} : A x Top =~ A =>
-  (A x Top) =~< x-comm >=~
-  (Top x A) =~< Top-identity-left >=~
+\func T-identity-right {A : \Type} : A x T =~ A =>
+  (A x T) =~< x-comm >=~
+  (T x A) =~< T-identity-left >=~
   A `=~-qed
