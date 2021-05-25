@@ -419,3 +419,59 @@ uniq-⊎ h (inj₂ y) = refl
     | inj2 (inj1 b) => idp
     | inj2 (inj2 c) => idp
   }
+
+{-Agda-
+data ⊥ : Set where
+  -- no clauses!
+-Agda-}
+
+\data _|_
+
+{-Agda-
+⊥-elim : ∀ {A : Set}
+  → ⊥
+    --
+  → A
+⊥-elim ()
+-Agda-}
+
+\func _|_-elim {A : \Type} (e : _|_) : A
+
+{-Agda-
+uniq-⊥ : ∀ {C : Set} (h : ⊥ → C) (w : ⊥) → ⊥-elim w ≡ h w
+uniq-⊥ h ()
+-Agda-}
+
+\func uniq-_|_ {C : \Type} (h : _|_ -> C) (w : _|_) : _|_-elim w = h w
+
+{-Agda-
+⊥-count : ⊥ → ℕ
+⊥-count ()
+-Agda-}
+
+\func _|_-count (e : _|_) : Nat
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func _|_-identity-left {A : \Type} : (_|_ u A) =~ A \cowith
+  | f (w : _|_ u A) : A \with {
+    | inj1 e => _|_-elim e
+    | inj2 a => a
+  }
+  | ret => inj2
+  | ret_f (w : _|_ u A) : inj2 (f w) = w \with {
+    | inj1 e => _|_-elim e
+    | inj2 a => idp
+  }
+  | f_sec => \lam a => idp
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func _|_-identity-right {A : \Type} : (A u _|_) =~ A =>
+  (A u _|_) =~< u-comm >=~
+  (_|_ u A) =~< _|_-identity-left >=~
+  A `=~-qed
