@@ -475,3 +475,79 @@ uniq-⊥ h ()
   (A u _|_) =~< u-comm >=~
   (_|_ u A) =~< _|_-identity-left >=~
   A `=~-qed
+
+{-Agda-
+→-elim : ∀ {A B : Set}
+  → (A → B)
+  → A
+    -------
+  → B
+→-elim L M = L M
+-Agda-}
+
+\func ->-elim {A B : \Type} (f : A -> B) (a : A) : B => f a
+
+-- In Arend, implication is a function over `\Prop`:
+
+\func ->-elim' {A B : \Prop} (imp : A -> B) (a : A) : B => imp a
+
+{-Agda-
+η-→ : ∀ {A B : Set} (f : A → B) → (λ (x : A) → f x) ≡ f
+η-→ f = refl
+-Agda-}
+
+\func eta--> {A B : \Type} (f : A -> B) : (\lam x => f x) = f => idp
+
+{-Agda-
+→-count : (Bool → Tri) → ℕ
+→-count f with f true | f false
+...          | aa     | aa      =   1
+...          | aa     | bb      =   2
+...          | aa     | cc      =   3
+...          | bb     | aa      =   4
+...          | bb     | bb      =   5
+...          | bb     | cc      =   6
+...          | cc     | aa      =   7
+...          | cc     | bb      =   8
+...          | cc     | cc      =   9
+-Agda-}
+
+\func ->-count (f : Bool -> Tri) : Nat => \case f true, f false \with {
+  | aa, aa => 1
+  | aa, bb => 2
+  | aa, cc => 3
+  | bb, aa => 4
+  | bb, bb => 5
+  | bb, cc => 6
+  | cc, aa => 7
+  | cc, bb => 8
+  | cc, cc => 9
+}
+
+{-Agda-
+currying : ∀ {A B C : Set} → (A → B → C) ≃ (A × B → C)
+currying =
+  record
+    { to      =  λ{ f → λ{ ⟨ x , y ⟩ → f x y }}
+    ; from    =  λ{ g → λ{ x → λ{ y → g ⟨ x , y ⟩ }}}
+    ; from∘to =  λ{ f → refl }
+    ; to∘from =  λ{ g → extensionality λ{ ⟨ x , y ⟩ → refl }}
+    }
+-Agda-}
+
+-- TODO it looks like threre is no pattern matching on lambda parameters.
+-- We have to use named functions, which is tedious as we need to write their signatures.
+
+\func currying {A B C : \Type} : (A -> B -> C) =~ (A x B -> C) \cowith
+  | f => f'
+  | ret => \lam g a b => g (prod a b)
+  | ret_f => \lam f => idp
+  | f_sec => \lam g => extensionality (f-ret-eq g)
+
+  \where {
+    \func f' {A B C : \Type} (f : A -> B -> C) (ab : A x B) : C \elim ab
+      | prod a b => f a b
+
+    \func f-ret-eq {A B C : \Type} (g : A x B -> C) (ab : A x B) : f' (\lam a b => g (prod a b)) ab = g ab \elim ab
+      | prod a b => idp
+  }
