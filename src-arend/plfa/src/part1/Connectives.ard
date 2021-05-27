@@ -574,3 +574,24 @@ currying =
   | f_sec => \lam gh => \case gh \as gh', idp : gh = gh' \with {
     | prod g h, gh=gh' => rewrite gh=gh' idp
   }
+
+{-Agda-
+→-distrib-× : ∀ {A B C : Set} → (A → B × C) ≃ (A → B) × (A → C)
+→-distrib-× =
+  record
+    { to      = λ{ f → ⟨ proj₁ ∘ f , proj₂ ∘ f ⟩ }
+    ; from    = λ{ ⟨ g , h ⟩ → λ x → ⟨ g x , h x ⟩ }
+    ; from∘to = λ{ f → extensionality λ{ x → η-× (f x) } }
+    ; to∘from = λ{ ⟨ g , h ⟩ → refl }
+    }
+-Agda-}
+
+\func ->-distrib-x {A B C : \Type} : (A -> B x C) =~ ((A -> B) x (A -> C)) \cowith
+  | f => \lam f' => prod (proj1 o f') (proj2 o f')
+  | ret (gh : (A -> B) x (A -> C)) : A -> B x C \elim gh {
+    | prod g h => \lam x => prod (g x) (h x)
+  }
+  | ret_f => \lam f => extensionality (\lam x => eta-x (f x))
+  | f_sec (gh : (A -> B) x (A -> C)) : prod (proj1 o ret gh) (proj2 o ret gh) = gh \with {
+    | prod g h => idp
+  }
