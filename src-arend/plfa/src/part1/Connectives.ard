@@ -536,22 +536,19 @@ currying =
 -Agda-}
 
 -- TODO it looks like threre is no pattern matching on lambda parameters.
--- We have to use named functions, which is tedious as we need to write their signatures.
--- It looks like implementing field via pattern matching doesn't always help too.
+-- `idp` trick in \case helps, but looks obscure.
+
+\import Paths.Meta (rewrite)
 
 \func currying {A B C : \Type} : (A -> B -> C) =~ (A x B -> C) \cowith
-  | f => f'
+  | f => \lam f' ab => \case ab \with {
+    | prod a b => f' a b
+  }
   | ret => \lam g a b => g (prod a b)
   | ret_f => \lam f => idp
-  | f_sec => \lam g => extensionality (f-ret-eq g)
-
-  \where {
-    \func f' {A B C : \Type} (f : A -> B -> C) (ab : A x B) : C \elim ab
-      | prod a b => f a b
-
-    \func f-ret-eq {A B C : \Type} (g : A x B -> C) (ab : A x B) : f' (\lam a b => g (prod a b)) ab = g ab \elim ab
-      | prod a b => idp
-  }
+  | f_sec => \lam g => extensionality (\lam ab => \case ab \as ab', idp : ab = ab' \with {
+    | prod a b, ab=ab' => rewrite ab=ab' idp
+  })
 
 {-Agda-
 →-distrib-⊎ : ∀ {A B C : Set} → (A ⊎ B → C) ≃ ((A → C) × (B → C))
@@ -566,18 +563,14 @@ currying =
 
 \func ->-distrib-u {A B C : \Type} : (A u B -> C) =~ ((A -> C) x (B -> C)) \cowith
   | f => \lam f' => prod (f' o inj1) (f' o inj2)
-  | ret => ret'
-  | ret_f => \lam f => extensionality (f-ret-eq f)
-  | f_sec (p : (A -> C) x (B -> C)) : prod (ret' p o inj1) (ret' p o inj2) = p \with {
-    | prod g h => idp
+  | ret => \lam gh ab => \case gh, ab \with {
+    | prod g _, inj1 x => g x
+    | prod _ h, inj2 y => h y
   }
-
-  \where {
-    \func ret' {A B C : \Type} (p : (A -> C) x (B -> C)) (ab : A u B) : C
-      | prod g _, inj1 x => g x
-      | prod _ h, inj2 y => h y
-
-    \func f-ret-eq {A B C : \Type} (f : A u B -> C) (ab : A u B) : ret' (prod (f o inj1) (f o inj2)) ab = f ab \elim ab
-      | inj1 x => idp
-      | inj2 y => idp
+  | ret_f => \lam f => extensionality (\lam ab => \case ab \as ab', idp : ab = ab' \with {
+    | inj1 x, ab=ab' => rewrite ab=ab' idp
+    | inj2 y, ab=ab' => rewrite ab=ab' idp
+  })
+  | f_sec => \lam gh => \case gh \as gh', idp : gh = gh' \with {
+    | prod g h, gh=gh' => rewrite gh=gh' idp
   }
