@@ -245,12 +245,11 @@ open _≃_
 </details>
 
 ```tex
-\record \infix 1 =~ (A B : \Type) {
+\record \infix 1 =~ (A B : \Type)
   | to : A -> B
   | from : B -> A
   | from-to : \Pi (x : A) -> from (to x) = x
   | to-from : \Pi (y : B) -> to (from y) = y
-}
 ```
 Let's unpack the definition. An isomorphism between sets `A` and `B` consists
 of four things:
@@ -509,11 +508,10 @@ open _≲_
 </details>
 
 ```tex
-\record \infix 1 <~ (A B : \Type) {
+\record \infix 1 <~ (A B : \Type)
   | to : A -> B
   | from : B -> A
   | from-to : \Pi (x : A) -> from (to x) = x
-}
 ```
 It is the same as an isomorphism, save that it lacks the `to∘from` field.
 Hence, we know that `from` is left-inverse to `to`, but not that `from`
@@ -705,10 +703,9 @@ record _⇔_ (A B : Set) : Set where
 </details>
 
 ```tex
-\record \infix 1 <=> (A B : \Type) {
+\record \infix 1 <=> (A B : \Type)
   | to : A -> B
   | from : B -> A
-}
 ```
 Show that equivalence is reflexive, symmetric, and transitive.
 

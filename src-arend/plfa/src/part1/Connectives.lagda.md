@@ -14,11 +14,11 @@ module plfa.part1.Connectives where
 </details>
 
 ```tex
--- Arend uses a "propositions as some types" aproach to encode logic. There is as a special universe '\Prop'
+-- Arend uses a "propositions as some types" aproach to encode logic. There is as a special universe `\Prop`
 -- of types that has at most one element. Empty types correspond to false propositions,
 -- one element types correspond to true propositions.
--- https://arend-lang.github.io/documentation/language-reference/expressions/universes
--- https://ncatlab.org/nlab/show/propositions+as+types#PropositionsAsSomeTypes
+-- See: https://arend-lang.github.io/documentation/language-reference/expressions/universes
+-- See: https://ncatlab.org/nlab/show/propositions+as+types#PropositionsAsSomeTypes
 ```
 
 <!-- The ⊥ ⊎ A ≅ A exercise requires a (inj₁ ()) pattern,
@@ -31,11 +31,11 @@ This chapter introduces the basic logical connectives, by observing a
 correspondence between connectives of logic and data types, a
 principle known as _Propositions as Types_:
 
-  * _conjunction_ is _product_,
-  * _disjunction_ is _sum_,
-  * _true_ is _unit type_,
-  * _false_ is _empty type_,
-  * _implication_ is _function space_.
+* _conjunction_ is _product_,
+* _disjunction_ is _sum_,
+* _true_ is _unit type_,
+* _false_ is _empty type_,
+* _implication_ is _function space_.
 
 
 ## Imports
@@ -85,7 +85,7 @@ data _×_ (A B : Set) : Set where
 \data \infixr 2 x (A B : \Type)
   | prod A B
 
--- Conjunction is a product over '\Prop'
+-- Conjunction is a product over `\Prop`
 
 \func \infixr 2 && (A B : \Prop) : \Prop => A x B
 ```
@@ -389,8 +389,26 @@ corresponds to `⟨ 1 , ⟨ true , aa ⟩ ⟩`, which is a member of the latter.
 Show that `A ⇔ B` as defined [earlier](/Isomorphism/#iff)
 is isomorphic to `(A → B) × (B → A)`.
 
-```
+<details><summary>Agda</summary>
+
+```agda
 -- Your code goes here
+```
+</details>
+
+```tex
+\import part1.Isomorphism (<=>)
+
+\func <=>=~x {A B : \Type} : (A <=> B) =~ (A -> B) x (B -> A) \cowith
+  | f (A<=>B : A <=> B) : (A -> B) x (B -> A) => prod A<=>B.to A<=>B.from
+  | ret (AxB : (A -> B) x (B -> A)) : A <=> B \cowith {
+    | to => proj1 AxB
+    | from => proj2 AxB
+  }
+  | ret_f (A<=>B : A <=> B) => idp
+  | f_sec (AxB : (A -> B) x (B -> A)) : f (ret AxB) = AxB \with {
+    | prod AB BA => idp
+  }
 ```
 
 
@@ -398,12 +416,19 @@ is isomorphic to `(A → B) × (B → A)`.
 
 Truth `⊤` always holds. We formalise this idea by
 declaring a suitable record type:
-```
+<details><summary>Agda</summary>
+
+```agda
 data ⊤ : Set where
 
   tt :
     --
     ⊤
+```
+</details>
+
+```tex
+\data T | tt
 ```
 Evidence that `⊤` holds is of the form `tt`.
 
@@ -414,18 +439,35 @@ us nothing new.
 
 The nullary case of `η-×` is `η-⊤`, which asserts that any
 value of type `⊤` must be equal to `tt`:
-```
+<details><summary>Agda</summary>
+
+```agda
 η-⊤ : ∀ (w : ⊤) → tt ≡ w
 η-⊤ tt = refl
+```
+</details>
+
+```tex
+\func eta-T (w : T) : tt = w
+  | tt => idp
 ```
 The pattern matching on the left-hand side is essential. Replacing
 `w` by `tt` allows both sides of the propositional equality to
 simplify to the same term.
 
 Alternatively, we can declare truth as an empty record:
-```
+<details><summary>Agda</summary>
+
+```agda
 record ⊤′ : Set where
   constructor tt′
+```
+</details>
+
+```tex
+\record T'
+
+\func tt' : T' \cowith
 ```
 The record construction `record {}` corresponds to the term `tt`. The
 constructor declaration allows us to write `tt′`.
@@ -434,23 +476,45 @@ As with the product, the data type `⊤` and the record type `⊤′` behave
 similarly, but η-equality holds *by definition* for the record type. While
 proving `η-⊤′`, we do not have to pattern match on `w`---Agda *knows* it is
 equal to `tt′`:
-```
+<details><summary>Agda</summary>
+
+```agda
 η-⊤′ : ∀ (w : ⊤′) → tt′ ≡ w
 η-⊤′ w = refl
 ```
+</details>
+
+```tex
+\func eta-T' (w : T') : tt' = w => idp
+```
 Agda knows that *any* value of type `⊤′` must be `tt′`, so any time we need a
 value of type `⊤′`, we can tell Agda to figure it out:
-```
+<details><summary>Agda</summary>
+
+```agda
 truth′ : ⊤′
 truth′ = _
+```
+</details>
+
+```tex
+-- Arend doesn't have this.
 ```
 
 We refer to `⊤` as the _unit_ type. And, indeed,
 type `⊤` has exactly one member, `tt`.  For example, the following
 function enumerates all possible arguments of type `⊤`:
-```
+<details><summary>Agda</summary>
+
+```agda
 ⊤-count : ⊤ → ℕ
 ⊤-count tt = 1
+```
+</details>
+
+```tex
+\func T-count (w : T) : Nat
+  | tt => 1
 ```
 
 For numbers, one is the identity of multiplication. Correspondingly,
@@ -458,7 +522,9 @@ unit is the identity of product _up to isomorphism_.  For left
 identity, the `to` function takes `⟨ tt , x ⟩` to `x`, and the `from`
 function does the inverse.  The evidence of left inverse requires
 matching against a suitable pattern to enable simplification:
-```
+<details><summary>Agda</summary>
+
+```agda
 ⊤-identityˡ : ∀ {A : Set} → ⊤ × A ≃ A
 ⊤-identityˡ =
   record
@@ -467,6 +533,17 @@ matching against a suitable pattern to enable simplification:
     ; from∘to = λ{ ⟨ tt , x ⟩ → refl }
     ; to∘from = λ{ x → refl }
     }
+```
+</details>
+
+```tex
+\func T-identity-left {A : \Type} : T x A =~ A \cowith
+  | f => \lam p => proj2 p
+  | ret => \lam a => prod tt a
+  | ret_f (p : T x A) : prod tt (proj2 p) = p \with {
+    | prod tt a => idp
+  }
+  | f_sec => \lam a => idp
 ```
 
 Having an _identity_ is different from having an identity
@@ -483,7 +560,9 @@ For instance, `⟨ tt , true ⟩`, which is a member of the former,
 corresponds to `true`, which is a member of the latter.
 
 Right identity follows from commutativity of product and left identity:
-```
+<details><summary>Agda</summary>
+
+```agda
 ⊤-identityʳ : ∀ {A : Set} → (A × ⊤) ≃ A
 ⊤-identityʳ {A} =
   ≃-begin
@@ -494,6 +573,14 @@ Right identity follows from commutativity of product and left identity:
     A
   ≃-∎
 ```
+</details>
+
+```tex
+\func T-identity-right {A : \Type} : A x T =~ A =>
+  (A x T) =~< x-comm >=~
+  (T x A) =~< T-identity-left >=~
+  A `=~-qed
+```
 Here we have used a chain of isomorphisms, analogous to that used for
 equality.
 
@@ -503,7 +590,9 @@ equality.
 Given two propositions `A` and `B`, the disjunction `A ⊎ B` holds
 if either `A` holds or `B` holds.  We formalise this idea by
 declaring a suitable inductive type:
-```
+<details><summary>Agda</summary>
+
+```agda
 data _⊎_ (A B : Set) : Set where
 
   inj₁ :
@@ -516,13 +605,36 @@ data _⊎_ (A B : Set) : Set where
       -----
     → A ⊎ B
 ```
+</details>
+
+```tex
+\data \infixr 1 u (A B : \Type)
+  | inj1 A
+  | inj2 B
+
+-- (!) Note that `u` is not in `\Prop`: even if `A` and `B` are in `\Prop`, `A u B` can have
+-- more than one element. So, we cannot use `u` to encode disjunction in Arend. To fix this,
+-- we can enforce a data definition to be in `\Prop` by using `\truncated` keyword
+-- and explicit `: \Prop` annotation:
+
+\truncated \data \infixr 1 || (A B : \Prop) : \Prop
+  | byLeft A
+  | byRight B
+
+-- Truncating a data has one crucial consequence: any function defined by recursion over a truncated data
+-- must have the codomain lying in the universe of the data. In our case, functions over `A || B`
+-- can only return types in `\Prop`.
+-- See: https://arend-lang.github.io/documentation/language-reference/definitions/data#truncation
+```
 Evidence that `A ⊎ B` holds is either of the form `inj₁ M`, where `M`
 provides evidence that `A` holds, or `inj₂ N`, where `N` provides
 evidence that `B` holds.
 
 Given evidence that `A → C` and `B → C` both hold, then given
 evidence that `A ⊎ B` holds we can conclude that `C` holds:
-```
+<details><summary>Agda</summary>
+
+```agda
 case-⊎ : ∀ {A B C : Set}
   → (A → C)
   → (B → C)
@@ -531,6 +643,13 @@ case-⊎ : ∀ {A B C : Set}
   → C
 case-⊎ f g (inj₁ x) = f x
 case-⊎ f g (inj₂ y) = g y
+```
+</details>
+
+```tex
+\func case-u {A B C : \Type} (f : A -> C) (g : B -> C) (w : A u B) : C \elim w
+  | inj1 x => f x
+  | inj2 y => g y
 ```
 Pattern matching against `inj₁` and `inj₂` is typical of how we exploit
 evidence that a disjunction holds.
@@ -545,17 +664,35 @@ the former are sometimes given the names `⊎-I₁` and `⊎-I₂` and the
 latter the name `⊎-E`.
 
 Applying the destructor to each of the constructors is the identity:
-```
+<details><summary>Agda</summary>
+
+```agda
 η-⊎ : ∀ {A B : Set} (w : A ⊎ B) → case-⊎ inj₁ inj₂ w ≡ w
 η-⊎ (inj₁ x) = refl
 η-⊎ (inj₂ y) = refl
 ```
-More generally, we can also throw in an arbitrary function from a disjunction:
+</details>
+
+```tex
+\func eta-u {A B : \Type} (w : A u B) : case-u inj1 inj2 w = w
+  | inj1 x => idp
+  | inj2 y => idp
 ```
+More generally, we can also throw in an arbitrary function from a disjunction:
+<details><summary>Agda</summary>
+
+```agda
 uniq-⊎ : ∀ {A B C : Set} (h : A ⊎ B → C) (w : A ⊎ B) →
   case-⊎ (h ∘ inj₁) (h ∘ inj₂) w ≡ h w
 uniq-⊎ h (inj₁ x) = refl
 uniq-⊎ h (inj₂ y) = refl
+```
+</details>
+
+```tex
+\func uniq-u {A B C : \Type} (h : A u B -> C) (w : A u B) : case-u (h o inj1) (h o inj2) w = h w \elim w
+  | inj1 x => idp
+  | inj2 y => idp
 ```
 The pattern matching on the left-hand side is essential.  Replacing
 `w` by `inj₁ x` allows both sides of the propositional equality to
@@ -586,13 +723,25 @@ members:
 
 For example, the following function enumerates all
 possible arguments of type `Bool ⊎ Tri`:
-```
+<details><summary>Agda</summary>
+
+```agda
 ⊎-count : Bool ⊎ Tri → ℕ
 ⊎-count (inj₁ true)   =  1
 ⊎-count (inj₁ false)  =  2
 ⊎-count (inj₂ aa)     =  3
 ⊎-count (inj₂ bb)     =  4
 ⊎-count (inj₂ cc)     =  5
+```
+</details>
+
+```tex
+\func u-count (w : Bool u Tri) : Nat
+  | inj1 true => 1
+  | inj1 false => 2
+  | inj2 aa => 3
+  | inj2 bb => 4
+  | inj2 cc => 5
 ```
 
 Sum on types also shares a property with sum on numbers in that it is
@@ -602,25 +751,76 @@ commutative and associative _up to isomorphism_.
 
 Show sum is commutative up to isomorphism.
 
-```
+<details><summary>Agda</summary>
+
+```agda
 -- Your code goes here
+```
+</details>
+
+```tex
+\func u-comm {A B : \Type} : (A u B) =~ (B u A) \cowith
+  | f => \lam w => case-u inj2 inj1 w
+  | ret => \lam w => case-u inj2 inj1 w
+  | ret_f (w : A u B) : case-u inj2 inj1 (case-u inj2 inj1 w) = w \with {
+    | inj1 a => idp
+    | inj2 b => idp
+  }
+  | f_sec (w : B u A) : case-u inj2 inj1 (case-u inj2 inj1 w) = w \with {
+    | inj1 a => idp
+    | inj2 b => idp
+  }
 ```
 
 #### Exercise `⊎-assoc` (practice)
 
 Show sum is associative up to isomorphism.
 
-```
+<details><summary>Agda</summary>
+
+```agda
 -- Your code goes here
+```
+</details>
+
+```tex
+\func u-assoc {A B C : \Type} : ((A u B) u C) =~ (A u (B u C)) \cowith
+  | f (w : (A u B) u C) : A u B u C \with {
+    | inj1 (inj1 a) => inj1 a
+    | inj1 (inj2 b) => inj2 (inj1 b)
+    | inj2 c => inj2 (inj2 c)
+  }
+  | ret (w : A u B u C) : (A u B) u C \with {
+    | inj1 a => inj1 (inj1 a)
+    | inj2 (inj1 b) => inj1 (inj2 b)
+    | inj2 (inj2 c) => inj2 c
+  }
+  | ret_f (w : (A u B) u C) : ret (f w) = w \with {
+    | inj1 (inj1 a) => idp
+    | inj1 (inj2 b) => idp
+    | inj2 c => idp
+  }
+  | f_sec (w : A u B u C) : f (ret w) = w \with {
+    | inj1 a => idp
+    | inj2 (inj1 b) => idp
+    | inj2 (inj2 c) => idp
+  }
 ```
 
 ## False is empty
 
 False `⊥` never holds.  We formalise this idea by declaring
 a suitable inductive type:
-```
+<details><summary>Agda</summary>
+
+```agda
 data ⊥ : Set where
   -- no clauses!
+```
+</details>
+
+```tex
+\data _|_
 ```
 There is no possible evidence that `⊥` holds.
 
@@ -631,12 +831,19 @@ conclude anything!  This is a basic principle of logic, known in
 medieval times by the Latin phrase _ex falso_, and known to children
 through phrases such as "if pigs had wings, then I'd be the Queen of
 Sheba".  We formalise it as follows:
-```
+<details><summary>Agda</summary>
+
+```agda
 ⊥-elim : ∀ {A : Set}
   → ⊥
     --
   → A
 ⊥-elim ()
+```
+</details>
+
+```tex
+\func _|_-elim {A : \Type} (e : _|_) : A
 ```
 This is our first use of the _absurd pattern_ `()`.
 Here since `⊥` is a type with no members, we indicate that it is
@@ -649,9 +856,16 @@ in the standard library.
 
 The nullary case of `uniq-⊎` is `uniq-⊥`, which asserts that `⊥-elim`
 is equal to any arbitrary function from `⊥`:
-```
+<details><summary>Agda</summary>
+
+```agda
 uniq-⊥ : ∀ {C : Set} (h : ⊥ → C) (w : ⊥) → ⊥-elim w ≡ h w
 uniq-⊥ h ()
+```
+</details>
+
+```tex
+\func uniq-_|_ {C : \Type} (h : _|_ -> C) (w : _|_) : _|_-elim w = h w
 ```
 Using the absurd pattern asserts there are no possible values for `w`,
 so the equation holds trivially.
@@ -659,9 +873,16 @@ so the equation holds trivially.
 We refer to `⊥` as the _empty_ type. And, indeed,
 type `⊥` has no members. For example, the following function
 enumerates all possible arguments of type `⊥`:
-```
+<details><summary>Agda</summary>
+
+```agda
 ⊥-count : ⊥ → ℕ
 ⊥-count ()
+```
+</details>
+
+```tex
+\func _|_-count (e : _|_) : Nat
 ```
 Here again the absurd pattern `()` indicates that no value can match
 type `⊥`.
@@ -673,16 +894,43 @@ is the identity of sums _up to isomorphism_.
 
 Show empty is the left identity of sums up to isomorphism.
 
-```
+<details><summary>Agda</summary>
+
+```agda
 -- Your code goes here
+```
+</details>
+
+```tex
+\func _|_-identity-left {A : \Type} : (_|_ u A) =~ A \cowith
+  | f (w : _|_ u A) : A \with {
+    | inj1 e => _|_-elim e
+    | inj2 a => a
+  }
+  | ret => inj2
+  | ret_f (w : _|_ u A) : inj2 (f w) = w \with {
+    | inj1 e => _|_-elim e
+    | inj2 a => idp
+  }
+  | f_sec => \lam a => idp
 ```
 
 #### Exercise `⊥-identityʳ` (practice)
 
 Show empty is the right identity of sums up to isomorphism.
 
-```
+<details><summary>Agda</summary>
+
+```agda
 -- Your code goes here
+```
+</details>
+
+```tex
+\func _|_-identity-right {A : \Type} : (A u _|_) =~ A =>
+  (A u _|_) =~< u-comm >=~
+  (_|_ u A) =~< _|_-identity-left >=~
+  A `=~-qed
 ```
 
 ## Implication is function {name=implication}
@@ -703,13 +951,24 @@ converts evidence that `A` holds into evidence that `B` holds.
 
 Put another way, if we know that `A → B` and `A` both hold,
 then we may conclude that `B` holds:
-```
+<details><summary>Agda</summary>
+
+```agda
 →-elim : ∀ {A B : Set}
   → (A → B)
   → A
     -------
   → B
 →-elim L M = L M
+```
+</details>
+
+```tex
+\func ->-elim {A B : \Type} (f : A -> B) (a : A) : B => f a
+
+-- In Arend, implication is a function over `\Prop`:
+
+\func ->-elim' {A B : \Prop} (imp : A -> B) (a : A) : B => imp a
 ```
 In medieval times, this rule was known by the name _modus ponens_.
 It corresponds to function application.
@@ -719,9 +978,16 @@ is referred to as _introducing_ a function,
 while applying a function is referred to as _eliminating_ the function.
 
 Elimination followed by introduction is the identity:
-```
+<details><summary>Agda</summary>
+
+```agda
 η-→ : ∀ {A B : Set} (f : A → B) → (λ (x : A) → f x) ≡ f
 η-→ f = refl
+```
+</details>
+
+```tex
+\func eta--> {A B : \Type} (f : A -> B) : (\lam x => f x) = f => idp
 ```
 
 Implication binds less tightly than any other operator. Thus, `A ⊎ B →
@@ -743,7 +1009,9 @@ three squared) members:
 
 For example, the following function enumerates all possible
 arguments of the type `Bool → Tri`:
-```
+<details><summary>Agda</summary>
+
+```agda
 →-count : (Bool → Tri) → ℕ
 →-count f with f true | f false
 ...          | aa     | aa      =   1
@@ -755,6 +1023,21 @@ arguments of the type `Bool → Tri`:
 ...          | cc     | aa      =   7
 ...          | cc     | bb      =   8
 ...          | cc     | cc      =   9
+```
+</details>
+
+```tex
+\func ->-count (f : Bool -> Tri) : Nat => \case f true, f false \with {
+  | aa, aa => 1
+  | aa, bb => 2
+  | aa, cc => 3
+  | bb, aa => 4
+  | bb, bb => 5
+  | bb, cc => 6
+  | cc, aa => 7
+  | cc, bb => 8
+  | cc, cc => 9
+}
 ```
 
 Exponential on types also share a property with exponential on
@@ -773,7 +1056,9 @@ Both types can be viewed as functions that given evidence that `A` holds
 and evidence that `B` holds can return evidence that `C` holds.
 This isomorphism sometimes goes by the name *currying*.
 The proof of the right inverse requires extensionality:
-```
+<details><summary>Agda</summary>
+
+```agda
 currying : ∀ {A B C : Set} → (A → B → C) ≃ (A × B → C)
 currying =
   record
@@ -782,6 +1067,24 @@ currying =
     ; from∘to =  λ{ f → refl }
     ; to∘from =  λ{ g → extensionality λ{ ⟨ x , y ⟩ → refl }}
     }
+```
+</details>
+
+```tex
+-- TODO it looks like threre is no pattern matching on lambda parameters.
+-- `idp` trick in \case helps, but looks obscure.
+
+\import Paths.Meta (rewrite)
+
+\func currying {A B C : \Type} : (A -> B -> C) =~ (A x B -> C) \cowith
+  | f => \lam f' ab => \case ab \with {
+    | prod a b => f' a b
+  }
+  | ret => \lam g a b => g (prod a b)
+  | ret_f => \lam f => idp
+  | f_sec => \lam g => extensionality (\lam ab => \case ab \as ab', idp : ab = ab' \with {
+    | prod a b, ab=ab' => rewrite ab=ab' idp
+  })
 ```
 
 Currying tells us that instead of a function that takes a pair of arguments,
@@ -809,7 +1112,9 @@ we have the isomorphism:
 That is, the assertion that if either `A` holds or `B` holds then `C` holds
 is the same as the assertion that if `A` holds then `C` holds and if
 `B` holds then `C` holds.  The proof of the left inverse requires extensionality:
-```
+<details><summary>Agda</summary>
+
+```agda
 →-distrib-⊎ : ∀ {A B C : Set} → (A ⊎ B → C) ≃ ((A → C) × (B → C))
 →-distrib-⊎ =
   record
@@ -818,6 +1123,23 @@ is the same as the assertion that if `A` holds then `C` holds and if
     ; from∘to = λ{ f → extensionality λ{ (inj₁ x) → refl ; (inj₂ y) → refl } }
     ; to∘from = λ{ ⟨ g , h ⟩ → refl }
     }
+```
+</details>
+
+```tex
+\func ->-distrib-u {A B C : \Type} : (A u B -> C) =~ ((A -> C) x (B -> C)) \cowith
+  | f => \lam f' => prod (f' o inj1) (f' o inj2)
+  | ret => \lam gh ab => \case gh, ab \with {
+    | prod g _, inj1 x => g x
+    | prod _ h, inj2 y => h y
+  }
+  | ret_f => \lam f => extensionality (\lam ab => \case ab \as ab', idp : ab = ab' \with {
+    | inj1 x, ab=ab' => rewrite ab=ab' idp
+    | inj2 y, ab=ab' => rewrite ab=ab' idp
+  })
+  | f_sec => \lam gh => \case gh \as gh', idp : gh = gh' \with {
+    | prod g h, gh=gh' => rewrite gh=gh' idp
+  }
 ```
 
 Corresponding to the law
