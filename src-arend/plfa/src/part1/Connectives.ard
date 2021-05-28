@@ -20,9 +20,8 @@ open plfa.part1.Isomorphism.≃-Reasoning
 
 \import Paths (==<, >==, qed)
 \import Function (o)
-\import util.Equiv (=~, =~-Reasoning)
+\import util.Equiv (=~, =~-Reasoning, <~)
 \open =~-Reasoning
-\import Equiv (>->)
 \import util.Function (extensionality)
 
 {-Agda-
@@ -594,4 +593,92 @@ currying =
   | ret_f => \lam f => extensionality (\lam x => eta-x (f x))
   | f_sec (gh : (A -> B) x (A -> C)) : prod (proj1 o ret gh) (proj2 o ret gh) = gh \with {
     | prod g h => idp
+  }
+
+{-Agda-
+×-distrib-⊎ : ∀ {A B C : Set} → (A ⊎ B) × C ≃ (A × C) ⊎ (B × C)
+×-distrib-⊎ =
+  record
+    { to      = λ{ ⟨ inj₁ x , z ⟩ → (inj₁ ⟨ x , z ⟩)
+                 ; ⟨ inj₂ y , z ⟩ → (inj₂ ⟨ y , z ⟩)
+                 }
+    ; from    = λ{ (inj₁ ⟨ x , z ⟩) → ⟨ inj₁ x , z ⟩
+                 ; (inj₂ ⟨ y , z ⟩) → ⟨ inj₂ y , z ⟩
+                 }
+    ; from∘to = λ{ ⟨ inj₁ x , z ⟩ → refl
+                 ; ⟨ inj₂ y , z ⟩ → refl
+                 }
+    ; to∘from = λ{ (inj₁ ⟨ x , z ⟩) → refl
+                 ; (inj₂ ⟨ y , z ⟩) → refl
+                 }
+    }
+-Agda-}
+
+\func x-distrib-u {A B C : \Type} : (A u B) x C =~ (A x C u B x C) \cowith
+  | f (p : (A u B) x C) : A x C u B x C \with {
+    | prod (inj1 x) z => inj1 (prod x z)
+    | prod (inj2 y) z => inj2 (prod y z)
+  }
+  | ret (p : A x C u B x C) : (A u B) x C \with {
+    | inj1 (prod x z) => prod (inj1 x) z
+    | inj2 (prod y z) => prod (inj2 y) z
+  }
+  | ret_f (p : (A u B) x C) : ret (f p) = p \with {
+    | prod (inj1 x) z => idp
+    | prod (inj2 y) z => idp
+  }
+  | f_sec (p : A x C u B x C) : f (ret p) = p \with {
+    | inj1 (prod x z) => idp
+    | inj2 (prod y z) => idp
+  }
+
+{-Agda-
+⊎-distrib-× : ∀ {A B C : Set} → (A × B) ⊎ C ≲ (A ⊎ C) × (B ⊎ C)
+⊎-distrib-× =
+  record
+    { to      = λ{ (inj₁ ⟨ x , y ⟩) → ⟨ inj₁ x , inj₁ y ⟩
+                 ; (inj₂ z)         → ⟨ inj₂ z , inj₂ z ⟩
+                 }
+    ; from    = λ{ ⟨ inj₁ x , inj₁ y ⟩ → (inj₁ ⟨ x , y ⟩)
+                 ; ⟨ inj₁ x , inj₂ z ⟩ → (inj₂ z)
+                 ; ⟨ inj₂ z , _      ⟩ → (inj₂ z)
+                 }
+    ; from∘to = λ{ (inj₁ ⟨ x , y ⟩) → refl
+                 ; (inj₂ z)         → refl
+                 }
+    }
+-Agda-}
+
+\func u-distrib-x {A B C : \Type} : (A x B u C) <~ (A u C) x (B u C) \cowith
+  | to (p : A x B u C) : (A u C) x (B u C) \with {
+    | inj1 (prod x y) => prod (inj1 x) (inj1 y)
+    | inj2 z => prod (inj2 z) (inj2 z)
+  }
+  | from (p : (A u C) x (B u C)) : A x B u C \with {
+    | prod (inj1 x) (inj1 y) => inj1 (prod x y)
+    | prod (inj1 x) (inj2 z) => inj2 z
+    | prod (inj2 z) _ => inj2 z
+  }
+  | from-to (p : A x B u C) : from (to p) = p \with {
+    | inj1 (prod x y) => idp
+    | inj2 z => idp
+  }
+
+-- (!) In Arend, we can prove (A && B || C) = (A || C) && (B || C).
+-- We use `propExt` which is a convenient wrapper around `iso` that we used for `x-comm'` before.
+
+\import Logic (propExt)
+
+\func &&-distrib-|| {A B C : \Prop} : (A && B || C) = (A || C) && (B || C) =>
+  propExt &&-distrib-||-right &&-distrib-||-left
+
+  \where {
+    \func &&-distrib-||-right {A B C : \Prop} (p : A && B || C) : (A || C) && (B || C)
+      | byLeft (prod a b) => prod (byLeft a) (byLeft b)
+      | byRight c => prod (byRight c) (byRight c)
+
+    \func &&-distrib-||-left {A B C : \Prop} (p : (A || C) && (B || C)) : A && B || C
+      | prod (byLeft a) (byLeft b) => byLeft (prod a b)
+      | prod (byLeft a) (byRight c) => byRight c
+      | prod (byRight c) _ => byRight c
   }
