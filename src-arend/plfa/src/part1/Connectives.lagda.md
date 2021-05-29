@@ -14,7 +14,7 @@ module plfa.part1.Connectives where
 </details>
 
 ```tex
--- Arend uses a "propositions as some types" aproach to encode logic. There is as a special universe `\Prop`
+-- Arend uses a "propositions as some types" approach to encode logic. There is as a special universe `\Prop`
 -- of types that has at most one element. Empty types correspond to false propositions,
 -- one element types correspond to true propositions.
 -- See: https://arend-lang.github.io/documentation/language-reference/expressions/universes
@@ -58,8 +58,7 @@ open plfa.part1.Isomorphism.≃-Reasoning
 \import Function (o)
 \import util.Equiv (=~, =~-Reasoning)
 \open =~-Reasoning
-\import Equiv (>->)
-\import util.Function (extensionality)
+\import part1.Isomorphism (<~, extensionality)
 ```
 
 
@@ -206,7 +205,7 @@ pattern match on `w` to know that η-equality holds:
 </details>
 
 ```tex
-\func eta-&&' {A B : \Type} (w : A x' B) : w.proj1' prod' w.proj2' = w => idp
+\func eta-x' {A B : \Type} (w : A x' B) : w.proj1' prod' w.proj2' = w => idp
 ```
 It can be very convenient to have η-equality *definitionally*, and so the
 standard library defines `_×_` as a record type. We use the definition from the
@@ -1154,7 +1153,9 @@ That is, the assertion that if `A` holds then `B` holds and `C` holds
 is the same as the assertion that if `A` holds then `B` holds and if
 `A` holds then `C` holds.  The proof of left inverse requires both extensionality
 and the rule `η-×` for products:
-```
+<details><summary>Agda</summary>
+
+```agda
 →-distrib-× : ∀ {A B C : Set} → (A → B × C) ≃ (A → B) × (A → C)
 →-distrib-× =
   record
@@ -1164,13 +1165,28 @@ and the rule `η-×` for products:
     ; to∘from = λ{ ⟨ g , h ⟩ → refl }
     }
 ```
+</details>
+
+```tex
+\func ->-distrib-x {A B C : \Type} : (A -> B x C) =~ ((A -> B) x (A -> C)) \cowith
+  | f => \lam f' => prod (proj1 o f') (proj2 o f')
+  | ret (gh : (A -> B) x (A -> C)) : A -> B x C \elim gh {
+    | prod g h => \lam x => prod (g x) (h x)
+  }
+  | ret_f => \lam f => extensionality (\lam x => eta-x (f x))
+  | f_sec (gh : (A -> B) x (A -> C)) : prod (proj1 o ret gh) (proj2 o ret gh) = gh \with {
+    | prod g h => idp
+  }
+```
 
 
 ## Distribution
 
 Products distribute over sum, up to isomorphism.  The code to validate
 this fact is similar in structure to our previous results:
-```
+<details><summary>Agda</summary>
+
+```agda
 ×-distrib-⊎ : ∀ {A B C : Set} → (A ⊎ B) × C ≃ (A × C) ⊎ (B × C)
 ×-distrib-⊎ =
   record
@@ -1188,9 +1204,32 @@ this fact is similar in structure to our previous results:
                  }
     }
 ```
+</details>
+
+```tex
+\func x-distrib-u {A B C : \Type} : (A u B) x C =~ (A x C u B x C) \cowith
+  | f (p : (A u B) x C) : A x C u B x C \with {
+    | prod (inj1 x) z => inj1 (prod x z)
+    | prod (inj2 y) z => inj2 (prod y z)
+  }
+  | ret (p : A x C u B x C) : (A u B) x C \with {
+    | inj1 (prod x z) => prod (inj1 x) z
+    | inj2 (prod y z) => prod (inj2 y) z
+  }
+  | ret_f (p : (A u B) x C) : ret (f p) = p \with {
+    | prod (inj1 x) z => idp
+    | prod (inj2 y) z => idp
+  }
+  | f_sec (p : A x C u B x C) : f (ret p) = p \with {
+    | inj1 (prod x z) => idp
+    | inj2 (prod y z) => idp
+  }
+```
 
 Sums do not distribute over products up to isomorphism, but it is an embedding:
-```
+<details><summary>Agda</summary>
+
+```agda
 ⊎-distrib-× : ∀ {A B C : Set} → (A × B) ⊎ C ≲ (A ⊎ C) × (B ⊎ C)
 ⊎-distrib-× =
   record
@@ -1205,6 +1244,43 @@ Sums do not distribute over products up to isomorphism, but it is an embedding:
                  ; (inj₂ z)         → refl
                  }
     }
+```
+</details>
+
+```tex
+\func u-distrib-x {A B C : \Type} : (A x B u C) <~ (A u C) x (B u C) \cowith
+  | to (p : A x B u C) : (A u C) x (B u C) \with {
+    | inj1 (prod x y) => prod (inj1 x) (inj1 y)
+    | inj2 z => prod (inj2 z) (inj2 z)
+  }
+  | from (p : (A u C) x (B u C)) : A x B u C \with {
+    | prod (inj1 x) (inj1 y) => inj1 (prod x y)
+    | prod (inj1 x) (inj2 z) => inj2 z
+    | prod (inj2 z) _ => inj2 z
+  }
+  | from-to (p : A x B u C) : from (to p) = p \with {
+    | inj1 (prod x y) => idp
+    | inj2 z => idp
+  }
+
+-- (!) In Arend, we can prove (A && B || C) = (A || C) && (B || C).
+-- We use `propExt` which is a convenient wrapper around `iso` that we used for `x-comm'` before.
+
+\import Logic (propExt)
+
+\func &&-distrib-|| {A B C : \Prop} : (A && B || C) = (A || C) && (B || C) =>
+  propExt &&-distrib-||-right &&-distrib-||-left
+
+  \where {
+    \func &&-distrib-||-right {A B C : \Prop} (p : A && B || C) : (A || C) && (B || C)
+      | byLeft (prod a b) => prod (byLeft a) (byLeft b)
+      | byRight c => prod (byRight c) (byRight c)
+
+    \func &&-distrib-||-left {A B C : \Prop} (p : (A || C) && (B || C)) : A && B || C
+      | prod (byLeft a) (byLeft b) => byLeft (prod a b)
+      | prod (byLeft a) (byRight c) => byRight c
+      | prod (byRight c) _ => byRight c
+  }
 ```
 Note that there is a choice in how we write the `from` function.
 As given, it takes `⟨ inj₂ z , inj₂ z′ ⟩` to `inj₂ z`, but it is
@@ -1234,8 +1310,20 @@ postulate
 This is called a _weak distributive law_. Give the corresponding
 distributive law, and explain how it relates to the weak version.
 
-```
+<details><summary>Agda</summary>
+
+```agda
 -- Your code goes here
+```
+</details>
+
+```tex
+-- (A u B) x C =~ A x C u B x C
+-- A x C u B x C -> A + B * C
+
+\func u-weak-x {A B C : \Type} (p : (A u B) x C) : A u (B x C)
+  | prod (inj1 a) _ => inj1 a
+  | prod (inj2 b) c => inj2 (prod b c)
 ```
 
 
@@ -1248,20 +1336,42 @@ postulate
 ```
 Does the converse hold? If so, prove; if not, give a counterexample.
 
-```
+<details><summary>Agda</summary>
+
+```agda
 -- Your code goes here
+```
+</details>
+
+```tex
+\func ux-implies-xu {A B C D : \Type} (p : A x B u C x D) : (A u C) x (B u D)
+  | inj1 (prod a b) => prod (inj1 a) (inj1 b)
+  | inj2 (prod c d) => prod (inj2 c) (inj2 d)
+
+-- The converse doesn't hold. Counterexample:
+-- Let A = T, B = _|_, C = _|_, D = T.
+-- Then (T u _|_) x (_|_ u T) = T,
+-- but   T x _|_  u  _|_ x T  = _|_
 ```
 
 
 ## Standard library
 
 Definitions similar to those in this chapter can be found in the standard library:
-```
+<details><summary>Agda</summary>
+
+```agda
 import Data.Product using (_×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
 import Data.Unit using (⊤; tt)
 import Data.Sum using (_⊎_; inj₁; inj₂) renaming ([_,_] to case-⊎)
 import Data.Empty using (⊥; ⊥-elim)
 import Function.Equivalence using (_⇔_)
+```
+</details>
+
+```tex
+-- \import Logic (||, Empty)
+-- \import Relation.Equivalence (Equivalence)
 ```
 The standard library constructs pairs with `_,_` whereas we use `⟨_,_⟩`.
 The former makes it convenient to build triples or larger tuples from pairs,
