@@ -9,8 +9,3 @@
 
   \func \fix 3 =~-qed (A : \Type) : A =~ A => idEquiv
 }
-
-\record \infix 1 <~ (A B : \Type)
-  | to : A -> B
-  | from : B -> A
-  | from-to : \Pi (x : A) -> from (to x) = x

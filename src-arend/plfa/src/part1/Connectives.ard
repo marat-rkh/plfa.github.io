@@ -20,9 +20,9 @@ open plfa.part1.Isomorphism.≃-Reasoning
 
 \import Paths (==<, >==, qed)
 \import Function (o)
-\import util.Equiv (=~, =~-Reasoning, <~)
+\import util.Equiv (=~, =~-Reasoning)
 \open =~-Reasoning
-\import util.Function (extensionality)
+\import part1.Isomorphism (<~, extensionality)
 
 {-Agda-
 data _×_ (A B : Set) : Set where
@@ -682,3 +682,38 @@ currying =
       | prod (byLeft a) (byRight c) => byRight c
       | prod (byRight c) _ => byRight c
   }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- (A u B) x C =~ A x C u B x C
+-- A x C u B x C -> A + B * C
+
+\func u-weak-x {A B C : \Type} (p : (A u B) x C) : A u (B x C)
+  | prod (inj1 a) _ => inj1 a
+  | prod (inj2 b) c => inj2 (prod b c)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func ux-implies-xu {A B C D : \Type} (p : A x B u C x D) : (A u C) x (B u D)
+  | inj1 (prod a b) => prod (inj1 a) (inj1 b)
+  | inj2 (prod c d) => prod (inj2 c) (inj2 d)
+
+-- The converse doesn't hold. Counterexample:
+-- Let A = T, B = _|_, C = _|_, D = T.
+-- Then (T u _|_) x (_|_ u T) = T,
+-- but   T x _|_  u  _|_ x T  = _|_
+
+{-Agda-
+import Data.Product using (_×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
+import Data.Unit using (⊤; tt)
+import Data.Sum using (_⊎_; inj₁; inj₂) renaming ([_,_] to case-⊎)
+import Data.Empty using (⊥; ⊥-elim)
+import Function.Equivalence using (_⇔_)
+-Agda-}
+
+-- \import Logic (||, Empty)
+-- \import Relation.Equivalence (Equivalence)
