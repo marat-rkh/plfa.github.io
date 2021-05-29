@@ -2,7 +2,7 @@
 module plfa.part1.Connectives where
 -Agda-}
 
--- Arend uses a "propositions as some types" aproach to encode logic. There is as a special universe `\Prop`
+-- Arend uses a "propositions as some types" approach to encode logic. There is as a special universe `\Prop`
 -- of types that has at most one element. Empty types correspond to false propositions,
 -- one element types correspond to true propositions.
 -- See: https://arend-lang.github.io/documentation/language-reference/expressions/universes
@@ -91,7 +91,7 @@ open _×′_
 η-×′ w = refl
 -Agda-}
 
-\func eta-&&' {A B : \Type} (w : A x' B) : w.proj1' prod' w.proj2' = w => idp
+\func eta-x' {A B : \Type} (w : A x' B) : w.proj1' prod' w.proj2' = w => idp
 
 {-Agda-
 data Bool : Set where
