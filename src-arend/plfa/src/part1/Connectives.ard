@@ -715,5 +715,5 @@ import Data.Empty using (⊥; ⊥-elim)
 import Function.Equivalence using (_⇔_)
 -Agda-}
 
--- \import Logic (||, Empty)
+-- \import Logic (||, Empty, absurd)
 -- \import Relation.Equivalence (Equivalence)

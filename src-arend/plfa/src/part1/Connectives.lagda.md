@@ -1370,7 +1370,7 @@ import Function.Equivalence using (_⇔_)
 </details>
 
 ```tex
--- \import Logic (||, Empty)
+-- \import Logic (||, Empty, absurd)
 -- \import Relation.Equivalence (Equivalence)
 ```
 The standard library constructs pairs with `_,_` whereas we use `⟨_,_⟩`.
