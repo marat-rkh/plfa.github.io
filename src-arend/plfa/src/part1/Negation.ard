@@ -71,3 +71,66 @@ contraposition f ¬y x = ¬y (f x)
 
 \func contraposition {A B : \Type} (f : A -> B) : Not B -> Not A =>
   \lam not-y x => not-y (f x)
+
+{-Agda-
+_≢_ : ∀ {A : Set} → A → A → Set
+x ≢ y  =  ¬ (x ≡ y)
+-Agda-}
+
+\func \infix 1 /= {A : \Type} (x y : A) : \Prop => Not (x = y)
+
+{-Agda-
+_ : 1 ≢ 2
+_ = λ()
+-Agda-}
+
+\func [1/=2] : 1 /= 2 => \lam p => \case p \with {}
+
+{-Agda-
+peano : ∀ {m : ℕ} → zero ≢ suc m
+peano = λ()
+-Agda-}
+
+\func peano {m : Nat} : 0 /= suc m => \lam p => \case p \with {}
+
+{-Agda-
+id : ⊥ → ⊥
+id x = x
+
+id′ : ⊥ → ⊥
+id′ ()
+-Agda-}
+
+\func id (e : Empty) : Empty => e
+
+\func id' (e : Empty) : Empty
+
+{-Agda-
+id≡id′ : id ≡ id′
+id≡id′ = extensionality (λ())
+-Agda-}
+
+\func id=id' : id = id' => extensionality (\lam p => \case p \with {})
+
+{-Agda-
+assimilation : ∀ {A : Set} (¬x ¬x′ : ¬ A) → ¬x ≡ ¬x′
+assimilation ¬x ¬x′ = extensionality (λ x → ⊥-elim (¬x x))
+-Agda-}
+
+\func assimilation {A : \Type} (not-x not-x' : Not A) : not-x = not-x' =>
+  extensionality (\lam x => absurd (not-x x))
+
+-- In Arend, we use `\Prop` to encode logic. Types in `\Prop` have at most one element by definition.
+-- Builtin function `Path.inProp` states exactly that:
+
+\func assimilation' {A : \Type} (not-x not-x' : Not A) : not-x = not-x' => Path.inProp not-x not-x'
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import part1.Relations (<, s<s, z<s)
+
+\func <-irreflexive {n : Nat} (n<n : n < n) : Empty
+  | {0}, ()
+  | {suc n}, s<s n<n => <-irreflexive n<n
