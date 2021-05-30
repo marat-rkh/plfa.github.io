@@ -1,0 +1,2 @@
+\data \infixr 3 && (A B : \Prop)
+  | both A B

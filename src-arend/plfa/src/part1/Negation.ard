@@ -1,0 +1,73 @@
+{-Agda-
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Data.Nat using (ℕ; zero; suc)
+open import Data.Empty using (⊥; ⊥-elim)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Product using (_×_)
+open import plfa.part1.Isomorphism using (_≃_; extensionality)
+-Agda-}
+
+\import Logic (Empty, absurd, ||)
+\import util.Logic (&&)
+\import util.Equiv (=~)
+\import part1.Isomorphism (extensionality)
+
+{-Agda-
+¬_ : Set → Set
+¬ A = A → ⊥
+-Agda-}
+
+\func \fix 4 Not (A : \Type) : \Prop => A -> Empty
+
+{-Agda-
+¬-elim : ∀ {A : Set}
+  → ¬ A
+  → A
+    ---
+  → ⊥
+¬-elim ¬x x = ¬x x
+-Agda-}
+
+\func Not-elim {A : \Type} (not-x : Not A) (x : A) : Empty => not-x x
+
+{-Agda-
+¬¬-intro : ∀ {A : Set}
+  → A
+    -----
+  → ¬ ¬ A
+¬¬-intro x  =  λ{¬x → ¬x x}
+-Agda-}
+
+\func Not-Not-intro {A : \Type} (x : A) : Not (Not A) => \lam not-x => not-x x
+
+{-Agda-
+¬¬-intro′ : ∀ {A : Set}
+  → A
+    -----
+  → ¬ ¬ A
+¬¬-intro′ x ¬x = ¬x x
+-Agda-}
+
+\func Not-Not-intro' {A : \Type} (x : A) (not-x : Not A) : Empty => not-x x
+
+{-Agda-
+¬¬¬-elim : ∀ {A : Set}
+  → ¬ ¬ ¬ A
+    -------
+  → ¬ A
+¬¬¬-elim ¬¬¬x  =  λ x → ¬¬¬x (¬¬-intro x)
+-Agda-}
+
+\func Not-Not-Not-elim {A : \Type} (not-not-not-x : Not (Not (Not A))) : Not A =>
+  \lam x => not-not-not-x (Not-Not-intro x)
+
+{-Agda-
+contraposition : ∀ {A B : Set}
+  → (A → B)
+    -----------
+  → (¬ B → ¬ A)
+contraposition f ¬y x = ¬y (f x)
+-Agda-}
+
+\func contraposition {A B : \Type} (f : A -> B) : Not B -> Not A =>
+  \lam not-y x => not-y (f x)
