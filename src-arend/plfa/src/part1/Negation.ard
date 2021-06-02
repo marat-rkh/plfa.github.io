@@ -7,7 +7,7 @@ open import Data.Product using (_×_)
 open import plfa.part1.Isomorphism using (_≃_; extensionality)
 -Agda-}
 
-\import Logic (Empty, absurd, ||)
+\import Logic (Empty, absurd, ||, byLeft, byRight)
 \import util.Logic (&&)
 \import util.Equiv (=~)
 \import part1.Isomorphism (extensionality)
@@ -169,6 +169,27 @@ assimilation ¬x ¬x′ = extensionality (λ x → ⊥-elim (¬x x))
 -- Your code goes here
 -Agda-}
 
-\import part1.Connectives (->-distrib-u)
+-- The statement we need to prove is a special case of `part1.Connectives.->-distrib-u`.
+-- But we can easily prove equality without using it.
 
--- TODO we need to adapt ->-distrib-u to || and &&.
+\import Logic (propExt)
+\import part1.Connectives (prod, proj1, proj2)
+
+\func ||-dual-&& {A B : \Prop} : Not (A || B) = Not A && Not B => propExt to from
+  \where {
+    \func to {A B : \Prop} (p : Not (A || B)) : Not A && Not B =>
+      prod (\lam a => p (byLeft a)) (\lam b => p (byRight b))
+
+    \func from {A B : \Prop} (p : Not A && Not B) : Not (A || B)
+      | prod not-a not-b => \lam ab => \case ab \with {
+        | byLeft a => not-a a
+        | byRight b => not-b b
+      }
+  }
+
+-- `Not (A && B) = Not A || Not B` is not provable in constructive mathematics.
+-- But we can prove that the right side implies the left one.
+
+\func &&-dual-||-from {A B : \Prop} (p : Not A || Not B) : Not (A && B)
+  | byLeft not-a => \lam ab => not-a (proj1 ab)
+  | byRight not-b => \lam ab => not-b (proj2 ab)

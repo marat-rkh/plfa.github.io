@@ -1,2 +1,3 @@
-\data \infixr 3 && (A B : \Prop)
-  | both A B
+\import part1.Connectives ()
+
+\func \infixr 3 && (A B : \Prop) => A part1.Connectives.&& B
