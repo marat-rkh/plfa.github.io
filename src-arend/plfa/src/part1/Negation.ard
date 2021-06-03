@@ -193,3 +193,11 @@ assimilation ¬x ¬x′ = extensionality (λ x → ⊥-elim (¬x x))
 \func &&-dual-||-from {A B : \Prop} (p : Not A || Not B) : Not (A && B)
   | byLeft not-a => \lam ab => not-a (proj1 ab)
   | byRight not-b => \lam ab => not-b (proj2 ab)
+
+{-Agda-
+em-irrefutable : ∀ {A : Set} → ¬ ¬ (A ⊎ ¬ A)
+em-irrefutable = λ k → k (inj₂ (λ x → k (inj₁ x)))
+-Agda-}
+
+\func em-irrefutable {A : \Prop} : Not (Not (A || Not A)) =>
+  \lam k => k (byRight (\lam x => k (byLeft x)))
