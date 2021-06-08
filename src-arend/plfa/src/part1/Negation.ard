@@ -201,3 +201,32 @@ em-irrefutable = λ k → k (inj₂ (λ x → k (inj₁ x)))
 
 \func em-irrefutable {A : \Prop} : Not (Not (A || Not A)) =>
   \lam k => k (byRight (\lam x => k (byLeft x)))
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func em=dne : (\Pi (A : \Prop) -> A || Not A) = (\Pi (A : \Prop) -> Not (Not A) -> A) =>
+  propExt [=>] [<=]
+  \where {
+    \func [=>] (em : \Pi (A : \Prop) -> A || Not A) : \Pi (A : \Prop) -> Not (Not A) -> A =>
+      \lam A => \case em A \with {
+        | byLeft a => \lam _ => a
+        | byRight not-a => \lam not-not-a => absurd (not-not-a not-a)
+      }
+
+    \func [<=] (dne : \Pi (A : \Prop) -> Not (Not A) -> A) : \Pi (A : \Prop) -> A || Not A =>
+      \lam A => dne (A || Not A) em-irrefutable
+  }
+
+\func dne=pl : (\Pi (A : \Prop) -> Not (Not A) -> A) = (\Pi (A B : \Prop) -> ((A -> B) -> A) -> A) =>
+  propExt [=>] [<=]
+  \where {
+    \func [=>] (dne : \Pi (A : \Prop) -> Not (Not A) -> A) : (\Pi (A B : \Prop) -> ((A -> B) -> A) -> A) =>
+      \lam A B aba => {?}
+--      \lam not-a=>a => dne (\lam not-a => not-a (not-a=>a not-a))
+
+    \func [<=] (pl : \Pi (A B : \Prop) -> ((A -> B) -> A) -> A) : (\Pi (A : \Prop) -> Not (Not A) -> A) =>
+      \lam A => {?}
+--      \lam not-not-a => pl (\lam not-a => absurd (not-not-a not-a))
+  }
