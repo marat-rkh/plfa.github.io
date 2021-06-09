@@ -223,10 +223,8 @@ em-irrefutable = λ k → k (inj₂ (λ x → k (inj₁ x)))
   propExt [=>] [<=]
   \where {
     \func [=>] (dne : \Pi (A : \Prop) -> Not (Not A) -> A) : (\Pi (A B : \Prop) -> ((A -> B) -> A) -> A) =>
-      \lam A B aba => {?}
---      \lam not-a=>a => dne (\lam not-a => not-a (not-a=>a not-a))
+      \lam A B a->b->a => dne A (\lam not-a => not-a (a->b->a (\lam a => absurd (not-a a))))
 
     \func [<=] (pl : \Pi (A B : \Prop) -> ((A -> B) -> A) -> A) : (\Pi (A : \Prop) -> Not (Not A) -> A) =>
-      \lam A => {?}
---      \lam not-not-a => pl (\lam not-a => absurd (not-not-a not-a))
+      \lam A => \lam not-not-a => pl A Empty (\lam not-a => absurd (not-not-a not-a))
   }
