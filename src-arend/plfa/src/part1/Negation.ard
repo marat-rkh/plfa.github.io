@@ -263,3 +263,14 @@ em-irrefutable = λ k → k (inj₂ (λ x → k (inj₁ x)))
         | prod not-a not-not-a => not-not-a not-a
       })
   }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func Stable (A : \Prop) : \Prop => Not (Not A) -> A
+
+\func neg-Stable (A : \Prop) : Stable (Not A) =>
+  \lam not-not-not-a a => Not-Not-Not-elim not-not-not-a a
+
+\func conj-Stable {A B : \Prop} (sa : Stable A) (sb : Stable B) : Stable (A && B) => {?}
