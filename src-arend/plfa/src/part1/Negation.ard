@@ -219,12 +219,47 @@ em-irrefutable = λ k → k (inj₂ (λ x → k (inj₁ x)))
       \lam A => dne (A || Not A) em-irrefutable
   }
 
-\func dne=pl : (\Pi (A : \Prop) -> Not (Not A) -> A) = (\Pi (A B : \Prop) -> ((A -> B) -> A) -> A) =>
+\func em=pl : (\Pi (A : \Prop) -> A || Not A) = (\Pi (A B : \Prop) -> ((A -> B) -> A) -> A) =>
   propExt [=>] [<=]
   \where {
-    \func [=>] (dne : \Pi (A : \Prop) -> Not (Not A) -> A) : (\Pi (A B : \Prop) -> ((A -> B) -> A) -> A) =>
-      \lam A B a->b->a => dne A (\lam not-a => not-a (a->b->a (\lam a => absurd (not-a a))))
+    \func [=>] (em : \Pi (A : \Prop) -> A || Not A) : \Pi (A B : \Prop) -> ((A -> B) -> A) -> A =>
+      \lam A B a->b->a => \case em A \with {
+        | byLeft a => a
+        | byRight not-a => a->b->a (\lam a => absurd (not-a a))
+      }
 
-    \func [<=] (pl : \Pi (A B : \Prop) -> ((A -> B) -> A) -> A) : (\Pi (A : \Prop) -> Not (Not A) -> A) =>
-      \lam A => \lam not-not-a => pl A Empty (\lam not-a => absurd (not-not-a not-a))
+    \func [<=] (pl : \Pi (A B : \Prop) -> ((A -> B) -> A) -> A) : \Pi (A : \Prop) -> A || Not A =>
+      \lam A => pl (A || Not A) Empty (\lam p => absurd (em-irrefutable p))
+  }
+
+\func em=iad : (\Pi (A : \Prop) -> A || Not A) = (\Pi (A B : \Prop) -> (A -> B) -> Not A || B) =>
+  propExt [=>] [<=]
+  \where {
+    \func [=>] (em : \Pi (A : \Prop) -> A || Not A) : \Pi (A B : \Prop) -> (A -> B) -> Not A || B =>
+      \lam A B a->b => \case em A \with {
+        | byLeft a => byRight (a->b a)
+        | byRight not-a => byLeft not-a
+      }
+
+    \func [<=] (iad : \Pi (A B : \Prop) -> (A -> B) -> Not A || B) : \Pi (A : \Prop) -> A || Not A =>
+      \lam A => \let not-a||a => iad A A (\lam a => a) \in \case not-a||a \with {
+        | byLeft not-a => byRight not-a
+        | byRight a => byLeft a
+      }
+  }
+
+\func em=dm : (\Pi (A : \Prop) -> A || Not A) = (\Pi (A B : \Prop) -> Not (Not A && Not B) -> A || B) =>
+  propExt [=>] [<=]
+  \where {
+    \func [=>] (em : \Pi (A : \Prop) -> A || Not A) : \Pi (A B : \Prop) -> Not (Not A && Not B) -> A || B =>
+      \lam A B not-a&&not-b->empty => \case em A, em B \with {
+        | byLeft a, _ => byLeft a
+        | _, byLeft b => byRight b
+        | byRight not-a, byRight npt-b => absurd (not-a&&not-b->empty (prod not-a npt-b))
+      }
+
+    \func [<=] (dm : \Pi (A B : \Prop) -> Not (Not A && Not B) -> A || B) : \Pi (A : \Prop) -> A || Not A =>
+      \lam A => dm A (Not A) (\lam p => \case p \with {
+        | prod not-a not-not-a => not-not-a not-a
+      })
   }
