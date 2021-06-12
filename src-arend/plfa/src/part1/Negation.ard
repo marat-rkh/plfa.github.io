@@ -273,7 +273,10 @@ em-irrefutable = λ k → k (inj₂ (λ x → k (inj₁ x)))
 \func neg-Stable (A : \Prop) : Stable (Not A) =>
   \lam not-not-not-a a => Not-Not-Not-elim not-not-not-a a
 
-\func conj-Stable {A B : \Prop} (sa : Stable A) (sb : Stable B) : Stable (A && B) => {?}
+\func conj-Stable {A B : \Prop} (sa : Stable A) (sb : Stable B) : Stable (A && B) =>
+  \lam not-not-ab => prod
+      (sa (\lam not-a => not-not-ab (\lam ab => not-a (proj1 ab))))
+      (sb (\lam not-b => not-not-ab (\lam ab => not-b (proj2 ab))))
 
 {-Agda-
 import Relation.Nullary using (¬_)
