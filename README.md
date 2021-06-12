@@ -8,7 +8,7 @@ with [Arend plugin installed](https://arend-lang.github.io/documentation/getting
 
 ## Progress
 
-Part 1: 6/10 sections completed.
+Part 1: 7/10 sections completed.
 
 Part 2: 0/11 sections completed.
 

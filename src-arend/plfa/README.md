@@ -8,3 +8,4 @@
 - [Equality](src/part1/Equality.lagda.md): Equality and equational reasoning
 - [Isomorphism](src/part1/Isomorphism.lagda.md): Isomorphism and Embedding
 - [Connectives](src/part1/Connectives.lagda.md): Conjunction, disjunction, and implication
+- [Negation](src/part1/Negation.lagda.md): Negation, with intuitionistic and classical logic
