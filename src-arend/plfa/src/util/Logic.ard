@@ -1,3 +1,10 @@
 \import part1.Connectives ()
 
 \func \infixr 3 && (A B : \Prop) => A part1.Connectives.&& B
+  \where {
+    \cons prod {A B : \Prop} (a : A) (b : B) => part1.Connectives.x.prod a b
+
+    \func proj1 => part1.Connectives.proj1
+
+    \func proj2 => part1.Connectives.proj2
+  }
