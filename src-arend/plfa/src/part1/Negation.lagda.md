@@ -381,7 +381,7 @@ This result is an easy consequence of something we've proved previously.
 -- But we can easily prove equality without using it.
 
 \import Logic (propExt)
-\import part1.Connectives (prod, proj1, proj2)
+\open && (prod, proj1, proj2)
 
 \func ||-dual-&& {A B : \Prop} : Not (A || B) = Not A && Not B => propExt to from
   \where {
