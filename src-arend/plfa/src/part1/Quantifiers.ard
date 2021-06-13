@@ -1,0 +1,76 @@
+{-Agda-
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl)
+open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
+open import Relation.Nullary using (¬_)
+open import Data.Product using (_×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import plfa.part1.Isomorphism using (_≃_; extensionality)
+-Agda-}
+
+\open Nat (+, *)
+\import Logic (Not, absurd, ||)
+\import part1.Connectives (x)
+\open || (byLeft, byRight)
+\import util.Logic (&&)
+\open && (prod, proj1, proj2)
+\import Logic (propExt)
+\import part1.Isomorphism (extensionality)
+
+{-Agda-
+∀-elim : ∀ {A : Set} {B : A → Set}
+  → (L : ∀ (x : A) → B x)
+  → (M : A)
+    -----------------
+  → B M
+∀-elim L M = L M
+-Agda-}
+
+\func Pi-elim {A : \Type} {B : A -> \Type} (L : \Pi (a : A) -> B a) (M : A) : B M => L M
+
+{-Agda-
+postulate
+  ∀-distrib-× : ∀ {A : Set} {B C : A → Set} →
+    (∀ (x : A) → B x × C x) ≃ (∀ (x : A) → B x) × (∀ (x : A) → C x)
+-Agda-}
+
+\func Pi-distrib-&& {A : \Type} {B C : A -> \Prop} :
+  (\Pi (a : A) -> B a && C a) = (\Pi (a : A) -> B a) && (\Pi (a : A) -> C a) =>
+  propExt ([=>] {A} {B} {C}) ([<=] {A} {B} {C})
+  \where {
+    \func [=>] {A : \Type} {B C : A -> \Prop} (p : \Pi (a : A) -> B a && C a) :
+      (\Pi (a : A) -> B a) && (\Pi (a : A) -> C a) =>
+      prod (\lam a => proj1 (p a)) (\lam a => (proj2 (p a)))
+
+    \func [<=] {A : \Type} {B C : A -> \Prop} (p : (\Pi (a : A) -> B a) && (\Pi (a : A) -> C a)) :
+      \Pi (a : A) -> B a && C a =>
+      \lam a => prod ((proj1 p) a) ((proj2 p) a)
+  }
+
+{-Agda-
+postulate
+  ⊎∀-implies-∀⊎ : ∀ {A : Set} {B C : A → Set} →
+    (∀ (x : A) → B x) ⊎ (∀ (x : A) → C x)  →  ∀ (x : A) → B x ⊎ C x
+-Agda-}
+
+\func ||-Pi-implies-Pi-|| {A : \Type} {B C : A -> \Prop} (p : (\Pi (a : A) -> B a) || (\Pi (a : A) -> C a)) :
+  \Pi (a : A) -> B a || C a \elim p
+  | byLeft a=>Ba => \lam a => byLeft (a=>Ba a)
+  | byRight a=>Ca => \lam a => byRight (a=>Ca a)
+
+\func Pi-||->||-Pi =>
+  \Pi {A : \Type} {B C : A -> \Prop} -> (\Pi (a : A) -> B a || C a) -> (\Pi (a : A) -> B a) || (\Pi (a : A) -> C a)
+
+\import Data.Bool
+
+\func Pi-||-doesn't-imply-||-Pi : Not (Pi-||->||-Pi) =>
+  \lam p => \case p {Bool} {__ = true} {__ = false} bool-is-true-or-false \with {
+    | byLeft any-bool-is-true => \case any-bool-is-true false \with {}
+    | byRight any-bool-is-false => \case any-bool-is-false true \with {}
+  }
+
+  \where {
+    \func bool-is-true-or-false (b : Bool) : (b = true) || (b = false) \elim b
+      | true => byLeft idp
+      | false => byRight idp
+  }
