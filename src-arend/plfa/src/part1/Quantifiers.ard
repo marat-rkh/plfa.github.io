@@ -10,11 +10,10 @@ open import plfa.part1.Isomorphism using (_≃_; extensionality)
 
 \open Nat (+, *)
 \import Logic (Not, absurd, ||)
-\import part1.Connectives (x)
 \open || (byLeft, byRight)
 \import util.Logic (&&)
 \open && (prod, proj1, proj2)
-\import Logic (propExt)
+\import util.Equiv (=~)
 \import part1.Isomorphism (extensionality)
 
 {-Agda-
@@ -33,6 +32,8 @@ postulate
   ∀-distrib-× : ∀ {A : Set} {B C : A → Set} →
     (∀ (x : A) → B x × C x) ≃ (∀ (x : A) → B x) × (∀ (x : A) → C x)
 -Agda-}
+
+\import Logic (propExt)
 
 \func Pi-distrib-&& {A : \Type} {B C : A -> \Prop} :
   (\Pi (a : A) -> B a && C a) = (\Pi (a : A) -> B a) && (\Pi (a : A) -> C a) =>
@@ -73,4 +74,33 @@ postulate
     \func bool-is-true-or-false (b : Bool) : (b = true) || (b = false) \elim b
       | true => byLeft idp
       | false => byRight idp
+  }
+
+{-Agda-
+data Tri : Set where
+  aa : Tri
+  bb : Tri
+  cc : Tri
+-Agda-}
+
+\import part1.Connectives (Tri, x)
+\open Tri
+\import part1.Connectives (x, proj1 \as x-proj1, proj2 \as x-proj2)
+\import part1.Isomorphism (Pi-extensionality)
+\import Paths.Meta (rewrite)
+
+\func Pi-x {B : Tri -> \Type} : (\Pi (t : Tri) -> B t) =~ B aa x B bb x B cc \cowith
+  | f => \lam p => x.prod (p aa) (x.prod (p bb) (p cc))
+  | ret => \lam p t => \case t \as t' \return B t' \with {
+    | aa => x-proj1 p
+    | bb => x-proj1 (x-proj2 p)
+    | cc => x-proj2 (x-proj2 p)
+  }
+  | ret_f => \lam p => Pi-extensionality {Tri} {B} (\lam x => \case x \as x', idp : x = x' \with {
+    | aa, eq => rewrite eq idp
+    | bb, eq => rewrite eq idp
+    | cc, eq => rewrite eq idp
+  })
+  | f_sec => \lam p => \case p \as p', idp : p = p' \with {
+    | x.prod a (x.prod b c), eq => rewrite eq idp
   }
