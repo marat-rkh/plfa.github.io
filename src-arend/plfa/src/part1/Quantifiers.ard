@@ -104,3 +104,101 @@ data Tri : Set where
   | f_sec => \lam p => \case p \as p', idp : p = p' \with {
     | x.prod a (x.prod b c), eq => rewrite eq idp
   }
+
+{-Agda-
+data Σ (A : Set) (B : A → Set) : Set where
+  ⟨_,_⟩ : (x : A) → B x → Σ A B
+-Agda-}
+
+\data Sigma (A : \Type) (B : A -> \Prop)
+  | pair (x : A) (B x)
+
+-- TODO Add a note about TruncP
+
+\import Logic (TruncP, inP)
+
+{-Agda-
+Σ-syntax = Σ
+infix 2 Σ-syntax
+syntax Σ-syntax A (λ x → B) = Σ[ x ∈ A ] B
+-Agda-}
+
+-- Arend has a special builtin type `\Sigma` for dependent tuples:
+
+\func Sigma-syntax-example (A : \Type) (B : A -> \Prop) (a : A) (b : B a) : \Sigma (a : A) (B a) => (a, b)
+
+\import Logic.Meta (∃)
+
+\func Exists-syntax-example (A : \Type) (B : A -> \Prop) (a : A) (b : B a) : ∃ (a : A) (B a) => inP (a, b)
+
+{-Agda-
+record Σ′ (A : Set) (B : A → Set) : Set where
+  field
+    proj₁′ : A
+    proj₂′ : B proj₁′
+-Agda-}
+
+\record Sigma' (A : \Type) (B : A -> \Prop)
+  | proj1' : A
+  | proj2' : B proj1'
+
+{-Agda-
+∃ : ∀ {A : Set} (B : A → Set) → Set
+∃ {A} B = Σ A B
+
+∃-syntax = ∃
+syntax ∃-syntax (λ x → B) = ∃[ x ] B
+-Agda-}
+
+\func Exists-syntax-example' (A : \Type) (B : A -> \Type) (a : A) (b : B a) : ∃ {a} (B a) => inP (a, b)
+
+{-Agda-
+∃-elim : ∀ {A : Set} {B : A → Set} {C : Set}
+  → (∀ x → B x → C)
+  → ∃[ x ] B x
+    ---------------
+  → C
+∃-elim f ⟨ x , y ⟩ = f x y
+-Agda-}
+
+\func Sigma-elim {A : \Type} {B : A -> \Type} {C : \Type}
+                 (f : \Pi (x : A) -> B x -> C)
+                 (e : \Sigma (x : A) (B x)) : C \elim e
+  | (x, y) => f x y
+
+{-Agda-
+∀∃-currying : ∀ {A : Set} {B : A → Set} {C : Set}
+  → (∀ x → B x → C) ≃ (∃[ x ] B x → C)
+∀∃-currying =
+  record
+    { to      =  λ{ f → λ{ ⟨ x , y ⟩ → f x y }}
+    ; from    =  λ{ g → λ{ x → λ{ y → g ⟨ x , y ⟩ }}}
+    ; from∘to =  λ{ f → refl }
+    ; to∘from =  λ{ g → extensionality λ{ ⟨ x , y ⟩ → refl }}
+    }
+-Agda-}
+
+\func Pi-Sigma-currying {A : \Type} {B : A -> \Type} {C : \Type} :
+  (\Pi (x : A) -> B x -> C) =~ (\Sigma (x : A) (B x) -> C) \cowith
+  | f => \lam f' xy => \case xy \with {
+    | (x, y) => f' x y
+  }
+  | ret => \lam g x y => g (x, y)
+  | ret_f => \lam f => idp
+  | f_sec => \lam g => extensionality (\lam xy => \case xy \as xy', idp : xy = xy' \with {
+    | (x, y), ab=ab' => rewrite ab=ab' idp
+  })
+
+{-Agda-
+postulate
+  ∃-distrib-⊎ : ∀ {A : Set} {B C : A → Set} →
+    ∃[ x ] (B x ⊎ C x) ≃ (∃[ x ] B x) ⊎ (∃[ x ] C x)
+-Agda-}
+
+\func Exists-distrib-|| {A : \Type} {B C : A -> \Prop} : ∃ (a : A) (B a || C a) = (∃ (a : A) (B a) || ∃ (a : A) (C a)) =>
+  propExt ([=>] {A} {B} {C}) ([<=] {A} {B} {C})
+  \where {
+    \func [=>] {A : \Type} {B C : A -> \Prop} (p : ∃ (a : A) (B a || C a)) : ∃ (a : A) (B a) || ∃ (a : A) (C a) => {?}
+
+    \func [<=] {A : \Type} {B C : A -> \Prop} (p : ∃ (a : A) (B a) || ∃ (a : A) (C a)) : ∃ (a : A) (B a || C a) => {?}
+  }
