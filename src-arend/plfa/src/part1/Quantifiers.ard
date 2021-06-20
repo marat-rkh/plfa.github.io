@@ -54,7 +54,7 @@ postulate
     (∀ (x : A) → B x) ⊎ (∀ (x : A) → C x)  →  ∀ (x : A) → B x ⊎ C x
 -Agda-}
 
-\func ||-Pi-implies-Pi-|| {A : \Type} {B C : A -> \Prop} (p : (\Pi (a : A) -> B a) || (\Pi (a : A) -> C a)) :
+\func ||-Pi->Pi-|| {A : \Type} {B C : A -> \Prop} (p : (\Pi (a : A) -> B a) || (\Pi (a : A) -> C a)) :
   \Pi (a : A) -> B a || C a \elim p
   | byLeft a=>Ba => \lam a => byLeft (a=>Ba a)
   | byRight a=>Ca => \lam a => byRight (a=>Ca a)
@@ -64,7 +64,7 @@ postulate
 
 \import Data.Bool
 
-\func Pi-||-doesn't-imply-||-Pi : Not (Pi-||->||-Pi) =>
+\func Pi-||->||-Pi-is-false : Not (Pi-||->||-Pi) =>
   \lam p => \case p {Bool} {__ = true} {__ = false} bool-is-true-or-false \with {
     | byLeft any-bool-is-true => \case any-bool-is-true false \with {}
     | byRight any-bool-is-false => \case any-bool-is-false true \with {}
@@ -207,16 +207,36 @@ postulate
     ∃[ x ] (B x ⊎ C x) ≃ (∃[ x ] B x) ⊎ (∃[ x ] C x)
 -Agda-}
 
-\func Exists-distrib-|| {A : \Type} {B C : A -> \Prop} : ∃ (a : A) (B a || C a) = (∃ (a : A) (B a) || ∃ (a : A) (C a)) =>
+\func Exists-distrib-|| {A : \Type} {B C : A -> \Prop} : ∃ {a} (B a || C a) = (∃ {a} (B a) || ∃ {a} (C a)) =>
   propExt ([=>] {A} {B} {C}) ([<=] {A} {B} {C})
   \where {
-    \func [=>] {A : \Type} {B C : A -> \Prop} (p : ∃ (a : A) (B a || C a)) : ∃ (a : A) (B a) || ∃ (a : A) (C a)
+    \func [=>] {A : \Type} {B C : A -> \Prop} (p : ∃ {a} (B a || C a)) : ∃ {a} (B a) || ∃ {a} (C a)
       | inP (a, b||c) => \case b||c \with {
         | byLeft b => byLeft (inP (a, b))
         | byRight c => byRight (inP (a, c))
       }
 
-    \func [<=] {A : \Type} {B C : A -> \Prop} (p : ∃ (a : A) (B a) || ∃ (a : A) (C a)) : ∃ (a : A) (B a || C a)
+    \func [<=] {A : \Type} {B C : A -> \Prop} (p : ∃ {a} (B a) || ∃ {a} (C a)) : ∃ {a} (B a || C a)
       | byLeft (inP (a, b)) => inP (a, byLeft b)
       | byRight (inP (a, c)) => inP (a, byRight c)
   }
+
+{-Agda-
+postulate
+  ∃×-implies-×∃ : ∀ {A : Set} {B C : A → Set} →
+    ∃[ x ] (B x × C x) → (∃[ x ] B x) × (∃[ x ] C x)
+-Agda-}
+
+\func Exists-&&->&&-Exists {A : \Type} {B C : A -> \Prop} (p : ∃ {a} (B a && C a)) : (∃ {a} (B a)) && (∃ {a} (C a))
+  | inP (a, x.prod b c) => x.prod (inP (a, b)) (inP (a, c))
+
+\func &&-Exists->Exists-&& => \Pi {A : \Type} {B C : A -> \Prop} -> (∃ {a} (B a)) && (∃ {a} (C a)) -> ∃ {a} (B a && C a)
+
+\import Paths (inv, *>)
+
+\func &&-Exists->Exists-&&-is-false : Not (&&-Exists->Exists-&&) =>
+  \lam p => \case p {Bool} {\lam b => b = true} {\lam b => b = false} (x.prod (inP (true, idp)) (inP (false, idp))) \with {
+    | inP (b, x.prod b=true b=false) => \case (inv b=true) *> b=false \with {}
+  }
+
+-- TODO ∃-||
