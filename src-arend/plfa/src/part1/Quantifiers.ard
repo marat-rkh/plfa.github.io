@@ -9,7 +9,7 @@ open import plfa.part1.Isomorphism using (_≃_; extensionality)
 -Agda-}
 
 \open Nat (+, *)
-\import Logic (Not, absurd, ||)
+\import Logic (Not, absurd, truncP, ||)
 \open || (byLeft, byRight)
 \import util.Logic (&&)
 \open && (prod, proj1, proj2)
@@ -210,7 +210,13 @@ postulate
 \func Exists-distrib-|| {A : \Type} {B C : A -> \Prop} : ∃ (a : A) (B a || C a) = (∃ (a : A) (B a) || ∃ (a : A) (C a)) =>
   propExt ([=>] {A} {B} {C}) ([<=] {A} {B} {C})
   \where {
-    \func [=>] {A : \Type} {B C : A -> \Prop} (p : ∃ (a : A) (B a || C a)) : ∃ (a : A) (B a) || ∃ (a : A) (C a) => {?}
+    \func [=>] {A : \Type} {B C : A -> \Prop} (p : ∃ (a : A) (B a || C a)) : ∃ (a : A) (B a) || ∃ (a : A) (C a)
+      | inP (a, b||c) => \case b||c \with {
+        | byLeft b => byLeft (inP (a, b))
+        | byRight c => byRight (inP (a, c))
+      }
 
-    \func [<=] {A : \Type} {B C : A -> \Prop} (p : ∃ (a : A) (B a) || ∃ (a : A) (C a)) : ∃ (a : A) (B a || C a) => {?}
+    \func [<=] {A : \Type} {B C : A -> \Prop} (p : ∃ (a : A) (B a) || ∃ (a : A) (C a)) : ∃ (a : A) (B a || C a)
+      | byLeft (inP (a, b)) => inP (a, byLeft b)
+      | byRight (inP (a, c)) => inP (a, byRight c)
   }
