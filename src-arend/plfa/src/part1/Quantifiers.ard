@@ -113,9 +113,18 @@ data Σ (A : Set) (B : A → Set) : Set where
 \data Sigma (A : \Type) (B : A -> \Prop)
   | pair (x : A) (B x)
 
--- TODO Add a note about TruncP
+-- (!) Note that `Sigma` is not generally in `\Prop`. We can fix this using truncation as we did for disjunction
+-- in `part1.Connectives`. This time, we will use `TruncP` from the standard library, it allows truncating any type
+-- to `\Prop`. `TruncP` has 2 contructors:
+-- 1. `inP` - constructs values of `TruncP` from any type.
+-- 2. `truncP` - states that any 2 values of `TruncP` are identical.
+-- Note that `truncP` is special. It doesn't construct values of `TruncP`, but rather constructs values
+-- of identity type on `TruncP`. This is a feature of higher inductive types. `TruncP` is an example of such type.
+-- See: https://arend-lang.github.io/documentation/language-reference/definitions/hits
 
 \import Logic (TruncP, inP)
+
+\func Exists-example (A : \Type) (B : A -> \Prop) (a : A) (b : B a) : TruncP (Sigma A B) => inP (pair a b)
 
 {-Agda-
 Σ-syntax = Σ
@@ -126,6 +135,9 @@ syntax Σ-syntax A (λ x → B) = Σ[ x ∈ A ] B
 -- Arend has a special builtin type `\Sigma` for dependent tuples:
 
 \func Sigma-syntax-example (A : \Type) (B : A -> \Prop) (a : A) (b : B a) : \Sigma (a : A) (B a) => (a, b)
+
+-- For `TruncP (\Sigma ...)` convenient syntax is provided by the meta definition `∃`.
+-- See: https://arend-lang.github.io/about/arend-features#language-extensions
 
 \import Logic.Meta (∃)
 
@@ -161,10 +173,10 @@ syntax ∃-syntax (λ x → B) = ∃[ x ] B
 ∃-elim f ⟨ x , y ⟩ = f x y
 -Agda-}
 
-\func Sigma-elim {A : \Type} {B : A -> \Type} {C : \Type}
-                 (f : \Pi (x : A) -> B x -> C)
-                 (e : \Sigma (x : A) (B x)) : C \elim e
-  | (x, y) => f x y
+\func Exists-elim {A : \Type} {B : A -> \Prop} {C : \Prop}
+                  (f : \Pi (x : A) -> B x -> C)
+                  (e : ∃ {x} (B x)) : C \elim e
+  | inP (x, y) => f x y
 
 {-Agda-
 ∀∃-currying : ∀ {A : Set} {B : A → Set} {C : Set}
