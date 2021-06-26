@@ -9,7 +9,7 @@ open import plfa.part1.Isomorphism using (_≃_; extensionality)
 -Agda-}
 
 \open Nat (+, *)
-\import Logic (Not, absurd, truncP, ||)
+\import Logic (Empty, Not, absurd, ||)
 \open || (byLeft, byRight)
 \import util.Logic (&&)
 \open && (prod, proj1, proj2)
@@ -240,3 +240,89 @@ postulate
   }
 
 -- TODO ∃-||
+
+{-Agda-
+data even : ℕ → Set
+data odd  : ℕ → Set
+
+data even where
+
+  even-zero : even zero
+
+  even-suc : ∀ {n : ℕ}
+    → odd n
+      ------------
+    → even (suc n)
+
+data odd where
+  odd-suc : ∀ {n : ℕ}
+    → even n
+      -----------
+    → odd (suc n)
+-Agda-}
+
+\import part1.Relations (even, odd, suc-even, suc-odd, zero-even)
+
+{-Agda-
+even-∃ : ∀ {n : ℕ} → even n → ∃[ m ] (    m * 2 ≡ n)
+odd-∃  : ∀ {n : ℕ} →  odd n → ∃[ m ] (1 + m * 2 ≡ n)
+
+even-∃ even-zero                       =  ⟨ zero , refl ⟩
+even-∃ (even-suc o) with odd-∃ o
+...                    | ⟨ m , refl ⟩  =  ⟨ suc m , refl ⟩
+
+odd-∃  (odd-suc e)  with even-∃ e
+...                    | ⟨ m , refl ⟩  =  ⟨ m , refl ⟩
+-Agda-}
+
+\import Paths (pmap)
+
+\func even-Exists {n : Nat} (en : even n) : ∃ {m} (m * 2 = n)
+  | {0}, zero-even => inP (0, idp)
+  | {suc n}, suc-even o => \case odd-Exists o \with {
+    | inP (m, p) => inP (suc m, pmap suc p)
+  }
+
+\func odd-Exists {n : Nat} (on : odd n) : ∃ {m} (1 + m * 2 = n)
+  | {suc n}, suc-odd e => \case even-Exists e \with {
+    | inP (m, p) => inP (m, pmap suc p)
+  }
+
+{-Agda-
+∃-even : ∀ {n : ℕ} → ∃[ m ] (    m * 2 ≡ n) → even n
+∃-odd  : ∀ {n : ℕ} → ∃[ m ] (1 + m * 2 ≡ n) →  odd n
+
+∃-even ⟨  zero , refl ⟩  =  even-zero
+∃-even ⟨ suc m , refl ⟩  =  even-suc (∃-odd ⟨ m , refl ⟩)
+
+∃-odd  ⟨     m , refl ⟩  =  odd-suc (∃-even ⟨ m , refl ⟩)
+-Agda-}
+
+\import Arith.Nat (pred)
+
+-- TODO can we avoid all these `\case term \with {}`?
+
+\func Exists-even {n : Nat} (e : ∃ {m} (m * 2 = n)) : even n \elim n
+  | 0 => zero-even
+  | suc n => suc-even (Exists-odd (lemma1 e))
+  \where {
+    \func lemma1 {n : Nat} (e : ∃ {m} (m * 2 = suc n)) : ∃ {k} (suc (k * 2) = n)
+      | {0}, inP (0, p) => \case p \with {}
+      | {0}, inP (suc n, p) => \case p \with {}
+      | {suc n}, inP ((0, p)) => \case p \with {}
+      | {suc n}, inP (suc m, p) => inP (m, pmap pred p)
+  }
+
+\func Exists-odd {n : Nat} (e : ∃ {m} (suc (m * 2) = n)) : odd n \elim n
+  | 0 =>
+    \let empty => TruncP.map e (\case __.2 \with {})
+    \in absurd (TruncP.remove Path.inProp empty)
+  | suc n =>
+    \let e' : ∃ {m} (m * 2 = n) => TruncP.map e (\lam p => (p.1, pmap pred p.2))
+    \in suc-odd (Exists-even e')
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- TODO ∃-even-odd
