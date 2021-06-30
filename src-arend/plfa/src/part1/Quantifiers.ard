@@ -300,16 +300,14 @@ odd-∃  (odd-suc e)  with even-∃ e
 
 \import Arith.Nat (pred)
 
--- TODO can we avoid all these `\case term \with {}`?
-
 \func Exists-even {n : Nat} (e : ∃ {m} (m * 2 = n)) : even n \elim n
   | 0 => zero-even
   | suc n => suc-even (Exists-odd (lemma1 e))
   \where {
     \func lemma1 {n : Nat} (e : ∃ {m} (m * 2 = suc n)) : ∃ {k} (suc (k * 2) = n)
-      | {0}, inP (0, p) => \case p \with {}
-      | {0}, inP (suc n, p) => \case p \with {}
-      | {suc n}, inP ((0, p)) => \case p \with {}
+      | {0}, inP (0, ())
+      | {0}, inP (suc n, ())
+      | {suc n}, inP ((0, ()))
       | {suc n}, inP (suc m, p) => inP (m, pmap pred p)
   }
 
