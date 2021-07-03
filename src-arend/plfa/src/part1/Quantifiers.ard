@@ -9,7 +9,8 @@ open import plfa.part1.Isomorphism using (_≃_; extensionality)
 -Agda-}
 
 \open Nat (+, *)
-\import Logic (Empty, Not, absurd, ||)
+\import Logic (Empty, absurd, ||)
+\import util.Logic (~)
 \open || (byLeft, byRight)
 \import util.Logic (&&)
 \open && (prod, proj1, proj2)
@@ -64,7 +65,7 @@ postulate
 
 \import Data.Bool
 
-\func Pi-||->||-Pi-is-false : Not (Pi-||->||-Pi) =>
+\func Pi-||->||-Pi-is-false : ~ (Pi-||->||-Pi) =>
   \lam p => \case p {Bool} {__ = true} {__ = false} bool-is-true-or-false \with {
     | byLeft any-bool-is-true => \case any-bool-is-true false \with {}
     | byRight any-bool-is-false => \case any-bool-is-false true \with {}
@@ -234,7 +235,7 @@ postulate
 
 \import Paths (inv, *>)
 
-\func &&-Exists->Exists-&&-is-false : Not (&&-Exists->Exists-&&) =>
+\func &&-Exists->Exists-&&-is-false : ~ (&&-Exists->Exists-&&) =>
   \lam p => \case p {Bool} {\lam b => b = true} {\lam b => b = false} (x.prod (inP (true, idp)) (inP (false, idp))) \with {
     | inP (b, x.prod b=true b=false) => \case (inv b=true) *> b=false \with {}
   }
@@ -352,3 +353,41 @@ odd-∃  (odd-suc e)  with even-∃ e
           | q : z <= suc z => <=_0_+-right 1
         \in TruncP.map p (NatLE.<=-transitive __ q)
   }
+
+{-Agda-
+¬∃≃∀¬ : ∀ {A : Set} {B : A → Set}
+  → (¬ ∃[ x ] B x) ≃ ∀ x → ¬ B x
+¬∃≃∀¬ =
+  record
+    { to      =  λ{ ¬∃xy x y → ¬∃xy ⟨ x , y ⟩ }
+    ; from    =  λ{ ∀¬xy ⟨ x , y ⟩ → ∀¬xy x y }
+    ; from∘to =  λ{ ¬∃xy → extensionality λ{ ⟨ x , y ⟩ → refl } }
+    ; to∘from =  λ{ ∀¬xy → refl }
+    }
+-Agda-}
+
+\func NotExists=ForAllNot \alias ~∃=∀~ {A : \Type} {B : A -> \Prop} : ~ (∃ {x} (B x)) = (\Pi (x : A) -> ~ (B x)) =>
+  propExt ([=>] {A} {B}) ([<=] {A} {B})
+  \where {
+    \func [=>] {A : \Type} {B : A -> \Prop} (p : ~ (∃ {x} (B x))) : \Pi (x : A) -> ~ (B x) =>
+      \lam x bx => p (inP (x, bx))
+
+    \func [<=] {A : \Type} {B : A -> \Prop} (p : \Pi (x : A) -> ~ (B x)) : ~ (∃ {x} (B x)) =>
+      \lam q => \case q \with {
+        | inP (x, bx) => p x bx
+      }
+  }
+
+{-Agda-
+postulate
+  ∃¬-implies-¬∀ : ∀ {A : Set} {B : A → Set}
+    → ∃[ x ] (¬ B x)
+      --------------
+    → ¬ (∀ x → B x)
+-Agda-}
+
+\func ExistsNot-implies-NotForAll \alias ∃~-implies-~∀
+  {A : \Type} {B : A -> \Prop} (p : ∃ {x} (~ (B x))) : ~ (\Pi (x : A) -> B x) \elim p
+  | inP (x, not-bx) => \lam x=>bx => not-bx (x=>bx x)
+
+-- The inverse doesn't hold as we need a double negation elimination to prove it.
