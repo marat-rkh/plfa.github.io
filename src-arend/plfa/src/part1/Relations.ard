@@ -493,19 +493,18 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
   | O b => O-one (One b)
   | I b => I-one (One b)
 
-\func inc-can {b : Bin} (cn : Can b) : Can (inc b)
+\func inc-Can {b : Bin} (cn : Can b) : Can (inc b)
   | {O <>}, zero-can => one-can one
-  | one-can ob => one-can $ inc-one ob
-  \where {
-    \func inc-one {b : Bin} (ob : One b) : One $ inc b
-      | {I <>}, one => O-one one
-      | {O b}, O-one ob => I-one ob
-      | {I b}, I-one ob => O-one $ inc-one ob
-  }
+  | one-can ob => one-can $ inc-One ob
 
-\func to-can {n : Nat} : Can (to n)
+\func inc-One {b : Bin} (ob : One b) : One $ inc b
+  | {I <>}, one => O-one one
+  | {O b}, O-one ob => I-one ob
+  | {I b}, I-one ob => O-one $ inc-One ob
+
+\func to-Can {n : Nat} : Can (to n)
   | {0} => zero-can
-  | {suc n} => inc-can to-can
+  | {suc n} => inc-Can to-Can
 
 \import Arith.Nat (pred)
 \import Function (o)
@@ -515,34 +514,30 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
 \func can-to-from-id {b : Bin} (cb : Can b) : to (from b) = b
   | {O <>}, zero-can => idp
   | one-can ob => one-to-from-id ob
-  \where {
-    \func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b =>
-      \case from b \as from-b, idp : from b = from-b, One-b>=1 ob : 1 <= from-b \with {
-        | suc n, from-b=suc-n, s<=s _ =>
-          \let
-            | p : from (inc (to n)) = from b =>
-              from (inc (to n)) ==< rewrite (inv (from-inc=suc-from (to n))) idp >==
-              suc (from (to n)) ==< rewrite {1} (from-to-id n) idp >==
-              suc n ==< inv from-b=suc-n >==
-              from b `qed
-          \in rewrite from-b=suc-n (from-pmap-lemma One-inc-to ob p)
-      }
 
-    \func One-b>=1 {b : Bin} (ob : One b) : 1 <= from b
+\func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b =>
+  \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \return to (from-b) = b \with {
+    | suc n, s<=s _, from-b=suc-n =>
+      \let
+        | p : from (inc (to n)) = from b =>
+          from (inc (to n)) ==< rewrite (inv (from-inc=suc-from (to n))) idp >==
+          suc (from (to n)) ==< rewrite {1} (from-to-id n) idp >==
+          suc n ==< inv from-b=suc-n >==
+          from b `qed
+      \in from-pmap-lemma inc-to-One ob p
+  }
+
+  \where {
+    \func [1<=from-b] {b : Bin} (ob : One b) : 1 <= from b
       | {I <>}, one => s<=s z<=n
-      | {O b}, O-one ob => n>=1=>2*n>=1 (One-b>=1 ob)
-      | {I b}, I-one ob => +-mono-<= 0 1 _ _ z<=n (n>=1=>2*n>=1 (One-b>=1 ob))
+      | {O b}, O-one ob => n>=1=>2*n>=1 ([1<=from-b] ob)
+      | {I b}, I-one ob => +-mono-<= 0 1 _ _ z<=n (n>=1=>2*n>=1 ([1<=from-b] ob))
 
     \func n>=1=>2*n>=1 {n : Nat} (p : 1 <= n) : 1 <= 2 * n => *-mono-<= 1 2 _ _ (s<=s z<=n) p
 
-    \func One-inc-to {n : Nat} : One (inc (to n))
+    \func inc-to-One {n : Nat} : One (inc (to n))
       | {0} => one
-      | {suc n} => One-inc-One One-inc-to
-
-    \func One-inc-One {b : Bin} (ob : One b) : One (inc b)
-      | {I <>}, one => O-one one
-      | {O b}, O-one ob => I-one ob
-      | {I b}, I-one ob => O-one (One-inc-One ob)
+      | {suc n} => inc-One inc-to-One
 
     \func from-pmap-lemma {b d : Bin} (ob : One b) (od : One d) (p : from b = from d) : b = d \elim b, ob, p
       | I <>, one, p1 => \case d \as d', od : One d', p1 : 1 = from d' \return I <> = d' \with {
@@ -553,7 +548,7 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
         | I d1, I-one od1, p2 =>
           \let
             | p3 : from d1 = 0 => lemma3 (inv (pmap pred p2))
-            | p4 : 1 <= from d1 => One-b>=1 od1
+            | p4 : 1 <= from d1 => [1<=from-b] od1
           \in \case rewriteF p3 (p4) \with {}
       }
       | O b1, O-one ob1, p1 => \case d \as d', od : One d', p1 : 2 * from b1 = from d' \return O b1 = d' \with {
@@ -567,7 +562,7 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
         | I <>, one, p2 =>
           \let
             | p3 : from b1 = 0 => lemma3 (pmap pred p2)
-            | p4 : 1 <= from b1 => One-b>=1 ob1
+            | p4 : 1 <= from b1 => [1<=from-b] ob1
           \in \case rewriteF p3 (p4) \with {}
         | O d1, O-one od1, p2 => absurd (lemma1 (inv p2))
         | I d1, I-one od1, p2 => pmap I (from-pmap-lemma ob1 od1 (lemma2 (pmap pred p2)))
