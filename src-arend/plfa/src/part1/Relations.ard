@@ -285,7 +285,7 @@ data Total′ : ℕ → ℕ → Set where
 -Agda-}
 
 \import Function.Meta ($)
-\import Paths.Meta (rewrite)
+\import Paths.Meta (rewrite, rewriteI)
 
 \func +-mono-left-<= (m n p : Nat) (m<=n : m <= n) : m + p <= n + p =>
   rewrite (+-comm {m} {p}) $ rewrite (+-comm {n} {p}) $ +-mono-right-<= p m n m<=n
@@ -518,13 +518,12 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
 \func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b =>
   \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \return to (from-b) = b \with {
     | suc n, s<=s _, from-b=suc-n =>
-      \let
-        | p : from (inc (to n)) = from b =>
-          from (inc (to n)) ==< rewrite (inv (from-inc=suc-from (to n))) idp >==
-          suc (from (to n)) ==< rewrite {1} (from-to-id n) idp >==
-          suc n ==< inv from-b=suc-n >==
-          from b `qed
-      \in from-pmap-lemma inc-to-One ob p
+      \let p : from (inc (to n)) = from b =>
+        from (inc (to n)) ==< rewrite (inv (from-inc=suc-from (to n))) idp >==
+        suc (from (to n)) ==< rewrite {1} (from-to-id n) idp >==
+        suc n ==< inv from-b=suc-n >==
+        from b `qed
+      \in (pmap-drop-from inc-to-One ob p : inc (to n) = b)
   }
 
   \where {
@@ -539,7 +538,7 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
       | {0} => one
       | {suc n} => inc-One inc-to-One
 
-    \func from-pmap-lemma {b d : Bin} (ob : One b) (od : One d) (p : from b = from d) : b = d \elim b, ob, p
+    \func pmap-drop-from {b d : Bin} (ob : One b) (od : One d) (p : from b = from d) : b = d \elim b, ob, p
       | I <>, one, p1 => \case d \as d', od : One d', p1 : 1 = from d' \return I <> = d' \with {
         | I <>, one, p2 => idp
         | O d1, O-one od1, p2 => \case from d1 \as fd1, p2 : 1 = 2 * fd1 \with {
@@ -547,7 +546,7 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
         }
         | I d1, I-one od1, p2 =>
           \let
-            | p3 : from d1 = 0 => lemma3 (inv (pmap pred p2))
+            | p3 : from d1 = 0 => pmap-drop-2* (inv (pmap pred p2))
             | p4 : 1 <= from d1 => [1<=from-b] od1
           \in \case rewriteF p3 (p4) \with {}
       }
@@ -555,27 +554,24 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
         | I <>, one, p2 => \case from b1 \as fb1, p2 : 2 * fb1 = 1 \with {
           | 0, ()
         }
-        | O d1, O-one od1, p2 => pmap O (from-pmap-lemma ob1 od1 (lemma2 p2))
-        | I d1, I-one od1, p2 => absurd (lemma1 p2)
+        | O d1, O-one od1, p2 => pmap O (pmap-drop-from ob1 od1 (pmap-drop-2* p2))
+        | I d1, I-one od1, p2 => absurd ([2*m!=suc-2*n] p2)
       }
       | I b1, I-one ob1, p1 => \case d \as d', od : One d', p1 : suc (2 * from b1) = from d' \return I b1 = d' \with {
         | I <>, one, p2 =>
           \let
-            | p3 : from b1 = 0 => lemma3 (pmap pred p2)
+            | p3 : from b1 = 0 => pmap-drop-2* (pmap pred p2)
             | p4 : 1 <= from b1 => [1<=from-b] ob1
           \in \case rewriteF p3 (p4) \with {}
-        | O d1, O-one od1, p2 => absurd (lemma1 (inv p2))
-        | I d1, I-one od1, p2 => pmap I (from-pmap-lemma ob1 od1 (lemma2 (pmap pred p2)))
+        | O d1, O-one od1, p2 => absurd ([2*m!=suc-2*n] (inv p2))
+        | I d1, I-one od1, p2 => pmap I (pmap-drop-from ob1 od1 (pmap-drop-2* (pmap pred p2)))
       }
 
-    \func lemma1 {m n : Nat} (p : 2 * m = suc (2 * n)) : Empty
-      | {0}, {0}, ()
-      | {suc m}, {suc n}, p => lemma1 (pmap (pred o pred) p)
-
-    \func lemma2 {m n : Nat} (p : 2 * m = 2 * n) : m = n
+    \func pmap-drop-2* {m n : Nat} (p : 2 * m = 2 * n) : m = n
       | {0}, {0}, p => idp
-      | {suc m}, {suc n}, p => pmap suc (lemma2 (pmap (pred o pred) p))
+      | {suc m}, {suc n}, p => pmap suc (pmap-drop-2* (pmap (pred o pred) p))
 
-    \func lemma3 {n : Nat} (p : 2 * n = 0) : n = 0
-      | {0}, p => idp
+    \func [2*m!=suc-2*n] {m n : Nat} (p : 2 * m = suc (2 * n)) : Empty
+      | {0}, {0}, ()
+      | {suc m}, {suc n}, p => [2*m!=suc-2*n] (pmap (pred o pred) p)
   }
