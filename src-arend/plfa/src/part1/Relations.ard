@@ -482,6 +482,8 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
 
 \import util.Arith.Bin
 \open Bin
+\import Function (o)
+\import Paths (inv)
 
 \data Can Bin \with
   | O <> => zero-can
@@ -505,24 +507,21 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
   | {0} => zero-can
   | {suc n} => inc-Can to-Can
 
-\import Function (o)
-\import Paths (inv)
-
-\func can-to-from-id {b : Bin} (cb : Can b) : to (from b) = b
+\func to-from-id-Can {b : Bin} (cb : Can b) : to (from b) = b
   | {O <>}, zero-can => idp
-  | one-can ob => one-to-from-id ob
+  | one-can ob => to-from-id-One ob
 
-\func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b
+\func to-from-id-One {b : Bin} (ob : One b) : to (from b) = b
   | {I <>}, one => idp
   | {O b}, O-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
     | suc n, s<=s _, from-b=suc-n =>
-      rewrite {2} (inv $ one-to-from-id ob) $
+      rewrite {2} (inv $ to-from-id-One ob) $
       rewrite from-b=suc-n $
       lemma0
   }
   | {I b}, I-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
     | suc n, s<=s _, from-b=suc-n =>
-      rewrite {2} (inv $ one-to-from-id ob) $
+      rewrite {2} (inv $ to-from-id-One ob) $
       rewrite from-b=suc-n $
       lemma1
   }
