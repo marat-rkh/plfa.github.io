@@ -1249,10 +1249,19 @@ if `One b` then `1` is less or equal to the result of `from b`.)
 ## Standard library
 
 Definitions similar to those in this chapter can be found in the standard library:
-```
+<details><summary>Agda</summary>
+
+```agda
 import Data.Nat using (_≤_; z≤n; s≤s)
 import Data.Nat.Properties using (≤-refl; ≤-trans; ≤-antisym; ≤-total;
                                   +-monoʳ-≤; +-monoˡ-≤; +-mono-≤)
+```
+</details>
+
+```tex
+\open Nat (<=, zero<=_, suc<=suc)
+\import Arith.Nat (NatLE, <=_0_+-right, <=_0_+-left, <=_+)
+\open NatLE (<=-reflexive, <=-transitive, <=-antisymmetric, totality)
 ```
 In the standard library, `≤-total` is formalised in terms of
 disjunction (which we define in
