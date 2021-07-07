@@ -516,10 +516,10 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
 \func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b
   | {I <>}, one => idp
   | {O b}, O-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
-      | suc n, s<=s _, from-b=suc-n =>
-        rewrite {2} (inv $ one-to-from-id ob) $
-        rewrite from-b=suc-n lemma0
-    }
+    | suc n, s<=s _, from-b=suc-n =>
+      rewrite {2} (inv $ one-to-from-id ob) $
+      rewrite from-b=suc-n lemma0
+  }
   | {I b}, I-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
     | suc n, s<=s _, from-b=suc-n =>
       rewrite {2} (inv $ one-to-from-id ob) $
