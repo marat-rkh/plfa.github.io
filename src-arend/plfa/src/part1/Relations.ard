@@ -513,7 +513,6 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
   | {O <>}, zero-can => idp
   | one-can ob => one-to-from-id ob
 
--- TODO it seems like "Split" doesn't work when we have absurd patterns
 \func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b
   | {I <>}, one => idp
   | {O b}, O-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
