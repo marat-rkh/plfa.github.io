@@ -1186,6 +1186,8 @@ if `One b` then `1` is less or equal to the result of `from b`.)
 ```tex
 \import util.Arith.Bin
 \open Bin
+\import Function (o)
+\import Paths (inv)
 
 \data Can Bin \with
   | O <> => zero-can
@@ -1196,37 +1198,51 @@ if `One b` then `1` is less or equal to the result of `from b`.)
   | O b => O-one (One b)
   | I b => I-one (One b)
 
-\func inc-can {b : Bin} (cn : Can b) : Can (inc b)
+\func inc-Can {b : Bin} (cn : Can b) : Can (inc b)
   | {O <>}, zero-can => one-can one
-  | one-can ob => one-can $ inc-one ob
-  \where {
-    \func inc-one {b : Bin} (ob : One b) : One $ inc b
-      | {I <>}, one => O-one one
-      | {O b}, O-one ob => I-one ob
-      | {I b}, I-one ob => O-one $ inc-one ob
+  | one-can ob => one-can $ inc-One ob
+
+\func inc-One {b : Bin} (ob : One b) : One $ inc b
+  | {I <>}, one => O-one one
+  | {O b}, O-one ob => I-one ob
+  | {I b}, I-one ob => O-one $ inc-One ob
+
+\func to-Can {n : Nat} : Can (to n)
+  | {0} => zero-can
+  | {suc n} => inc-Can to-Can
+
+\func to-from-id-Can {b : Bin} (cb : Can b) : to (from b) = b
+  | {O <>}, zero-can => idp
+  | one-can ob => to-from-id-One ob
+
+\func to-from-id-One {b : Bin} (ob : One b) : to (from b) = b
+  | {I <>}, one => idp
+  | {O b}, O-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
+    | suc n, s<=s _, from-b=suc-n =>
+      rewrite {2} (inv $ to-from-id-One ob) $
+      rewrite from-b=suc-n $
+      lemma0
+  }
+  | {I b}, I-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
+    | suc n, s<=s _, from-b=suc-n =>
+      rewrite {2} (inv $ to-from-id-One ob) $
+      rewrite from-b=suc-n $
+      lemma1
   }
 
-\func to-can {n : Nat} : Can (to n)
-  | {0} => zero-can
-  | {suc n} => inc-can to-can
-
-\func can-to-from-id {b : Bin} (cb : Can b) : to (from b) = b
-  | {O <>}, zero-can => idp
-  | one-can ob => one-to-from-id ob
   \where {
-    \func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b
-      | {I <>}, one => idp
-      | {O b}, O-one ob => {?}
-      | {I b}, I-one ob => {?}
+    \func [1<=from-b] {b : Bin} (ob : One b) : 1 <= from b
+      | {I <>}, one => s<=s z<=n
+      | {O b}, O-one ob => *-mono-<= 1 2 _ _ (s<=s z<=n) ([1<=from-b] ob)
+      | {I b}, I-one ob => +-mono-<= 0 1 _ _ z<=n (*-mono-<= 1 2 _ _ (s<=s z<=n) ([1<=from-b] ob))
 
-    \func to-2*sn {n : Nat} : to (2 * suc n) = O (to (suc n))
+    \func lemma0 {n : Nat} : inc (inc (to (2 * n))) = O (inc (to n))
       | {0} => idp
-      | {suc n} => rewrite to-2*sn idp
+      | {suc n} => pmap (inc o inc) lemma0
 
-    \func one-from-suc {b : Bin} (ob : One b) : \Sigma (n : Nat) (from b = suc n)
-      | {I <>}, one => (0, idp)
-      | {O b}, O-one ob => {?}
-      | {I b}, I-one ob => {?}
+    \func lemma1 {n : Nat} : inc (inc (inc (to (2 * n)))) = I (inc (to n))
+      | {0} => idp
+      | {suc n} => pmap (inc o inc) lemma1
   }
 ```
 
