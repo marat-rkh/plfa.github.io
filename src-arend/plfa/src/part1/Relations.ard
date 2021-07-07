@@ -506,24 +506,25 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
   | {0} => zero-can
   | {suc n} => inc-Can to-Can
 
-\import Arith.Nat (pred)
 \import Function (o)
-\import Logic (Empty, absurd)
-\import Paths (==<, >==, qed, inv)
+\import Paths (inv)
 
 \func can-to-from-id {b : Bin} (cb : Can b) : to (from b) = b
   | {O <>}, zero-can => idp
   | one-can ob => one-to-from-id ob
 
-\func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b =>
-  \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \return to (from-b) = b \with {
+-- TODO it seems like "Split" doesn't work when we have absurd patterns
+\func one-to-from-id {b : Bin} (ob : One b) : to (from b) = b
+  | {I <>}, one => idp
+  | {O b}, O-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
+      | suc n, s<=s _, from-b=suc-n =>
+        rewrite {2} (inv $ one-to-from-id ob) $
+        rewrite from-b=suc-n lemma0
+    }
+  | {I b}, I-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
     | suc n, s<=s _, from-b=suc-n =>
-      \let p : from (inc (to n)) = from b =>
-        from (inc (to n)) ==< rewrite (inv (from-inc=suc-from (to n))) idp >==
-        suc (from (to n)) ==< rewrite {1} (from-to-id n) idp >==
-        suc n ==< inv from-b=suc-n >==
-        from b `qed
-      \in (pmap-drop-from inc-to-One ob p : inc (to n) = b)
+      rewrite {2} (inv $ one-to-from-id ob) $
+      rewrite from-b=suc-n lemma1
   }
 
   \where {
@@ -534,40 +535,11 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
 
     \func n>=1=>2*n>=1 {n : Nat} (p : 1 <= n) : 1 <= 2 * n => *-mono-<= 1 2 _ _ (s<=s z<=n) p
 
-    \func inc-to-One {n : Nat} : One (inc (to n))
-      | {0} => one
-      | {suc n} => inc-One inc-to-One
+    \func lemma0 {n : Nat} : inc (inc (to (2 * n))) = O (inc (to n))
+      | {0} => idp
+      | {suc n} => pmap (inc o inc) lemma0
 
-    \func pmap-drop-from {b d : Bin} (ob : One b) (od : One d) (p : from b = from d) : b = d \elim b, ob, p
-      | I <>, one, p1 => \case d \as d', od : One d', p1 : 1 = from d' \return I <> = d' \with {
-        | I <>, one, p2 => idp
-        | O d1, O-one od1, p2 => absurd $ [2*m!=suc-2*n] {_} {0} (inv p2)
-        | I d1, I-one od1, p2 =>
-          \let
-            | p3 : from d1 = 0 => pmap-drop-2* (inv (pmap pred p2))
-            | p4 : 1 <= from d1 => [1<=from-b] od1
-          \in \case rewriteF p3 p4 \with {}
-      }
-      | O b1, O-one ob1, p1 => \case d \as d', od : One d', p1 : 2 * from b1 = from d' \return O b1 = d' \with {
-        | I <>, one, p2 => absurd $ [2*m!=suc-2*n] {_} {0} p2
-        | O d1, O-one od1, p2 => pmap O (pmap-drop-from ob1 od1 (pmap-drop-2* p2))
-        | I d1, I-one od1, p2 => absurd $ [2*m!=suc-2*n] p2
-      }
-      | I b1, I-one ob1, p1 => \case d \as d', od : One d', p1 : suc (2 * from b1) = from d' \return I b1 = d' \with {
-        | I <>, one, p2 =>
-          \let
-            | p3 : from b1 = 0 => pmap-drop-2* (pmap pred p2)
-            | p4 : 1 <= from b1 => [1<=from-b] ob1
-          \in \case rewriteF p3 p4 \with {}
-        | O d1, O-one od1, p2 => absurd $ [2*m!=suc-2*n] (inv p2)
-        | I d1, I-one od1, p2 => pmap I (pmap-drop-from ob1 od1 (pmap-drop-2* (pmap pred p2)))
-      }
-
-    \func pmap-drop-2* {m n : Nat} (p : 2 * m = 2 * n) : m = n
-      | {0}, {0}, p => idp
-      | {suc m}, {suc n}, p => pmap suc (pmap-drop-2* (pmap (pred o pred) p))
-
-    \func [2*m!=suc-2*n] {m n : Nat} (p : 2 * m = suc (2 * n)) : Empty
-      | {0}, {0}, ()
-      | {suc m}, {suc n}, p => [2*m!=suc-2*n] (pmap (pred o pred) p)
+    \func lemma1 {n : Nat} : inc (inc (inc (to (2 * n)))) = I (inc (to n))
+      | {0} => idp
+      | {suc n} => pmap (inc o inc) lemma1
   }
