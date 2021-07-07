@@ -540,3 +540,13 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
       | {0} => idp
       | {suc n} => pmap (inc o inc) lemma1
   }
+
+{-Agda-
+import Data.Nat using (_≤_; z≤n; s≤s)
+import Data.Nat.Properties using (≤-refl; ≤-trans; ≤-antisym; ≤-total;
+                                  +-monoʳ-≤; +-monoˡ-≤; +-mono-≤)
+-Agda-}
+
+\open Nat (<=, zero<=_, suc<=suc)
+\import Arith.Nat (NatLE, <=_0_+-right, <=_0_+-left, <=_+)
+\open NatLE (<=-reflexive, <=-transitive, <=-antisymmetric, totality)
