@@ -285,7 +285,7 @@ data Total′ : ℕ → ℕ → Set where
 -Agda-}
 
 \import Function.Meta ($)
-\import Paths.Meta (rewrite, rewriteI)
+\import Paths.Meta (rewrite)
 
 \func +-mono-left-<= (m n p : Nat) (m<=n : m <= n) : m + p <= n + p =>
   rewrite (+-comm {m} {p}) $ rewrite (+-comm {n} {p}) $ +-mono-right-<= p m n m<=n
@@ -482,7 +482,6 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
 
 \import util.Arith.Bin
 \open Bin
-\open Paths.Meta (rewriteF)
 
 \data Can Bin \with
   | O <> => zero-can
@@ -518,21 +517,21 @@ o+e≡o (suc em) en  =  suc (e+e≡e em en)
   | {O b}, O-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
     | suc n, s<=s _, from-b=suc-n =>
       rewrite {2} (inv $ one-to-from-id ob) $
-      rewrite from-b=suc-n lemma0
+      rewrite from-b=suc-n $
+      lemma0
   }
   | {I b}, I-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
     | suc n, s<=s _, from-b=suc-n =>
       rewrite {2} (inv $ one-to-from-id ob) $
-      rewrite from-b=suc-n lemma1
+      rewrite from-b=suc-n $
+      lemma1
   }
 
   \where {
     \func [1<=from-b] {b : Bin} (ob : One b) : 1 <= from b
       | {I <>}, one => s<=s z<=n
-      | {O b}, O-one ob => n>=1=>2*n>=1 ([1<=from-b] ob)
-      | {I b}, I-one ob => +-mono-<= 0 1 _ _ z<=n (n>=1=>2*n>=1 ([1<=from-b] ob))
-
-    \func n>=1=>2*n>=1 {n : Nat} (p : 1 <= n) : 1 <= 2 * n => *-mono-<= 1 2 _ _ (s<=s z<=n) p
+      | {O b}, O-one ob => *-mono-<= 1 2 _ _ (s<=s z<=n) ([1<=from-b] ob)
+      | {I b}, I-one ob => +-mono-<= 0 1 _ _ z<=n (*-mono-<= 1 2 _ _ (s<=s z<=n) ([1<=from-b] ob))
 
     \func lemma0 {n : Nat} : inc (inc (to (2 * n))) = O (inc (to n))
       | {0} => idp
