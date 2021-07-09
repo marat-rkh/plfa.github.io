@@ -537,9 +537,6 @@ data Total (m n : ℕ) : Set where
 </details>
 
 ```tex
--- TODO It seems like Arend doesn't have a distinction between 'parameters' and 'indices'.
--- All data types are indexed (in Agda terms).
-
 \data Total (m n : Nat)
   | forward (m <= n)
   | flipped (n <= m)
@@ -573,7 +570,7 @@ data Total′ : ℕ → ℕ → Set where
 </details>
 
 ```tex
--- Same in Arend.
+-- Arend doesn't actually have a distinction between indices and parameters.
 ```
 Each parameter of the type translates as an implicit parameter of each
 constructor.  Unlike an indexed datatype, where the indexes can vary

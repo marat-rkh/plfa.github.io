@@ -185,9 +185,6 @@ data Total (m n : ℕ) : Set where
     → Total m n
 -Agda-}
 
--- TODO It seems like Arend doesn't have a distinction between 'parameters' and 'indices'.
--- All data types are indexed (in Agda terms).
-
 \data Total (m n : Nat)
   | forward (m <= n)
   | flipped (n <= m)
@@ -206,7 +203,7 @@ data Total′ : ℕ → ℕ → Set where
     → Total′ m n
 -Agda-}
 
--- Same in Arend.
+-- Arend doesn't actually have a distinction between indices and parameters.
 
 {-Agda-
 ≤-total : ∀ (m n : ℕ) → Total m n
