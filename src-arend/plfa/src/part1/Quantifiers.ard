@@ -391,3 +391,36 @@ postulate
   | inP (x, not-bx) => \lam x=>bx => not-bx (x=>bx x)
 
 -- The inverse doesn't hold as we need a double negation elimination to prove it.
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import util.Arith.Bin
+\open Bin (to, from, from-to-id)
+\import part1.Relations (Can, to-Can, to-from-id-Can, zero-can, one-can, One, one, O-one, I-one)
+
+\func Nat=~Can-Bin : Nat =~ (\Sigma (b : Bin) (Can b)) \cowith
+  | f (n : Nat) => (to n, to-Can)
+  | ret (cb : \Sigma (b : Bin) (Can b)) => from cb.1
+  | ret_f => from-to-id
+  | f_sec (cb : \Sigma (b : Bin) (Can b)) : (to (from cb.1), to-Can) = {\Sigma (b : Bin) (Can b)} cb \elim cb {
+    | (b, c) => lemma1 (to-from-id-Can c)
+  }
+  \where {
+    \func lemma1 {cb cb' : \Sigma (b : Bin) (Can b)} (p : cb.1 = cb'.1) : cb = cb'
+        | {(b, cb)}, {(b', cb')}, p => {?}
+
+    \func Can-b-isProp {b : Bin} (cb cb' : Can b) : cb = cb'
+      | {O <>}, zero-can, zero-can => idp
+      | {O <>}, _, one-can (O-one ())
+      | {O <>}, one-can (O-one ()), _
+      | one-can ob, one-can ob' => pmap one-can (One-b-isProp ob ob')
+
+    \func One-b-isProp {b : Bin} (ob ob' : One b) : ob = ob'
+      | {I <>}, one, one => idp
+      | {I <>}, _, I-one ()
+      | {O b}, O-one ob, O-one ob' => pmap O-one (One-b-isProp ob ob')
+      | {I <>}, I-one (), _
+      | {I b}, I-one ob, I-one ob' => pmap I-one (One-b-isProp ob ob')
+  }
