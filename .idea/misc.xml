@@ -17,8 +17,14 @@
         <option name="showTypesInLambda" value="true" />
       </ArendPrintingOptions>
     </option>
+    <option name="goalPrintingOptions">
+      <ArendPrintingOptions>
+        <option name="showTupleType" value="true" />
+      </ArendPrintingOptions>
+    </option>
     <option name="hierarchyViewType" value="Supertypes of {0}" />
     <option name="librariesRoot" value="$USER_HOME$/.arend/libs" />
+    <option name="showWarnings" value="false" />
   </component>
   <component name="ProjectRootManager">
     <output url="file://$PROJECT_DIR$/out" />
