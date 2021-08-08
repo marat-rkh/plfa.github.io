@@ -1,0 +1,254 @@
+{-Agda-
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl)
+open Eq.≡-Reasoning
+open import Data.Nat using (ℕ; zero; suc)
+open import Data.Product using (_×_) renaming (_,_ to ⟨_,_⟩)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Relation.Nullary using (¬_)
+open import Relation.Nullary.Negation using ()
+  renaming (contradiction to ¬¬-intro)
+open import Data.Unit using (⊤; tt)
+open import Data.Empty using (⊥; ⊥-elim)
+open import plfa.part1.Relations using (_<_; z<s; s<s)
+open import plfa.part1.Isomorphism using (_⇔_)
+-Agda-}
+
+\import Paths (==<, >==, qed)
+\import util.Paths (=<>=)
+\import util.Logic (&&)
+\import Logic (||, byLeft, byRight)
+\import util.Logic (~)
+\import part1.Negation (Not-Not-intro)
+\import part1.Connectives (T \as Unit, tt)
+\import Logic (Empty, absurd)
+\import part1.Relations (<, z<s, s<s)
+\import part1.Isomorphism (<=>)
+
+{-Agda-
+infix 4 _≤_
+
+data _≤_ : ℕ → ℕ → Set where
+
+  z≤n : ∀ {n : ℕ}
+      --------
+    → zero ≤ n
+
+  s≤s : ∀ {m n : ℕ}
+    → m ≤ n
+      -------------
+    → suc m ≤ suc n
+-Agda-}
+
+\data \infix 4 <= Nat Nat \with
+  | 0, _ => z<=n
+  | suc m, suc n => s<=s (m <= n)
+
+{-Agda-
+2≤4 : 2 ≤ 4
+2≤4 = s≤s (s≤s z≤n)
+
+¬4≤2 : ¬ (4 ≤ 2)
+¬4≤2 (s≤s (s≤s ()))
+-Agda-}
+
+\func [2<=4] : 2 <= 4 => s<=s (s<=s z<=n)
+
+\func ~[4<=2] : ~ (4 <= 2) => \lam [4<=2] => \case [4<=2] \with {
+  | s<=s (s<=s ())
+}
+
+{-Agda-
+data Bool : Set where
+  true  : Bool
+  false : Bool
+-Agda-}
+
+\data Bool | true | false
+
+{-Agda-
+infix 4 _≤ᵇ_
+
+_≤ᵇ_ : ℕ → ℕ → Bool
+zero ≤ᵇ n       =  true
+suc m ≤ᵇ zero   =  false
+suc m ≤ᵇ suc n  =  m ≤ᵇ n
+-Agda-}
+
+\func \infix 4 <=b (m n : Nat) : Bool
+  | 0, n => true
+  | suc m, 0 => false
+  | suc m, suc n => m <=b n
+
+{-Agda-
+_ : (2 ≤ᵇ 4) ≡ true
+_ =
+  begin
+    2 ≤ᵇ 4
+  ≡⟨⟩
+    1 ≤ᵇ 3
+  ≡⟨⟩
+    0 ≤ᵇ 2
+  ≡⟨⟩
+    true
+  ∎
+
+_ : (4 ≤ᵇ 2) ≡ false
+_ =
+  begin
+    4 ≤ᵇ 2
+  ≡⟨⟩
+    3 ≤ᵇ 1
+  ≡⟨⟩
+    2 ≤ᵇ 0
+  ≡⟨⟩
+    false
+  ∎
+-Agda-}
+
+\func [2<=b4] : (2 <=b 4) = true =>
+  2 <=b 4 =<>=
+  1 <=b 3 =<>=
+  0 <=b 2 =<>=
+  true `qed
+
+\func ~[4<=b2] : (4 <=b 2) = false =>
+  4 <=b 2 =<>=
+  3 <=b 1 =<>=
+  2 <=b 0 =<>=
+  false `qed
+
+{-Agda-
+T : Bool → Set
+T true   =  ⊤
+T false  =  ⊥
+-Agda-}
+
+\func T (b : Bool) : \Type
+  | true => Unit
+  | false => Empty
+
+{-Agda-
+T→≡ : ∀ (b : Bool) → T b → b ≡ true
+T→≡ true tt   =  refl
+T→≡ false ()
+-Agda-}
+
+\func T->= (b : Bool) (t : T b) : b = true
+  | true, tt => idp
+
+{-Agda-
+≡→T : ∀ {b : Bool} → b ≡ true → T b
+≡→T refl  =  tt
+-Agda-}
+
+\func =->T {b : Bool} (p : b = true) : T b \elim p
+  | idp => tt
+
+{-Agda-
+≤ᵇ→≤ : ∀ (m n : ℕ) → T (m ≤ᵇ n) → m ≤ n
+≤ᵇ→≤ zero    n       tt  =  z≤n
+≤ᵇ→≤ (suc m) zero    ()
+≤ᵇ→≤ (suc m) (suc n) t   =  s≤s (≤ᵇ→≤ m n t)
+-Agda-}
+
+\func <=b-><= (m n : Nat) (_ : T (m <=b n)) : m <= n
+  | 0, n, tt => z<=n
+  | suc m, suc n, t => s<=s (<=b-><= m n t)
+
+{-Agda-
+≤→≤ᵇ : ∀ {m n : ℕ} → m ≤ n → T (m ≤ᵇ n)
+≤→≤ᵇ z≤n        =  tt
+≤→≤ᵇ (s≤s m≤n)  =  ≤→≤ᵇ m≤n
+-Agda-}
+
+\func <=-><=b {m n : Nat} (_ : m <= n) : T (m <=b n)
+  | {0}, z<=n => tt
+  | {suc m}, {suc n}, s<=s m<=n => <=-><=b m<=n
+
+{-Agda-
+data Dec (A : Set) : Set where
+  yes :   A → Dec A
+  no  : ¬ A → Dec A
+-Agda-}
+
+\data Dec (A : \Type)
+  | yes A
+  | no (~ A)
+
+{-Agda-
+¬s≤z : ∀ {m : ℕ} → ¬ (suc m ≤ zero)
+¬s≤z ()
+
+¬s≤s : ∀ {m n : ℕ} → ¬ (m ≤ n) → ¬ (suc m ≤ suc n)
+¬s≤s ¬m≤n (s≤s m≤n) = ¬m≤n m≤n
+-Agda-}
+
+\func ~s<=z {m : Nat} : ~ (suc m <= zero) => \lam s<=z => \case s<=z \with {}
+
+\func ~s<=s {m n : Nat} (~m<=n : ~ (m <= n)) : ~ (suc m <= suc n) => \lam sm<=sn => \case sm<=sn \with {
+  | s<=s m<=n => ~m<=n m<=n
+}
+
+{-Agda-
+_≤?_ : ∀ (m n : ℕ) → Dec (m ≤ n)
+zero  ≤? n                   =  yes z≤n
+suc m ≤? zero                =  no ¬s≤z
+suc m ≤? suc n with m ≤? n
+...               | yes m≤n  =  yes (s≤s m≤n)
+...               | no ¬m≤n  =  no (¬s≤s ¬m≤n)
+-Agda-}
+
+\func \infix 4 <=? (m n : Nat) : Dec (m <= n)
+  | 0, n => yes z<=n
+  | suc m, 0 => no ~s<=z
+  | suc m, suc n => \case m <=? n \with {
+    | yes m<=n => yes (s<=s m<=n)
+    | no ~m<=n => no (~s<=s ~m<=n)
+  }
+
+{-Agda-
+_ : 2 ≤? 4 ≡ yes (s≤s (s≤s z≤n))
+_ = refl
+
+_ : 4 ≤? 2 ≡ no (¬s≤s (¬s≤s ¬s≤z))
+_ = refl
+-Agda-}
+
+\func [2<=?4] : 2 <=? 4 = yes (s<=s (s<=s z<=n)) => idp
+
+\func [4<=?2] : 4 <=? 2 = no (~s<=s (~s<=s ~s<=z)) => idp
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import part1.Relations (<, z<s, s<s)
+\import Logic.Meta (contradiction)
+
+\func \infix 4 <? (m n : Nat) : Dec (m < n)
+  | 0, 0 => no contradiction
+  | 0, suc n => yes z<s
+  | suc m, 0 => no contradiction
+  | suc m, suc n => \case m <? n \with {
+    | yes m<n => yes (s<s m<n)
+    | no ~m<n => no (\lam sm<sn => \case sm<sn \with {
+      | s<s m<n => ~m<n m<n
+    })
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import Paths (pmap)
+\import Arith.Nat (pred)
+
+\func \infix 4 =N (m n : Nat) : Dec (m = n)
+  | 0, 0 => yes idp
+  | 0, suc n => no contradiction
+  | suc m, 0 => no contradiction
+  | suc m, suc n => \case m =N n \with {
+    | yes m=n => yes (pmap suc m=n)
+    | no m/=n => no (\lam sm=sn => m/=n (pmap pred sm=sn))
+  }

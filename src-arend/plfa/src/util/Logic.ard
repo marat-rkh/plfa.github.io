@@ -10,4 +10,4 @@
     \func proj2 => part1.Connectives.proj2
   }
 
-\func Not \alias ~ => LogicNot
+\func Not \alias ~ (A : \Type) => LogicNot A
