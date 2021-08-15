@@ -152,9 +152,9 @@ T→≡ false ()
 ≤ᵇ→≤ (suc m) (suc n) t   =  s≤s (≤ᵇ→≤ m n t)
 -Agda-}
 
-\func <=b-><= (m n : Nat) (_ : T (m <=b n)) : m <= n
+\func leq-b->leq \alias ≤b->≤ (m n : Nat) (_ : T (m <=b n)) : m <= n
   | 0, n, tt => z<=n
-  | suc m, suc n, t => s<=s (<=b-><= m n t)
+  | suc m, suc n, t => s<=s (≤b->≤ m n t)
 
 {-Agda-
 ≤→≤ᵇ : ∀ {m n : ℕ} → m ≤ n → T (m ≤ᵇ n)
@@ -162,9 +162,9 @@ T→≡ false ()
 ≤→≤ᵇ (s≤s m≤n)  =  ≤→≤ᵇ m≤n
 -Agda-}
 
-\func <=-><=b {m n : Nat} (_ : m <= n) : T (m <=b n)
+\func leq->leq-b \alias ≤->≤b {m n : Nat} (_ : m <= n) : T (m <=b n)
   | {0}, z<=n => tt
-  | {suc m}, {suc n}, s<=s m<=n => <=-><=b m<=n
+  | {suc m}, {suc n}, s<=s m<=n => ≤->≤b m<=n
 
 {-Agda-
 data Dec (A : Set) : Set where
@@ -244,11 +244,72 @@ _ = refl
 \import Paths (pmap)
 \import Arith.Nat (pred)
 
-\func \infix 4 =N (m n : Nat) : Dec (m = n)
+\func \infix 4 =N? (m n : Nat) : Dec (m = n)
   | 0, 0 => yes idp
   | 0, suc n => no contradiction
   | suc m, 0 => no contradiction
-  | suc m, suc n => \case m =N n \with {
+  | suc m, suc n => \case m =N? n \with {
     | yes m=n => yes (pmap suc m=n)
     | no m/=n => no (\lam sm=sn => m/=n (pmap pred sm=sn))
   }
+
+{-Agda-
+_≤?′_ : ∀ (m n : ℕ) → Dec (m ≤ n)
+m ≤?′ n with m ≤ᵇ n | ≤ᵇ→≤ m n | ≤→≤ᵇ {m} {n}
+...        | true   | p        | _            = yes (p tt)
+...        | false  | _        | ¬p           = no ¬p
+-Agda-}
+
+\import Paths.Meta (rewrite)
+
+\func \infix 4 <=?' (m n : Nat) : Dec (m <= n) =>
+  \case m <=b n \as q, ≤b->≤ m n : \Pi (T q) -> m <= n, ≤->≤b {m} {n} : \Pi (m <= n) -> T q \with {
+    | true, p, _ => yes (p tt)
+    | false, _, ~p => no ~p
+  }
+
+{-Agda-
+⌊_⌋ : ∀ {A : Set} → Dec A → Bool
+⌊ yes x ⌋  =  true
+⌊ no ¬x ⌋  =  false
+-Agda-}
+
+\func toBool {A : \Type} (d : Dec A) : Bool
+  | yes x => true
+  | no ~x => false
+
+{-Agda-
+_≤ᵇ′_ : ℕ → ℕ → Bool
+m ≤ᵇ′ n  =  ⌊ m ≤? n ⌋
+-Agda-}
+
+\func \infix 4 <=b' (m n : Nat) : Bool => toBool (m <=? n)
+
+{-Agda-
+toWitness : ∀ {A : Set} {D : Dec A} → T ⌊ D ⌋ → A
+toWitness {A} {yes x} tt  =  x
+toWitness {A} {no ¬x} ()
+
+fromWitness : ∀ {A : Set} {D : Dec A} → A → T ⌊ D ⌋
+fromWitness {A} {yes x} _  =  tt
+fromWitness {A} {no ¬x} x  =  ¬x x
+-Agda-}
+
+\func toWitness {A : \Type} {D : Dec A} (td : T (toBool D)) : A
+  | {A}, {yes x}, tt => x
+
+\func fromWitness {A : \Type} {D : Dec A} (x : A) : T (toBool D)
+  | {A}, {yes x}, _ => tt
+  | {A}, {no ~x}, x => ~x x
+
+{-Agda-
+≤ᵇ′→≤ : ∀ {m n : ℕ} → T (m ≤ᵇ′ n) → m ≤ n
+≤ᵇ′→≤  =  toWitness
+
+≤→≤ᵇ′ : ∀ {m n : ℕ} → m ≤ n → T (m ≤ᵇ′ n)
+≤→≤ᵇ′  =  fromWitness
+-Agda-}
+
+\func leq-b->leq' \alias ≤b->≤' {m n : Nat} (td : T (m <=b' n)) : m <= n => toWitness td
+
+\func leq->leq-b' \alias ≤->≤b' {m n : Nat} (p : m <= n) : T (m <=b' n) => fromWitness p
