@@ -313,3 +313,129 @@ fromWitness {A} {no ¬x} x  =  ¬x x
 \func leq-b->leq' \alias ≤b->≤' {m n : Nat} (td : T (m <=b' n)) : m <= n => toWitness td
 
 \func leq->leq-b' \alias ≤->≤b' {m n : Nat} (p : m <= n) : T (m <=b' n) => fromWitness p
+
+{-Agda-
+infixr 6 _∧_
+
+_∧_ : Bool → Bool → Bool
+true  ∧ true  = true
+false ∧ _     = false
+_     ∧ false = false
+-Agda-}
+
+\func \infixr 6 ^ (_ _ : Bool) : Bool
+  | true, true => true
+  | false, _ => false
+  | _, false => false
+
+{-Agda-
+infixr 6 _×-dec_
+
+_×-dec_ : ∀ {A B : Set} → Dec A → Dec B → Dec (A × B)
+yes x ×-dec yes y = yes ⟨ x , y ⟩
+no ¬x ×-dec _     = no λ{ ⟨ x , y ⟩ → ¬x x }
+_     ×-dec no ¬y = no λ{ ⟨ x , y ⟩ → ¬y y }
+-Agda-}
+
+\func \infixr 6 &&-dec {A B : \Prop} (da : Dec A) (db : Dec B) : Dec (A && B)
+  | yes x, yes y => yes (&&.prod x y)
+  | no ~x, _ => no (\lam a&&b => ~x (&&.proj1 a&&b))
+  | _, no ~y => no (\lam a&&b => ~y (&&.proj2 a&&b))
+
+{-Agda-
+infixr 5 _∨_
+
+_∨_ : Bool → Bool → Bool
+true  ∨ _      = true
+_     ∨ true   = true
+false ∨ false  = false
+-Agda-}
+
+\func \infixr 5 or \alias \infixr 5 ∨ (_ _ : Bool) : Bool
+  | true, _ => true
+  | _, true => true
+  | false, false => false
+
+{-Agda-
+infixr 5 _⊎-dec_
+
+_⊎-dec_ : ∀ {A B : Set} → Dec A → Dec B → Dec (A ⊎ B)
+yes x ⊎-dec _     = yes (inj₁ x)
+_     ⊎-dec yes y = yes (inj₂ y)
+no ¬x ⊎-dec no ¬y = no λ{ (inj₁ x) → ¬x x ; (inj₂ y) → ¬y y }
+-Agda-}
+
+\func \infixr 5 ||-dec {A B : \Prop} (da : Dec A) (db : Dec B) : Dec (A || B)
+  | yes x, _ => yes (byLeft x)
+  | _, yes y => yes (byRight y)
+  | no ~x, no ~y => no (\lam a||b => \case a||b \with {
+    | byLeft x => ~x x
+    | byRight y => ~y y
+  })
+
+{-Agda-
+not : Bool → Bool
+not true  = false
+not false = true
+-Agda-}
+
+\func not (_ : Bool) : Bool
+  | true => false
+  | false => true
+
+{-Agda-
+¬? : ∀ {A : Set} → Dec A → Dec (¬ A)
+¬? (yes x)  =  no (¬¬-intro x)
+¬? (no ¬x)  =  yes ¬x
+-Agda-}
+
+\func ~? {A : \Type} (d : Dec A) : Dec (~ A)
+  | yes x => no (Not-Not-intro x)
+  | no ~x => yes ~x
+
+{-Agda-
+_⊃_ : Bool → Bool → Bool
+_     ⊃ true   =  true
+false ⊃ _      =  true
+true  ⊃ false  =  false
+-Agda-}
+
+\func implication \alias ⊃ (_ _ : Bool) : Bool
+  | _, true => true
+  | false, _ => true
+  | true, false => false
+
+{-Agda-
+_→-dec_ : ∀ {A B : Set} → Dec A → Dec B → Dec (A → B)
+_     →-dec yes y  =  yes (λ _ → y)
+no ¬x →-dec _      =  yes (λ x → ⊥-elim (¬x x))
+yes x →-dec no ¬y  =  no (λ f → ¬y (f x))
+-Agda-}
+
+\func ->-dec {A B : \Type} (_ : Dec A) (_ : Dec B) : Dec (A -> B)
+  | _, yes y => yes (\lam _ => y)
+  | no ~x, _ => yes (\lam x => absurd (~x x))
+  | yes x, no ~y => no (\lam a->b => ~y (a->b x))
+
+{-Agda-
+postulate
+  ∧-× : ∀ {A B : Set} (x : Dec A) (y : Dec B) → ⌊ x ⌋ ∧ ⌊ y ⌋ ≡ ⌊ x ×-dec y ⌋
+  ∨-⊎ : ∀ {A B : Set} (x : Dec A) (y : Dec B) → ⌊ x ⌋ ∨ ⌊ y ⌋ ≡ ⌊ x ⊎-dec y ⌋
+  not-¬ : ∀ {A : Set} (x : Dec A) → not ⌊ x ⌋ ≡ ⌊ ¬? x ⌋
+-Agda-}
+
+\func ^-&& {A B : \Prop} (x : Dec A) (y : Dec B) : (toBool x) ^ (toBool y) = toBool (x &&-dec y)
+  | yes _, yes _ => idp
+  | yes _, no _ => idp
+  | no _, yes _ => idp
+  | no _, no _ => idp
+
+\func or-|| \alias ∨-|| {A B : \Prop} (x : Dec A) (y : Dec B) : (toBool x) ∨ (toBool y) = toBool (x ||-dec y)
+  | yes _, yes _ => idp
+  | yes _, no _ => idp
+  | no _, yes _ => idp
+  | no _, no _ => idp
+
+\func not-~ {A : \Type} (x : Dec A) : not (toBool x) = toBool (~? x)
+  | yes _ => idp
+  | no _ => idp
