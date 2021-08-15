@@ -439,3 +439,56 @@ postulate
 \func not-~ {A : \Type} (x : Dec A) : not (toBool x) = toBool (~? x)
   | yes _ => idp
   | no _ => idp
+
+{-Agda-
+minus : (m n : ℕ) (n≤m : n ≤ m) → ℕ
+minus m       zero    _         = m
+minus (suc m) (suc n) (s≤s n≤m) = minus m n n≤m
+-Agda-}
+
+\func minus (m n : Nat) (n<=m : n <= m) : Nat
+  | m, 0, _ => m
+  | suc m, suc n, s<=s n<=m => minus m n n<=m
+
+{-Agda-
+_ : minus 5 3 (s≤s (s≤s (s≤s z≤n))) ≡ 2
+_ = refl
+-Agda-}
+
+\func [5-3] : minus 5 3 (s<=s (s<=s (s<=s z<=n))) = 2 => idp
+
+{-Agda-
+_-_ : (m n : ℕ) {n≤m : T ⌊ n ≤? m ⌋} → ℕ
+_-_ m n {n≤m} = minus m n (toWitness n≤m)
+-Agda-}
+
+\func \infix 6 - (m n : Nat) {n<=m : T (toBool (n <=? m))} => minus m n (toWitness n<=m)
+
+{-Agda-
+_ : 5 - 3 ≡ 2
+_ = refl
+-Agda-}
+
+-- TODO doesn't work, Arend cannot infer the implicit argument
+-- \func [5-3]' : (5 - 3) = 2 => idp
+
+{-Agda-
+True : ∀ {Q} → Dec Q → Set
+True Q = T ⌊ Q ⌋
+-Agda-}
+
+-- TODO
+
+{-Agda-
+import Data.Bool.Base using (Bool; true; false; T; _∧_; _∨_; not)
+import Data.Nat using (_≤?_)
+import Relation.Nullary using (Dec; yes; no)
+import Relation.Nullary.Decidable using (⌊_⌋; True; toWitness; fromWitness)
+import Relation.Nullary.Negation using (¬?)
+import Relation.Nullary.Product using (_×-dec_)
+import Relation.Nullary.Sum using (_⊎-dec_)
+import Relation.Binary using (Decidable)
+-Agda-}
+
+\import Data.Bool (Bool, true, false, So, and, or, not)
+\import Set (Dec, yes, no, decToBool)
