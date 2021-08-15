@@ -10,3 +10,4 @@
 - [Connectives](src/part1/Connectives.lagda.md): Conjunction, disjunction, and implication
 - [Negation](src/part1/Negation.lagda.md): Negation, with intuitionistic and classical logic
 - [Quantifiers](src/part1/Quantifiers.lagda.md): Universals and existentials
+- [Decidable](src/part1/Decidable.lagda.md): Booleans and decision procedures
