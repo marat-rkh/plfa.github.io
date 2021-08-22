@@ -41,7 +41,7 @@ _ : List ℕ
 _ = 0 ∷ 1 ∷ 2 ∷ []
 -Agda-}
 
-\func [0::1::2] : List Nat => 0 :: 1 :: 2 :: []
+\func example-list : List Nat => 0 :: 1 :: 2 :: []
 
 {-Agda-
 data List′ : Set → Set where
@@ -56,7 +56,7 @@ _ : List ℕ
 _ = _∷_ {ℕ} 0 (_∷_ {ℕ} 1 (_∷_ {ℕ} 2 ([] {ℕ})))
 -Agda-}
 
-\func [0::1::2]' : List Nat => (::) {Nat} 0 ((::) {Nat} 1 ((::) {Nat} 2 ([] {Nat})))
+\func example-list' : List Nat => (::) {Nat} 0 ((::) {Nat} 1 ((::) {Nat} 2 ([] {Nat})))
 
 {-Agda-
 pattern [_] z = z ∷ []
@@ -97,7 +97,7 @@ _ =
   ∎
 -Agda-}
 
-\func [0::1::2]++[3::4] : 0 :: 1 :: 2 :: [] ++ 3 :: 4 :: [] = 0 :: 1 :: 2 :: 3 :: 4 :: [] =>
+\func example-append : 0 :: 1 :: 2 :: [] ++ 3 :: 4 :: [] = 0 :: 1 :: 2 :: 3 :: 4 :: [] =>
   0 :: 1 :: 2 :: [] ++ 3 :: 4 :: [] =<>=
   0 :: (1 :: 2 :: [] ++ 3 :: 4 :: []) =<>=
   0 :: 1 :: (2 :: [] ++ 3 :: 4 :: []) =<>=
@@ -204,7 +204,7 @@ _ =
   ∎
 -Agda-}
 
-\func length[0::1::2]=3 : length (0 :: 1 :: 2 :: []) = 3 =>
+\func example-length : length (0 :: 1 :: 2 :: []) = 3 =>
   length (0 :: 1 :: 2 :: []) =<>=
   suc (length (1 :: 2 :: [])) =<>=
   suc (suc (length (2 :: []))) =<>=
@@ -287,7 +287,7 @@ _ =
   ∎
 -Agda-}
 
-\func reverse[0::1::2]=[2::1::0] : reverse (0 :: 1 :: 2 :: []) = 2 :: 1 :: 0 :: [] =>
+\func example-reverse : reverse (0 :: 1 :: 2 :: []) = 2 :: 1 :: 0 :: [] =>
   reverse (0 :: 1 :: 2 :: []) =<>=
   reverse (1 :: 2 :: []) ++ 0 :: [] =<>=
   (reverse (2 :: []) ++ 1 :: []) ++ 0 :: [] =<>=
@@ -308,13 +308,220 @@ _ =
   | [] => rewrite (++-identity-r (reverse ys)) idp
   | :: x xs =>
     reverse (xs ++ ys) ++ x :: [] ==< rewrite {1} (reverse-++-distrib xs ys) idp >==
-    (reverse ys ++ reverse xs) ++ x :: [] ==< rewrite {1} (++-assoc _ _ _) idp >==
+    (reverse ys ++ reverse xs) ++ x :: [] ==< ++-assoc _ _ _ >==
     reverse ys ++ reverse xs ++ x :: [] `qed
 
 \func reverse-involutive {A : \Type} (xs : List A)  : reverse (reverse xs) = xs
   | [] => idp
   | :: x xs =>
-    reverse (reverse xs ++ x :: []) ==< rewrite {1} (reverse-++-distrib (reverse xs) (x :: [])) idp >==
+    reverse (reverse xs ++ x :: []) ==< reverse-++-distrib _ _ >==
     reverse (x :: []) ++ reverse (reverse xs) =<>=
     x :: reverse (reverse xs) ==< rewrite {1} (reverse-involutive _) idp >==
     x :: xs `qed
+
+{-Agda-
+shunt : ∀ {A : Set} → List A → List A → List A
+shunt []       ys  =  ys
+shunt (x ∷ xs) ys  =  shunt xs (x ∷ ys)
+-Agda-}
+
+\func shunt {A : \Type} (xs ys : List A) : List A \elim xs
+  | [] => ys
+  | :: x xs => shunt xs (x :: ys)
+
+{-Agda-
+shunt-reverse : ∀ {A : Set} (xs ys : List A)
+  → shunt xs ys ≡ reverse xs ++ ys
+shunt-reverse [] ys =
+  begin
+    shunt [] ys
+  ≡⟨⟩
+    ys
+  ≡⟨⟩
+    reverse [] ++ ys
+  ∎
+shunt-reverse (x ∷ xs) ys =
+  begin
+    shunt (x ∷ xs) ys
+  ≡⟨⟩
+    shunt xs (x ∷ ys)
+  ≡⟨ shunt-reverse xs (x ∷ ys) ⟩
+    reverse xs ++ (x ∷ ys)
+  ≡⟨⟩
+    reverse xs ++ ([ x ] ++ ys)
+  ≡⟨ sym (++-assoc (reverse xs) [ x ] ys) ⟩
+    (reverse xs ++ [ x ]) ++ ys
+  ≡⟨⟩
+    reverse (x ∷ xs) ++ ys
+  ∎
+-Agda-}
+
+\func shunt-reverse {A : \Type} (xs ys : List A) : shunt xs ys = reverse xs ++ ys \elim xs
+  | [] =>
+    shunt [] ys =<>=
+    ys =<>=
+    reverse [] ++ ys `qed
+  | :: x xs =>
+    shunt (x :: xs) ys =<>=
+    shunt xs (x :: ys) ==< shunt-reverse _ _ >==
+    reverse xs ++ (x :: ys) =<>=
+    reverse xs ++ (x :: [] ++ ys) ==< inv (++-assoc _ _ _) >==
+    (reverse xs ++ x :: []) ++ ys =<>=
+    reverse (x :: xs) ++ ys `qed
+
+{-Agda-
+reverse′ : ∀ {A : Set} → List A → List A
+reverse′ xs = shunt xs []
+-Agda-}
+
+\func reverse' {A : \Type} (xs : List A) : List A => shunt xs []
+
+{-Agda-
+reverses : ∀ {A : Set} (xs : List A)
+  → reverse′ xs ≡ reverse xs
+reverses xs =
+  begin
+    reverse′ xs
+  ≡⟨⟩
+    shunt xs []
+  ≡⟨ shunt-reverse xs [] ⟩
+    reverse xs ++ []
+  ≡⟨ ++-identityʳ (reverse xs) ⟩
+    reverse xs
+  ∎
+-Agda-}
+
+\func reverses {A : \Type} (xs : List A) : reverse' xs = reverse xs =>
+  reverse' xs =<>=
+  shunt xs [] ==< shunt-reverse xs [] >==
+  reverse xs ++ [] ==< ++-identity-r _ >==
+  reverse xs `qed
+
+{-Agda-
+_ : reverse′ [ 0 , 1 , 2 ] ≡ [ 2 , 1 , 0 ]
+_ =
+  begin
+    reverse′ (0 ∷ 1 ∷ 2 ∷ [])
+  ≡⟨⟩
+    shunt (0 ∷ 1 ∷ 2 ∷ []) []
+  ≡⟨⟩
+    shunt (1 ∷ 2 ∷ []) (0 ∷ [])
+  ≡⟨⟩
+    shunt (2 ∷ []) (1 ∷ 0 ∷ [])
+  ≡⟨⟩
+    shunt [] (2 ∷ 1 ∷ 0 ∷ [])
+  ≡⟨⟩
+    2 ∷ 1 ∷ 0 ∷ []
+  ∎
+-Agda-}
+
+\func example-reverse' : reverse' (0 :: 1 :: 2 :: []) = 2 :: 1 :: 0 :: [] =>
+  reverse' (0 :: 1 :: 2 :: []) =<>=
+  shunt (0 :: 1 :: 2 :: []) [] =<>=
+  shunt (1 :: 2 :: []) (0 :: []) =<>=
+  shunt (2 :: []) (1 :: 0 :: []) =<>=
+  shunt [] (2 :: 1 :: 0 :: []) =<>=
+  2 :: 1 :: 0 :: [] `qed
+
+{-Agda-
+map : ∀ {A B : Set} → (A → B) → List A → List B
+map f []        =  []
+map f (x ∷ xs)  =  f x ∷ map f xs
+-Agda-}
+
+\func map {A B : \Type} (f : A -> B) (xs : List A) : List B \elim xs
+  | [] => []
+  | :: x xs => f x :: map f xs
+
+{-Agda-
+_ : map suc [ 0 , 1 , 2 ] ≡ [ 1 , 2 , 3 ]
+_ =
+  begin
+    map suc (0 ∷ 1 ∷ 2 ∷ [])
+  ≡⟨⟩
+    suc 0 ∷ map suc (1 ∷ 2 ∷ [])
+  ≡⟨⟩
+    suc 0 ∷ suc 1 ∷ map suc (2 ∷ [])
+  ≡⟨⟩
+    suc 0 ∷ suc 1 ∷ suc 2 ∷ map suc []
+  ≡⟨⟩
+    suc 0 ∷ suc 1 ∷ suc 2 ∷ []
+  ≡⟨⟩
+    1 ∷ 2 ∷ 3 ∷ []
+  ∎
+-Agda-}
+
+\func example-map-suc : map suc (0 :: 1 :: 2 :: []) = 1 :: 2 :: 3 :: [] =>
+  map suc (0 :: 1 :: 2 :: []) =<>=
+  suc 0 :: map suc (1 :: 2 :: []) =<>=
+  suc 0 :: suc 1 :: map suc (2 :: []) =<>=
+  suc 0 :: suc 1 :: suc 2 :: map suc [] =<>=
+  suc 0 :: suc 1 :: suc 2 :: [] =<>=
+  1 :: 2 :: 3 :: [] `qed
+
+{-Agda-
+sucs : List ℕ → List ℕ
+sucs = map suc
+
+_ : sucs [ 0 , 1 , 2 ] ≡ [ 1 , 2 , 3 ]
+_ =
+  begin
+    sucs [ 0 , 1 , 2 ]
+  ≡⟨⟩
+    map suc [ 0 , 1 , 2 ]
+  ≡⟨⟩
+    [ 1 , 2 , 3 ]
+  ∎
+-Agda-}
+
+\func sucs => map suc
+
+\func example-sucs : sucs (0 :: 1 :: 2 :: []) = 1 :: 2 :: 3 :: [] =>
+  sucs (0 :: 1 :: 2 :: []) =<>=
+  map suc (0 :: 1 :: 2 :: []) =<>=
+  1 :: 2 :: 3 :: [] `qed
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import util.Function (extensionality)
+
+\func map-compose {A B C : \Type} (f : A -> B) (g : B -> C) : map (g o f) = map g o map f =>
+  extensionality {_} {_} {map (g o f)} {map g o map f} (lemma1 _ _ __)
+  \where {
+    \func lemma1 {A B C : \Type} (f : A -> B) (g : B -> C) (xs : List A) : map (g o f) xs = (map g o map f) xs \elim xs
+      | [] => idp
+      | :: x xs =>
+        (g o f) x :: map (g o f) xs ==< rewrite {1} lemma1 idp >==
+        (g o f) x :: (map g o map f) xs =<>=
+        map g (f x :: map f xs) =<>=
+        map g ((map f) (x :: xs)) =<>=
+        (map g o map f) (x :: xs) `qed
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func map-++-distribute {A B : \Type} (f : A -> B) (xs ys : List A) : map f (xs ++ ys) = map f xs ++ map f ys \elim xs
+  | [] => idp
+  | :: x xs => pmap (f x ::) (map-++-distribute _ _ _)
+
+{-Agda-
+data Tree (A B : Set) : Set where
+  leaf : A → Tree A B
+  node : Tree A B → B → Tree A B → Tree A B
+-Agda-}
+
+\data Tree (A B : \Type)
+  | leaf A
+  | node (Tree A B) B (Tree A B)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func map-Tree {A B C D : \Type} (f : A -> C) (g : B -> D) (tr : Tree A B) : Tree C D \elim tr
+  | leaf a => leaf (f a)
+  | node tr1 b tr2 => node (map-Tree f g tr1) (g b) (map-Tree f g tr2)
