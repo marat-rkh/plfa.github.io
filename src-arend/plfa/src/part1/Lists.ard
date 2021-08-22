@@ -1,0 +1,179 @@
+{-Agda-
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl; sym; trans; cong)
+open Eq.≡-Reasoning
+open import Data.Bool using (Bool; true; false; T; _∧_; _∨_; not)
+open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_; _≤_; s≤s; z≤n)
+open import Data.Nat.Properties using
+  (+-assoc; +-identityˡ; +-identityʳ; *-assoc; *-identityˡ; *-identityʳ)
+open import Relation.Nullary using (¬_; Dec; yes; no)
+open import Data.Product using (_×_; ∃; ∃-syntax) renaming (_,_ to ⟨_,_⟩)
+open import Function using (_∘_)
+open import Level using (Level)
+open import plfa.part1.Isomorphism using (_≃_; _⇔_)
+-Agda-}
+
+\import Paths (inv, *>, pmap, ==<, >==, qed)
+\import util.Paths (=<>=)
+\import Data.Bool (Bool, true, false, So, and, or, not)
+\open Nat (+, *, -, <=, suc<=suc, zero<=_)
+\import Arith.Nat (NatSemiring)
+\import part1.Decidable (~?, Dec, yes, no)
+\import util.Logic (&&)
+\import Function (o)
+\import util.Equiv (=~)
+\import part1.Isomorphism (<=>)
+
+{-Agda-
+data List (A : Set) : Set where
+  []  : List A
+  _∷_ : A → List A → List A
+
+infixr 5 _∷_
+-Agda-}
+
+\data List (A : \Type)
+  | []
+  | \infixr 5 :: A (List A)
+
+{-Agda-
+_ : List ℕ
+_ = 0 ∷ 1 ∷ 2 ∷ []
+-Agda-}
+
+\func [0::1::2] : List Nat => 0 :: 1 :: 2 :: []
+
+{-Agda-
+data List′ : Set → Set where
+  []′  : ∀ {A : Set} → List′ A
+  _∷′_ : ∀ {A : Set} → A → List′ A → List′ A
+-Agda-}
+
+-- Same in Arend.
+
+{-Agda-
+_ : List ℕ
+_ = _∷_ {ℕ} 0 (_∷_ {ℕ} 1 (_∷_ {ℕ} 2 ([] {ℕ})))
+-Agda-}
+
+\func [0::1::2]' : List Nat => (::) {Nat} 0 ((::) {Nat} 1 ((::) {Nat} 2 ([] {Nat})))
+
+{-Agda-
+pattern [_] z = z ∷ []
+pattern [_,_] y z = y ∷ z ∷ []
+pattern [_,_,_] x y z = x ∷ y ∷ z ∷ []
+pattern [_,_,_,_] w x y z = w ∷ x ∷ y ∷ z ∷ []
+pattern [_,_,_,_,_] v w x y z = v ∷ w ∷ x ∷ y ∷ z ∷ []
+pattern [_,_,_,_,_,_] u v w x y z = u ∷ v ∷ w ∷ x ∷ y ∷ z ∷ []
+-Agda-}
+
+-- There is no such thing in Arend.
+
+{-Agda-
+infixr 5 _++_
+
+_++_ : ∀ {A : Set} → List A → List A → List A
+[]       ++ ys  =  ys
+(x ∷ xs) ++ ys  =  x ∷ (xs ++ ys)
+-Agda-}
+
+\func \infixr 5 ++ {A : \Type} (_ _ : List A) : List A
+  | [], ys => ys
+  | :: x xs, ys => x :: (xs ++ ys)
+
+{-Agda-
+_ : [ 0 , 1 , 2 ] ++ [ 3 , 4 ] ≡ [ 0 , 1 , 2 , 3 , 4 ]
+_ =
+  begin
+    0 ∷ 1 ∷ 2 ∷ [] ++ 3 ∷ 4 ∷ []
+  ≡⟨⟩
+    0 ∷ (1 ∷ 2 ∷ [] ++ 3 ∷ 4 ∷ [])
+  ≡⟨⟩
+    0 ∷ 1 ∷ (2 ∷ [] ++ 3 ∷ 4 ∷ [])
+  ≡⟨⟩
+    0 ∷ 1 ∷ 2 ∷ ([] ++ 3 ∷ 4 ∷ [])
+  ≡⟨⟩
+    0 ∷ 1 ∷ 2 ∷ 3 ∷ 4 ∷ []
+  ∎
+-Agda-}
+
+\func [0::1::2]++[3::4] : 0 :: 1 :: 2 :: [] ++ 3 :: 4 :: [] = 0 :: 1 :: 2 :: 3 :: 4 :: [] =>
+  0 :: 1 :: 2 :: [] ++ 3 :: 4 :: [] =<>=
+  0 :: (1 :: 2 :: [] ++ 3 :: 4 :: []) =<>=
+  0 :: 1 :: (2 :: [] ++ 3 :: 4 :: []) =<>=
+  0 :: 1 :: 2 :: ([] ++ 3 :: 4 :: []) =<>=
+  0 :: 1 :: 2 :: 3 :: 4 :: [] `qed
+
+{-Agda-
+++-assoc : ∀ {A : Set} (xs ys zs : List A)
+  → (xs ++ ys) ++ zs ≡ xs ++ (ys ++ zs)
+++-assoc [] ys zs =
+  begin
+    ([] ++ ys) ++ zs
+  ≡⟨⟩
+    ys ++ zs
+  ≡⟨⟩
+    [] ++ (ys ++ zs)
+  ∎
+++-assoc (x ∷ xs) ys zs =
+  begin
+    (x ∷ xs ++ ys) ++ zs
+  ≡⟨⟩
+    x ∷ (xs ++ ys) ++ zs
+  ≡⟨⟩
+    x ∷ ((xs ++ ys) ++ zs)
+  ≡⟨ cong (x ∷_) (++-assoc xs ys zs) ⟩
+    x ∷ (xs ++ (ys ++ zs))
+  ≡⟨⟩
+    x ∷ xs ++ (ys ++ zs)
+  ∎
+-Agda-}
+
+\func ++-assoc {A : \Type} (xs ys zs : List A) : (xs ++ ys) ++ zs = xs ++ (ys ++ zs)
+  | [], ys, zs =>
+    ([] ++ ys) ++ zs =<>=
+    ys ++ zs =<>=
+    [] ++ (ys ++ zs) `qed
+  | :: x xs, ys, zs =>
+    (x :: xs ++ ys) ++ zs =<>=
+    x :: (xs ++ ys) ++ zs =<>=
+    x :: ((xs ++ ys) ++ zs) ==< pmap (x ::) (++-assoc xs ys zs) >==
+    x :: xs ++ (ys ++ zs) `qed
+
+{-Agda-
+++-identityˡ : ∀ {A : Set} (xs : List A) → [] ++ xs ≡ xs
+++-identityˡ xs =
+  begin
+    [] ++ xs
+  ≡⟨⟩
+    xs
+  ∎
+-Agda-}
+
+\func ++-identity-l {A : \Type} (xs : List A) : [] ++ xs = xs =>
+  [] ++ xs =<>= xs `qed
+
+{-Agda-
+++-identityʳ : ∀ {A : Set} (xs : List A) → xs ++ [] ≡ xs
+++-identityʳ [] =
+  begin
+    [] ++ []
+  ≡⟨⟩
+    []
+  ∎
+++-identityʳ (x ∷ xs) =
+  begin
+    (x ∷ xs) ++ []
+  ≡⟨⟩
+    x ∷ (xs ++ [])
+  ≡⟨ cong (x ∷_) (++-identityʳ xs) ⟩
+    x ∷ xs
+  ∎
+-Agda-}
+
+\func ++-identity-r {A : \Type} (xs : List A) : xs ++ [] = xs
+  | [] => [] ++ [] =<>= [] `qed
+  | :: x xs =>
+    (x :: xs) ++ [] =<>=
+    x :: (xs ++ []) ==< pmap (x ::) (++-identity-r xs) >==
+    x :: xs `qed
