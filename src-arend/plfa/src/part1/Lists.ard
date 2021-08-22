@@ -77,9 +77,9 @@ _++_ : ∀ {A : Set} → List A → List A → List A
 (x ∷ xs) ++ ys  =  x ∷ (xs ++ ys)
 -Agda-}
 
-\func \infixr 5 ++ {A : \Type} (_ _ : List A) : List A
-  | [], ys => ys
-  | :: x xs, ys => x :: (xs ++ ys)
+\func \infixr 5 ++ {A : \Type} (xs ys : List A) : List A \elim xs
+  | [] => ys
+  | :: x xs => x :: (xs ++ ys)
 
 {-Agda-
 _ : [ 0 , 1 , 2 ] ++ [ 3 , 4 ] ≡ [ 0 , 1 , 2 , 3 , 4 ]
@@ -129,12 +129,12 @@ _ =
   ∎
 -Agda-}
 
-\func ++-assoc {A : \Type} (xs ys zs : List A) : (xs ++ ys) ++ zs = xs ++ (ys ++ zs)
-  | [], ys, zs =>
+\func ++-assoc {A : \Type} (xs ys zs : List A) : (xs ++ ys) ++ zs = xs ++ (ys ++ zs) \elim xs
+  | [] =>
     ([] ++ ys) ++ zs =<>=
     ys ++ zs =<>=
     [] ++ (ys ++ zs) `qed
-  | :: x xs, ys, zs =>
+  | :: x xs =>
     (x :: xs ++ ys) ++ zs =<>=
     x :: (xs ++ ys) ++ zs =<>=
     x :: ((xs ++ ys) ++ zs) ==< pmap (x ::) (++-assoc xs ys zs) >==
@@ -176,4 +176,145 @@ _ =
   | :: x xs =>
     (x :: xs) ++ [] =<>=
     x :: (xs ++ []) ==< pmap (x ::) (++-identity-r xs) >==
+    x :: xs `qed
+
+{-Agda-
+length : ∀ {A : Set} → List A → ℕ
+length []        =  zero
+length (x ∷ xs)  =  suc (length xs)
+-Agda-}
+
+\func length {A : \Type} (_ : List A) : Nat
+  | [] => 0
+  | :: x xs => suc (length xs)
+
+{-Agda-
+_ : length [ 0 , 1 , 2 ] ≡ 3
+_ =
+  begin
+    length (0 ∷ 1 ∷ 2 ∷ [])
+  ≡⟨⟩
+    suc (length (1 ∷ 2 ∷ []))
+  ≡⟨⟩
+    suc (suc (length (2 ∷ [])))
+  ≡⟨⟩
+    suc (suc (suc (length {ℕ} [])))
+  ≡⟨⟩
+    suc (suc (suc zero))
+  ∎
+-Agda-}
+
+\func length[0::1::2]=3 : length (0 :: 1 :: 2 :: []) = 3 =>
+  length (0 :: 1 :: 2 :: []) =<>=
+  suc (length (1 :: 2 :: [])) =<>=
+  suc (suc (length (2 :: []))) =<>=
+  suc (suc (suc (length {Nat} []))) =<>=
+  suc (suc (suc 0)) `qed
+
+{-Agda-
+length-++ : ∀ {A : Set} (xs ys : List A)
+  → length (xs ++ ys) ≡ length xs + length ys
+length-++ {A} [] ys =
+  begin
+    length ([] ++ ys)
+  ≡⟨⟩
+    length ys
+  ≡⟨⟩
+    length {A} [] + length ys
+  ∎
+length-++ (x ∷ xs) ys =
+  begin
+    length ((x ∷ xs) ++ ys)
+  ≡⟨⟩
+    suc (length (xs ++ ys))
+  ≡⟨ cong suc (length-++ xs ys) ⟩
+    suc (length xs + length ys)
+  ≡⟨⟩
+    length (x ∷ xs) + length ys
+  ∎
+-Agda-}
+
+\func length-++ {A : \Type} (xs ys : List A) : length (xs ++ ys) = length xs + length ys \elim xs
+  | [] =>
+    length ([] ++ ys) =<>=
+    length ys =<>=
+    (length {Nat} []) + length ys `qed
+  | :: x xs =>
+    length ((x :: xs) ++ ys) =<>=
+    suc (length (xs ++ ys)) ==< pmap suc (length-++ xs ys) >==
+    suc (length xs + length ys) =<>=
+    length (x :: xs) + length ys `qed
+
+{-Agda-
+reverse : ∀ {A : Set} → List A → List A
+reverse []        =  []
+reverse (x ∷ xs)  =  reverse xs ++ [ x ]
+-Agda-}
+
+\func reverse {A : \Type} (_ : List A) : List A
+  | [] => []
+  | :: x xs => reverse xs ++ x :: []
+
+{-Agda-
+_ : reverse [ 0 , 1 , 2 ] ≡ [ 2 , 1 , 0 ]
+_ =
+  begin
+    reverse (0 ∷ 1 ∷ 2 ∷ [])
+  ≡⟨⟩
+    reverse (1 ∷ 2 ∷ []) ++ [ 0 ]
+  ≡⟨⟩
+    (reverse (2 ∷ []) ++ [ 1 ]) ++ [ 0 ]
+  ≡⟨⟩
+    ((reverse [] ++ [ 2 ]) ++ [ 1 ]) ++ [ 0 ]
+  ≡⟨⟩
+    (([] ++ [ 2 ]) ++ [ 1 ]) ++ [ 0 ]
+  ≡⟨⟩
+    (([] ++ 2 ∷ []) ++ 1 ∷ []) ++ 0 ∷ []
+  ≡⟨⟩
+    (2 ∷ [] ++ 1 ∷ []) ++ 0 ∷ []
+  ≡⟨⟩
+    2 ∷ ([] ++ 1 ∷ []) ++ 0 ∷ []
+  ≡⟨⟩
+    (2 ∷ 1 ∷ []) ++ 0 ∷ []
+  ≡⟨⟩
+    2 ∷ (1 ∷ [] ++ 0 ∷ [])
+  ≡⟨⟩
+    2 ∷ 1 ∷ ([] ++ 0 ∷ [])
+  ≡⟨⟩
+    2 ∷ 1 ∷ 0 ∷ []
+  ≡⟨⟩
+    [ 2 , 1 , 0 ]
+  ∎
+-Agda-}
+
+\func reverse[0::1::2]=[2::1::0] : reverse (0 :: 1 :: 2 :: []) = 2 :: 1 :: 0 :: [] =>
+  reverse (0 :: 1 :: 2 :: []) =<>=
+  reverse (1 :: 2 :: []) ++ 0 :: [] =<>=
+  (reverse (2 :: []) ++ 1 :: []) ++ 0 :: [] =<>=
+  ((reverse [] ++ 2 :: []) ++ 1 :: []) ++ 0 :: [] =<>=
+  (([] ++ 2 :: []) ++ 1 :: []) ++ 0 :: [] =<>=
+  (([] ++ 2 :: []) ++ 1 :: []) ++ 0 :: [] =<>=
+  (2 :: [] ++ 1 :: []) ++ 0 :: [] =<>=
+  2 :: ([] ++ 1 :: []) ++ 0 :: [] =<>=
+  (2 :: 1 :: []) ++ 0 :: [] =<>=
+  2 :: (1 :: [] ++ 0 :: []) =<>=
+  2 :: 1 :: ([] ++ 0 :: []) =<>=
+  2 :: 1 :: 0 :: [] =<>=
+  2 :: 1 :: 0 :: [] `qed
+
+\import Paths.Meta (rewrite)
+
+\func reverse-++-distrib {A : \Type} (xs ys : List A) : reverse (xs ++ ys) = reverse ys ++ reverse xs \elim xs
+  | [] => rewrite (++-identity-r (reverse ys)) idp
+  | :: x xs =>
+    reverse (xs ++ ys) ++ x :: [] ==< rewrite {1} (reverse-++-distrib xs ys) idp >==
+    (reverse ys ++ reverse xs) ++ x :: [] ==< rewrite {1} (++-assoc _ _ _) idp >==
+    reverse ys ++ reverse xs ++ x :: [] `qed
+
+\func reverse-involutive {A : \Type} (xs : List A)  : reverse (reverse xs) = xs
+  | [] => idp
+  | :: x xs =>
+    reverse (reverse xs ++ x :: []) ==< rewrite {1} (reverse-++-distrib (reverse xs) (x :: [])) idp >==
+    reverse (x :: []) ++ reverse (reverse xs) =<>=
+    x :: reverse (reverse xs) ==< rewrite {1} (reverse-involutive _) idp >==
     x :: xs `qed
