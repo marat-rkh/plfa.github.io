@@ -679,5 +679,12 @@ _ = refl
   \where {
     \func lemma {n : Nat} : n + n + (n -' 1) * n = (n + 1) * n
       | {0} => idp
-      | {suc n} => {?}
+      | {suc n} =>
+        n + n + ((n -' 0) * n + (n -' 0)) + 2 ==< rewrite {1, 2} ([n-'0=n] n) idp >==
+        -- TODO can we have a meta that applies comm and assoc until equation is solved?
+        (n + n) + (n * n + n) + 2 ==< rewrite {1} (inv NatSemiring.+-assoc) idp >==
+        ((n + n) + n * n) + n + 2 ==< rewrite {1} (NatSemiring.+-comm {n + n} {n * n}) idp >==
+        (n * n + (n + n)) + n + 2 ==< rewrite {1} (NatSemiring.*-comm {n} {2}) idp >==
+        (n * n + 2 * n) + n + 2 ==< rewrite {1} (inv NatSemiring.rdistr) idp >==
+        (n + 2) * n + n + 2 `qed
   }
