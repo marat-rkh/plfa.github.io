@@ -16,8 +16,8 @@ open import plfa.part1.Isomorphism using (_≃_; _⇔_)
 \import Paths (inv, *>, pmap, ==<, >==, qed)
 \import util.Paths (=<>=)
 \import Data.Bool (Bool, true, false, So, and, or, not)
-\open Nat (+, *, -, <=, suc<=suc, zero<=_)
-\import Arith.Nat (NatSemiring)
+\open Nat (+, *, <=, suc<=suc, zero<=_)
+\import Arith.Nat (-', NatSemiring)
 \import part1.Decidable (~?, Dec, yes, no)
 \import util.Logic (&&)
 \import Function (o)
@@ -525,3 +525,159 @@ data Tree (A B : Set) : Set where
 \func map-Tree {A B C D : \Type} (f : A -> C) (g : B -> D) (tr : Tree A B) : Tree C D \elim tr
   | leaf a => leaf (f a)
   | node tr1 b tr2 => node (map-Tree f g tr1) (g b) (map-Tree f g tr2)
+
+{-Agda-
+foldr : ∀ {A B : Set} → (A → B → B) → B → List A → B
+foldr _⊗_ e []        =  e
+foldr _⊗_ e (x ∷ xs)  =  x ⊗ foldr _⊗_ e xs
+-Agda-}
+
+\func foldr {A B : \Type} (** : A -> B -> B) (e : B) (xs : List A) : B \elim xs
+  | [] => e
+  | :: x xs => x `**` foldr ** e xs
+
+{-Agda-
+_ : foldr _+_ 0 [ 1 , 2 , 3 , 4 ] ≡ 10
+_ =
+  begin
+    foldr _+_ 0 (1 ∷ 2 ∷ 3 ∷ 4 ∷ [])
+  ≡⟨⟩
+    1 + foldr _+_ 0 (2 ∷ 3 ∷ 4 ∷ [])
+  ≡⟨⟩
+    1 + (2 + foldr _+_ 0 (3 ∷ 4 ∷ []))
+  ≡⟨⟩
+    1 + (2 + (3 + foldr _+_ 0 (4 ∷ [])))
+  ≡⟨⟩
+    1 + (2 + (3 + (4 + foldr _+_ 0 [])))
+  ≡⟨⟩
+    1 + (2 + (3 + (4 + 0)))
+  ∎
+-Agda-}
+
+\func example-foldr : foldr (+) 0 (1 :: 2 :: 3 :: 4 :: []) = 10 =>
+  foldr (+) 0 (1 :: 2 :: 3 :: 4 :: []) =<>=
+  1 + foldr (+) 0 (2 :: 3 :: 4 :: []) =<>=
+  1 + (2 + foldr (+) 0 (3 :: 4 :: [])) =<>=
+  1 + (2 + (3 + foldr (+) 0 (4 :: []))) =<>=
+  1 + (2 + (3 + (4 + foldr (+) 0 []))) =<>=
+  1 + (2 + (3 + (4 + 0))) `qed
+
+{-Agda-
+sum : List ℕ → ℕ
+sum = foldr _+_ 0
+
+_ : sum [ 1 , 2 , 3 , 4 ] ≡ 10
+_ =
+  begin
+    sum [ 1 , 2 , 3 , 4 ]
+  ≡⟨⟩
+    foldr _+_ 0 [ 1 , 2 , 3 , 4 ]
+  ≡⟨⟩
+    10
+  ∎
+-Agda-}
+
+\func sum : List Nat -> Nat => foldr (+) 0
+
+\func example-sum : sum (1 :: 2 :: 3 :: 4 :: []) = 10 =>
+  sum (1 :: 2 :: 3 :: 4 :: []) =<>=
+  foldr (+) 0 (1 :: 2 :: 3 :: 4 :: []) =<>=
+  10 `qed
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func product : List Nat -> Nat => foldr (*) 1
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func foldr-++ {A B : \Type} (** : A -> B -> B) (e : B) (xs ys : List A)
+  : foldr ** e (xs ++ ys) = foldr ** (foldr ** e ys) xs \elim xs
+  | [] => idp
+  | :: x xs => pmap (x `**`) (foldr-++ _ _ _ _)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func foldr-:: {A : \Type} (xs ys : List A) : xs ++ ys = foldr (::) ys xs \elim xs
+  | [] => idp
+  | :: x xs => pmap (x `::`) (foldr-:: _ _)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func map-is-foldr {A B : \Type} (f : A -> B) (xs : List A) : map f = foldr (\lam x xs => f x :: xs) [] =>
+  extensionality (lemma _ xs __)
+  \where {
+    \func lemma {A B : \Type} (f : A -> B) (xs : List A) (ys : List A)
+      : map f ys = (foldr (\lam x xs => f x :: xs) []) ys \elim ys
+      | [] => idp
+      | :: y ys => pmap (f y ::) (lemma _ xs _)
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func fold-Tree {A B C : \Type} (f : A -> C) (g : C -> B -> C -> C) (tr : Tree A B) : C \elim tr
+  | leaf a => f a
+  | node tr1 b tr2 => g (fold-Tree f g tr1) b (fold-Tree f g tr2)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import Paths (pmap2)
+
+\func map-is-foldr-Tree {A B C D : \Type} (f : A -> C) (g : B -> D)
+  : map-Tree f g = fold-Tree (\lam a => leaf (f a)) (\lam tr1 b tr2 => node tr1 (g b) tr2) =>
+  extensionality (lemma _ _)
+  \where {
+    \func lemma {A B C D : \Type} (f : A -> C) (g : B -> D) (tr : Tree A B)
+      : map-Tree f g tr = fold-Tree (\lam a => leaf (f a)) (\lam tr1 b tr2 => node tr1 (g b) tr2) tr \elim tr
+      | leaf a => idp
+      | node tr1 b tr2 => pmap2 (\lam tr1 tr2 => node tr1 (g b) tr2) (lemma _ _ _) (lemma _ _ _)
+  }
+
+{-Agda-
+downFrom : ℕ → List ℕ
+downFrom zero     =  []
+downFrom (suc n)  =  n ∷ downFrom n
+-Agda-}
+
+\func downFrom (_ : Nat) : List Nat
+  | 0 => []
+  | suc n => n :: downFrom n
+
+{-Agda-
+_ : downFrom 3 ≡ [ 2 , 1 , 0 ]
+_ = refl
+-Agda-}
+
+\func example-downFrom : downFrom 3 = 2 :: 1 :: 0 :: [] => idp
+
+\import part1.Induction (-'+assoc)
+\open -'+assoc ([n-'0=n])
+\import Function.Meta ($)
+\import Arith.Nat (-'id)
+
+\func sum-downFrom (n : Nat) : sum (downFrom n) * 2 = n * (n -' 1)
+  | 0 => idp
+  | suc n =>
+    (n + sum (downFrom n)) + (n + sum (downFrom n)) =<>=
+    (n + sum (downFrom n)) * 2 ==< NatSemiring.rdistr {n} {_} {2} >==
+    n * 2 + sum (downFrom n) * 2 ==< pmap (n * 2 +) (sum-downFrom n) >==
+    n * 2 + n * (n -' 1) ==< pmap (n * 2 +) NatSemiring.*-comm >==
+    n * 2 + (n -' 1) * n ==< lemma >==
+    suc n * n ==< pmap (suc n *) (inv $ [n-'0=n] _) >==
+    suc n * (n -' 0) `qed
+  \where {
+    \func lemma {n : Nat} : n + n + (n -' 1) * n = (n + 1) * n
+      | {0} => idp
+      | {suc n} => {?}
+  }
