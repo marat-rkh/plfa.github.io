@@ -842,3 +842,21 @@ foldr-monoid-++ _⊗_ e monoid-⊗ xs ys =
         y ⊗ foldl (⊗) x xs ==< rewrite {1} (inv $ identity-left x) idp >==
         y ⊗ foldl (⊗) (e ⊗ x) xs `qed
   }
+
+{-Agda-
+data All {A : Set} (P : A → Set) : List A → Set where
+  []  : All P []
+  _∷_ : ∀ {x : A} {xs : List A} → P x → All P xs → All P (x ∷ xs)
+-Agda-}
+
+\data All {A : \Type} (P : A -> \Type) (xs : List A) \elim xs
+  | [] => []all \alias []∃
+  | :: x xs => \infixr 7 ::all \alias \infixr 7 ::∀ (P x) (All P xs)
+
+{-Agda-
+_ : All (_≤ 2) [ 0 , 1 , 2 ]
+_ = z≤n ∷ s≤s z≤n ∷ s≤s (s≤s z≤n) ∷ []
+-Agda-}
+
+\func example-all : All (__ <= 2) (0 :: 1 :: 2 :: []) =>
+  zero<=_ ::∀ suc<=suc zero<=_ ::∀ suc<=suc (suc<=suc zero<=_) ::∀ []∃
