@@ -19,6 +19,7 @@
     </option>
     <option name="goalPrintingOptions">
       <ArendPrintingOptions>
+        <option name="showFieldInstance" value="false" />
         <option name="showTupleType" value="true" />
       </ArendPrintingOptions>
     </option>
@@ -26,7 +27,7 @@
     <option name="librariesRoot" value="$USER_HOME$/.arend/libs" />
     <option name="showWarnings" value="false" />
   </component>
-  <component name="ProjectRootManager">
+  <component name="ProjectRootManager" version="2" project-jdk-name="corretto-11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
