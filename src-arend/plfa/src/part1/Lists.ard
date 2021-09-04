@@ -688,3 +688,157 @@ _ = refl
         (n * n + 2 * n) + n + 2 ==< rewrite {1} (inv NatSemiring.rdistr) idp >==
         (n + 2) * n + n + 2 `qed
   }
+
+{-Agda-
+record IsMonoid {A : Set} (_⊗_ : A → A → A) (e : A) : Set where
+  field
+    assoc : ∀ (x y z : A) → (x ⊗ y) ⊗ z ≡ x ⊗ (y ⊗ z)
+    identityˡ : ∀ (x : A) → e ⊗ x ≡ x
+    identityʳ : ∀ (x : A) → x ⊗ e ≡ x
+
+open IsMonoid
+-Agda-}
+
+\class IsMonoid (A : \Type)
+  | \infixl 7 ** \alias \infixl 7 ⊗ : A -> A -> A
+  | e : A
+  | assoc (x y z : A) : (x ⊗ y) ** z = x ⊗ (y ⊗ z)
+  | identity-left (x : A) : e ⊗ x = x
+  | identity-right (x : A) : x ⊗ e = x
+
+{-Agda-
++-monoid : IsMonoid _+_ 0
++-monoid =
+  record
+    { assoc = +-assoc
+    ; identityˡ = +-identityˡ
+    ; identityʳ = +-identityʳ
+    }
+
+*-monoid : IsMonoid _*_ 1
+*-monoid =
+  record
+    { assoc = *-assoc
+    ; identityˡ = *-identityˡ
+    ; identityʳ = *-identityʳ
+    }
+
+++-monoid : ∀ {A : Set} → IsMonoid {List A} _++_ []
+++-monoid =
+  record
+    { assoc = ++-assoc
+    ; identityˡ = ++-identityˡ
+    ; identityʳ = ++-identityʳ
+    }
+-Agda-}
+
+\func +-monoid : IsMonoid _ (+) 0 \cowith
+  | assoc => NatSemiring.+-assoc {__} {__} {__}
+  | identity-left => NatSemiring.zro-left {__}
+  | identity-right => NatSemiring.zro-right {__}
+
+\func *-monoid : IsMonoid _ (*) 1 \cowith
+  | assoc => NatSemiring.*-assoc {__} {__} {__}
+  | identity-left => NatSemiring.ide-left {__}
+  | identity-right => NatSemiring.ide-right {__}
+
+\func ++-monoid {A : \Type} : IsMonoid (List A) (++) [] \cowith
+  | assoc => ++-assoc
+  | identity-left => ++-identity-l
+  | identity-right => ++-identity-r
+
+{-Agda-
+foldr-monoid : ∀ {A : Set} (_⊗_ : A → A → A) (e : A) → IsMonoid _⊗_ e →
+  ∀ (xs : List A) (y : A) → foldr _⊗_ y xs ≡ foldr _⊗_ e xs ⊗ y
+foldr-monoid _⊗_ e ⊗-monoid [] y =
+  begin
+    foldr _⊗_ y []
+  ≡⟨⟩
+    y
+  ≡⟨ sym (identityˡ ⊗-monoid y) ⟩
+    (e ⊗ y)
+  ≡⟨⟩
+    foldr _⊗_ e [] ⊗ y
+  ∎
+foldr-monoid _⊗_ e ⊗-monoid (x ∷ xs) y =
+  begin
+    foldr _⊗_ y (x ∷ xs)
+  ≡⟨⟩
+    x ⊗ (foldr _⊗_ y xs)
+  ≡⟨ cong (x ⊗_) (foldr-monoid _⊗_ e ⊗-monoid xs y) ⟩
+    x ⊗ (foldr _⊗_ e xs ⊗ y)
+  ≡⟨ sym (assoc ⊗-monoid x (foldr _⊗_ e xs) y) ⟩
+    (x ⊗ foldr _⊗_ e xs) ⊗ y
+  ≡⟨⟩
+    foldr _⊗_ e (x ∷ xs) ⊗ y
+  ∎
+-Agda-}
+
+\func foldr-monoid {M : IsMonoid} (xs : List M) (y : M) : foldr (⊗) y xs = foldr (⊗) e xs `⊗` y \elim xs
+  | [] =>
+    foldr (⊗) y [] =<>=
+    y ==< inv (identity-left y) >==
+    e ⊗ y =<>=
+    foldr (⊗) e [] ⊗ y `qed
+  | :: x xs =>
+    foldr (⊗) y (x :: xs) =<>=
+    x ⊗ (foldr (⊗) y xs) ==< pmap (x ⊗) (foldr-monoid xs y) >==
+    x ⊗ (foldr (⊗) e xs ⊗ y) ==< inv (assoc x (foldr (⊗) e xs) y) >==
+    (x ⊗ foldr (⊗) e xs) ⊗ y =<>=
+    foldr (⊗) e (x :: xs) ⊗ y `qed
+
+{-Agda-
+foldr-monoid-++ : ∀ {A : Set} (_⊗_ : A → A → A) (e : A) → IsMonoid _⊗_ e →
+  ∀ (xs ys : List A) → foldr _⊗_ e (xs ++ ys) ≡ foldr _⊗_ e xs ⊗ foldr _⊗_ e ys
+foldr-monoid-++ _⊗_ e monoid-⊗ xs ys =
+  begin
+    foldr _⊗_ e (xs ++ ys)
+  ≡⟨ foldr-++ _⊗_ e xs ys ⟩
+    foldr _⊗_ (foldr _⊗_ e ys) xs
+  ≡⟨ foldr-monoid _⊗_ e monoid-⊗ xs (foldr _⊗_ e ys) ⟩
+    foldr _⊗_ e xs ⊗ foldr _⊗_ e ys
+  ∎
+-Agda-}
+
+\func foldr-monoid-++ {M : IsMonoid} (xs ys : List M) : foldr (⊗) e (xs ++ ys) = foldr (⊗) e xs ⊗ foldr (⊗) e ys =>
+  foldr (⊗) e (xs ++ ys) ==< foldr-++ (⊗) e xs ys >==
+  foldr (⊗) (foldr (⊗) e ys) xs ==< foldr-monoid xs (foldr (⊗) e ys) >==
+  foldr (⊗) e xs ⊗ foldr (⊗) e ys `qed
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func foldl {A B : \Type} (** : B -> A -> B) (e : B) (xs : List A) : B \elim xs
+  | [] => e
+  | :: x xs => foldl (**) (e `**` x) xs
+
+\func example-foldl : foldl (+) 0 (1 :: 2 :: 3 :: 4 :: []) = 10 =>
+  foldl (+) 0 (1 :: 2 :: 3 :: 4 :: []) =<>=
+  foldl (+) (0 + 1) (2 :: 3 :: 4 :: []) =<>=
+  foldl (+) ((0 + 1) + 2) (3 :: 4 :: []) =<>=
+  foldl (+) (((0 + 1) + 2) + 3) (4 :: []) =<>=
+  foldl (+) ((((0 + 1) + 2) + 3) + 4) [] =<>=
+  (((0 + 1) + 2) + 3) + 4 `qed
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func foldr-monoid-foldl {M : IsMonoid} (xs : List M) : foldr (⊗) e xs = foldl (⊗) e xs
+  | [] => idp
+  | :: x xs =>
+    x ⊗ foldr (⊗) e xs ==< pmap (x ⊗) (foldr-monoid-foldl xs) >==
+    x ⊗ foldl (⊗) e xs ==< inv (foldl-monoid xs x) >==
+    foldl (⊗) x xs ==< rewrite {1} (inv (identity-left x)) idp >==
+    foldl (⊗) (e ⊗ x) xs `qed
+  \where {
+    \func foldl-monoid {M : IsMonoid} (xs : List M) (y : M) : foldl (**) y xs = y ** foldl (**) e xs \elim xs
+      | [] => inv $ identity-right y
+      | :: x xs =>
+        foldl (⊗) (y ⊗ x) xs ==< foldl-monoid _ _ >==
+        (y ⊗ x) ⊗ foldl (⊗) e xs ==< assoc y x _ >==
+        y ⊗ (x ⊗ foldl (⊗) e xs) ==< pmap (y ⊗) (inv $ foldl-monoid _ _) >==
+        y ⊗ foldl (⊗) x xs ==< rewrite {1} (inv $ identity-left x) idp >==
+        y ⊗ foldl (⊗) (e ⊗ x) xs `qed
+  }
