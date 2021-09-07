@@ -519,8 +519,8 @@ regard to inequality.  Rewrite all of `+-monoˡ-≤`, `+-monoʳ-≤`, and `+-mon
   \func \fix 3 <=qed {A : Preorder} (x : A) : x <= x => <=-reflexive
 }
 
-\import Arith.Nat (NatLE)
-\open Nat.<=
+\import Order.PartialOrder (<=)
+\import Arith.Nat (NatSemiring, suc<=suc)
 \open <=-Reasoning
 \import Function.Meta ($)
 \import Paths.Meta (rewrite)

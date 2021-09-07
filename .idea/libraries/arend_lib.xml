@@ -3,10 +3,7 @@
     <AREND_CONFIG>
       <root url="jar://$USER_HOME$/.arend/libs/arend-lib.zip!/arend.yaml" />
     </AREND_CONFIG>
-    <CLASSES>
-      <root url="jar://$USER_HOME$/.arend/libs/arend-lib.zip!/bin" />
-      <root url="jar://$USER_HOME$/.arend/libs/arend-lib.zip!/ext" />
-    </CLASSES>
+    <CLASSES />
     <JAVADOC />
     <SOURCES>
       <root url="jar://$USER_HOME$/.arend/libs/arend-lib.zip!/src" />

@@ -871,6 +871,7 @@ equations:
 ```tex
 \import Paths.Meta (rewrite)
 \import Function.Meta ($)
+\import Meta (later)
 
 \func +-assoc' (m n p : Nat) : (m + n) + p = m + (n + p) \elim p
   | 0 => idp
@@ -1059,7 +1060,7 @@ is associative and commutative.
 ```tex
 \func +-swap (m n p : Nat) : m + (n + p) = n + (m + p) =>
   m + (n + p) ==< (inv $ +-assoc m n p) >==
-  (m + n) + p ==< rewrite {1} (+-comm m n) idp >==
+  (m + n) + p ==< later rewrite (+-comm m n) idp >==
   (n + m) + p ==< +-assoc n m p >==
   n + (m + p) `qed
 ```
@@ -1084,7 +1085,7 @@ for all naturals `m`, `n`, and `p`.
 \func *-distrib-+ (p m n : Nat) : p * (m + n) = p * m + p * n \elim n
   | 0 => idp
   | suc n =>
-    p * (m + n) + p ==< rewrite {1} (*-distrib-+ p m n) idp >==
+    p * (m + n) + p ==< later rewrite (*-distrib-+ p m n) idp >==
     p * m + p * n + p ==< +-assoc (p * m) (p * n) p >==
     p * m + (p * n + p) `qed
 ```
@@ -1109,7 +1110,7 @@ for all naturals `m`, `n`, and `p`.
 \func *-assoc (m n p : Nat) : (m * n) * p = m * (n * p) \elim p
   | 0 => idp
   | suc p =>
-    m * n * p + m * n ==< rewrite {1} (*-assoc m n p) idp >==
+    m * n * p + m * n ==< later rewrite (*-assoc m n p) idp >==
     m * (n * p) + m * n ==< (inv $ *-distrib-+ m (n * p) n) >==
     m * (n * p + n) `qed
 ```
@@ -1137,12 +1138,12 @@ you will need to formulate and prove suitable lemmas.
   | suc m, 0 => inv $ *-left-0 m
   | suc m, suc n =>
     pmap suc (
-      suc m * n + m  ==< rewrite {1} (*-comm (suc m) n) idp >==
-      n * m + n + m ==< rewrite {1} (inv $ *-comm m n) idp >==
+      suc m * n + m  ==< later rewrite (*-comm (suc m) n) idp >==
+      n * m + n + m ==< later rewrite (inv $ *-comm m n) idp >==
       m * n + n + m ==< +-assoc (m * n) n m >==
-      m * n + (n + m) ==< rewrite {1} (+-comm n m) idp >==
+      m * n + (n + m) ==< later rewrite (+-comm n m) idp >==
       m * n + (m + n) ==< (inv $ +-assoc (m * n) m n) >==
-      m * n + m + n ==< rewrite {1} (*-comm m (suc n)) idp >==
+      m * n + m + n ==< later rewrite (*-comm m (suc n)) idp >==
       suc n * m + n `qed
     )
   \where {
@@ -1191,7 +1192,7 @@ for all naturals `m`, `n`, and `p`.
 ```tex
 \func -'+assoc (m n p : Nat): m -' n -' p = m -' (n + p)
   | m, n, 0 => [n-'0=n] (m -' n)
-  | m, 0, p => rewrite {1} ([n-'0=n] m) idp
+  | m, 0, p => rewrite ([n-'0=n] m) idp
   | 0, n, p => idp
   | suc m, suc n, p => -'+assoc m n p
 
@@ -1225,32 +1226,32 @@ for all `m`, `n`, and `p`.
 
 \func ^-distrib-left-+ (m n p : Nat) : m ^ (n + p) = (m ^ n) * (m ^ p) \elim n, p
   | n, 0 => idp
-  | 0, suc p => rewrite {1} (*-comm 1 (m * m ^ p)) idp
+  | 0, suc p => rewrite (*-comm 1 (m * m ^ p)) idp
   | suc n, suc p =>
-    m * (m * m ^ (n + p)) ==< rewrite {1} (*-comm m (m ^ (n + p))) idp >==
-    m * (m ^ (n + p) * m) ==< rewrite {1} (^-distrib-left-+ m n p) idp >==
-    m * (m ^ n * m ^ p * m) ==< rewrite {1} (*-assoc (m ^ n) (m ^ p) m) idp >==
-    m * (m ^ n * (m ^ p * m)) ==< rewrite {1} (*-comm (m ^ p) m) idp >==
-    m * (m ^ n * (m * m ^ p)) ==< rewrite {1} (inv $ *-assoc m (m ^ n) (m * m ^ p)) idp >==
+    m * (m * m ^ (n + p)) ==< later rewrite (*-comm m (m ^ (n + p))) idp >==
+    m * (m ^ (n + p) * m) ==< later rewrite (^-distrib-left-+ m n p) idp >==
+    m * (m ^ n * m ^ p * m) ==< later rewrite (*-assoc (m ^ n) (m ^ p) m) idp >==
+    m * (m ^ n * (m ^ p * m)) ==< later rewrite (*-comm (m ^ p) m) idp >==
+    m * (m ^ n * (m * m ^ p)) ==< later rewrite (inv $ *-assoc m (m ^ n) (m * m ^ p)) idp >==
     (m * m ^ n) * (m * m ^ p) `qed
 
 \func ^-distrib-right-* (m n p : Nat) : (m * n) ^ p = (m ^ p) * (n ^ p) \elim p
   | 0 => idp
   | suc p =>
-    m * n * (m * n) ^ p ==< rewrite {1} (*-assoc m n ((m * n) ^ p)) idp >==
-    m * (n * (m * n) ^ p) ==< rewrite {1} (*-comm n ((m * n) ^ p)) idp >==
-    m * ((m * n) ^ p * n) ==< rewrite {1} (^-distrib-right-* m n p) idp >==
-    m * (m ^ p * n ^ p * n) ==< rewrite {1} (*-assoc (m ^ p) (n ^ p) n) idp >==
-    m * (m ^ p * (n ^ p * n)) ==< rewrite {1} (*-comm (n ^ p) n) idp >==
-    m * (m ^ p * (n * n ^ p)) ==< rewrite {1} (inv $ *-assoc m (m ^ p) (n * n ^ p)) idp >==
+    m * n * (m * n) ^ p ==< later rewrite (*-assoc m n ((m * n) ^ p)) idp >==
+    m * (n * (m * n) ^ p) ==< later rewrite (*-comm n ((m * n) ^ p)) idp >==
+    m * ((m * n) ^ p * n) ==< later rewrite (^-distrib-right-* m n p) idp >==
+    m * (m ^ p * n ^ p * n) ==< later rewrite (*-assoc (m ^ p) (n ^ p) n) idp >==
+    m * (m ^ p * (n ^ p * n)) ==< later rewrite (*-comm (n ^ p) n) idp >==
+    m * (m ^ p * (n * n ^ p)) ==< later rewrite (inv $ *-assoc m (m ^ p) (n * n ^ p)) idp >==
     m * m ^ p * (n * n ^ p) `qed
 
 \func ^-*-assoc (m n p : Nat) : (m ^ n) ^ p = m ^ (n * p) \elim p
   | 0 => idp
   | suc p =>
-    m ^ n * (m ^ n) ^ p ==< rewrite {1} (^-*-assoc m n p) idp >==
-    m ^ n * m ^ (n * p) ==< rewrite {1} (inv $ ^-distrib-left-+ m n (n * p)) idp >==
-    m ^ (n + n * p) ==< rewrite {1} (+-comm n (n * p)) idp >==
+    m ^ n * (m ^ n) ^ p ==< later rewrite (^-*-assoc m n p) idp >==
+    m ^ n * m ^ (n * p) ==< later rewrite (inv $ ^-distrib-left-+ m n (n * p)) idp >==
+    m ^ (n + n * p) ==< later rewrite (+-comm n (n * p)) idp >==
     m ^ (n * p + n) `qed
 ```
 
@@ -1289,7 +1290,7 @@ For each law: if it holds, prove; if not, give a counterexample.
   | <> => idp
   | O b => idp
   | I b =>
-    2 * from (inc b) ==< rewrite {1} (from-inc=suc-from b) idp >==
+    2 * from (inc b) ==< later rewrite (from-inc=suc-from b) idp >==
     2 * (1 + (from b)) =<>=
     2 + (2 * from b) `qed
 
@@ -1298,8 +1299,8 @@ For each law: if it holds, prove; if not, give a counterexample.
 \func from-to-id (n : Nat) : from (to n) = n
   | 0 => idp
   | suc n =>
-    from (inc (to n)) ==< rewrite {1} (from-inc=suc-from (to n)) idp >==
-    suc (from (to n)) ==< rewrite {1} (from-to-id n) idp >==
+    from (inc (to n)) ==< later rewrite (from-inc=suc-from (to n)) idp >==
+    suc (from (to n)) ==< later rewrite (from-to-id n) idp >==
     suc n `qed
 ```
 

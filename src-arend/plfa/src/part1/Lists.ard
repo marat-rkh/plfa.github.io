@@ -16,8 +16,9 @@ open import plfa.part1.Isomorphism using (_≃_; _⇔_)
 \import Paths (inv, *>, pmap, ==<, >==, qed)
 \import util.Paths (=<>=)
 \import Data.Bool (Bool, true, false, So, and, or, not)
-\open Nat (+, *, <=, suc<=suc, zero<=_)
-\import Arith.Nat (-', NatSemiring)
+\open Nat (+, *)
+\import Order.PartialOrder (<=)
+\import Arith.Nat (-', NatSemiring, suc<=suc, zero<=_)
 \import part1.Decidable (~?, Dec, yes, no)
 \import util.Logic (&&)
 \import Function (o)
@@ -303,11 +304,12 @@ _ =
   2 :: 1 :: 0 :: [] `qed
 
 \import Paths.Meta (rewrite)
+\import Meta (later)
 
 \func reverse-++-distrib {A : \Type} (xs ys : List A) : reverse (xs ++ ys) = reverse ys ++ reverse xs \elim xs
   | [] => rewrite (++-identity-r (reverse ys)) idp
   | :: x xs =>
-    reverse (xs ++ ys) ++ x :: [] ==< rewrite {1} (reverse-++-distrib xs ys) idp >==
+    reverse (xs ++ ys) ++ x :: [] ==< later rewrite (reverse-++-distrib xs ys) idp >==
     (reverse ys ++ reverse xs) ++ x :: [] ==< ++-assoc _ _ _ >==
     reverse ys ++ reverse xs ++ x :: [] `qed
 
@@ -316,7 +318,7 @@ _ =
   | :: x xs =>
     reverse (reverse xs ++ x :: []) ==< reverse-++-distrib _ _ >==
     reverse (x :: []) ++ reverse (reverse xs) =<>=
-    x :: reverse (reverse xs) ==< rewrite {1} (reverse-involutive _) idp >==
+    x :: reverse (reverse xs) ==< later rewrite (reverse-involutive _) idp >==
     x :: xs `qed
 
 {-Agda-
@@ -493,7 +495,7 @@ _ =
     \func lemma1 {A B C : \Type} (f : A -> B) (g : B -> C) (xs : List A) : map (g o f) xs = (map g o map f) xs \elim xs
       | [] => idp
       | :: x xs =>
-        (g o f) x :: map (g o f) xs ==< rewrite {1} lemma1 idp >==
+        (g o f) x :: map (g o f) xs ==< later rewrite lemma1 idp >==
         (g o f) x :: (map g o map f) xs =<>=
         map g (f x :: map f xs) =<>=
         map g ((map f) (x :: xs)) =<>=
@@ -680,12 +682,13 @@ _ = refl
     \func lemma {n : Nat} : n + n + (n -' 1) * n = (n + 1) * n
       | {0} => idp
       | {suc n} =>
-        n + n + ((n -' 0) * n + (n -' 0)) + 2 ==< rewrite {1, 2} ([n-'0=n] n) idp >==
+        n + n + ((n -' 0) * n + (n -' 0)) + 2 ==< later rewrite ([n-'0=n] n) idp >==
+        n + n + (n * n + (n -' 0)) + 2 ==< later rewrite ([n-'0=n] n) idp >==
         -- TODO can we have a meta that applies comm and assoc until equation is solved?
-        (n + n) + (n * n + n) + 2 ==< rewrite {1} (inv NatSemiring.+-assoc) idp >==
-        ((n + n) + n * n) + n + 2 ==< rewrite {1} (NatSemiring.+-comm {n + n} {n * n}) idp >==
-        (n * n + (n + n)) + n + 2 ==< rewrite {1} (NatSemiring.*-comm {n} {2}) idp >==
-        (n * n + 2 * n) + n + 2 ==< rewrite {1} (inv NatSemiring.rdistr) idp >==
+        (n + n) + (n * n + n) + 2 ==< later rewrite (inv NatSemiring.+-assoc) idp >==
+        ((n + n) + n * n) + n + 2 ==< later rewrite (NatSemiring.+-comm {n + n} {n * n}) idp >==
+        (n * n + n * 2) + n + 2 ==< later rewrite (NatSemiring.*-comm {n} {2} : n * 2 = 2 * n) idp >==
+        (n * n + 2 * n) + n + 2 ==< later rewrite (inv NatSemiring.rdistr) idp >==
         (n + 2) * n + n + 2 `qed
   }
 
@@ -830,7 +833,7 @@ foldr-monoid-++ _⊗_ e monoid-⊗ xs ys =
   | :: x xs =>
     x ⊗ foldr (⊗) e xs ==< pmap (x ⊗) (foldr-monoid-foldl xs) >==
     x ⊗ foldl (⊗) e xs ==< inv (foldl-monoid xs x) >==
-    foldl (⊗) x xs ==< rewrite {1} (inv (identity-left x)) idp >==
+    foldl (⊗) x xs ==< later rewrite {1} (inv (identity-left x)) idp >==
     foldl (⊗) (e ⊗ x) xs `qed
   \where {
     \func foldl-monoid {M : IsMonoid} (xs : List M) (y : M) : foldl (**) y xs = y ** foldl (**) e xs \elim xs
@@ -839,7 +842,7 @@ foldr-monoid-++ _⊗_ e monoid-⊗ xs ys =
         foldl (⊗) (y ⊗ x) xs ==< foldl-monoid _ _ >==
         (y ⊗ x) ⊗ foldl (⊗) e xs ==< assoc y x _ >==
         y ⊗ (x ⊗ foldl (⊗) e xs) ==< pmap (y ⊗) (inv $ foldl-monoid _ _) >==
-        y ⊗ foldl (⊗) x xs ==< rewrite {1} (inv $ identity-left x) idp >==
+        y ⊗ foldl (⊗) x xs ==< later rewrite {1} (inv $ identity-left x) idp >==
         y ⊗ foldl (⊗) (e ⊗ x) xs `qed
   }
 

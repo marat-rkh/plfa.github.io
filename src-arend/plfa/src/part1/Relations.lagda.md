@@ -1216,13 +1216,15 @@ if `One b` then `1` is less or equal to the result of `from b`.)
   | {I <>}, one => idp
   | {O b}, O-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
     | suc n, s<=s _, from-b=suc-n =>
-      rewrite {2} (inv $ to-from-id-One ob) $
+      rewrite from-b=suc-n $
+      rewrite (inv $ to-from-id-One ob) $
       rewrite from-b=suc-n $
       lemma0
   }
   | {I b}, I-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
     | suc n, s<=s _, from-b=suc-n =>
-      rewrite {2} (inv $ to-from-id-One ob) $
+      rewrite from-b=suc-n $
+      rewrite (inv $ to-from-id-One ob) $
       rewrite from-b=suc-n $
       lemma1
   }
@@ -1256,9 +1258,12 @@ import Data.Nat.Properties using (≤-refl; ≤-trans; ≤-antisym; ≤-total;
 </details>
 
 ```tex
-\open Nat (<=, zero<=_, suc<=suc)
-\import Arith.Nat (NatLE, <=_0_+-right, <=_0_+-left, <=_+)
-\open NatLE (<=-reflexive, <=-transitive, <=-antisymmetric, totality)
+\import Order.PartialOrder (<=, <=-reflexive, <=-transitive, <=-antisymmetric)
+\import Order.LinearOrder (TotalOrder)
+\open TotalOrder (totality)
+\import Algebra.Ordered (LinearlyOrderedSemiring)
+\open LinearlyOrderedSemiring (<=_+)
+\import Arith.Nat (zero<=_, suc<=suc, NatSemiring)
 ```
 In the standard library, `≤-total` is formalised in terms of
 disjunction (which we define in

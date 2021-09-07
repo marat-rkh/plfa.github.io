@@ -663,28 +663,27 @@ Show that `y ≤ z` holds if and only if there exists a `x` such that
 </details>
 
 ```tex
-\open Nat (<=)
-\open <=
-\import Arith.Nat (NatLE, <=_0_+-right)
+\import Order.PartialOrder (<=)
+\import Arith.Nat (NatSemiring, suc<=suc, zero<=_)
 
 \func LEQ-lemma {y z : Nat} : TruncP (y <= z) = ∃ {x} (x + y = z) => propExt [=>] [<=]
   \where {
     -- TODO can we rewrite `TruncP.map p (\lam p' => (p'.1, pmap suc p'.2))` using `Data.Sigma (tupleMapRight)`?
     \func [=>] {y z : Nat} (leq : TruncP (y <= z)) : ∃ {x} (x + y = z)
-      | {0}, {z}, inP zero<=_ => inP (z, idp)
-      | {suc y}, {0}, inP ()
-      | {suc y}, {suc z}, inP (suc<=suc y<=z) =>
-        \let p : ∃ {x} (x + y = z) => [=>] (inP y<=z)
+      | {0}, {z}, _ => inP (z, idp)
+      | {suc y}, {0}, inP suc<=0 => absurd (suc<=0 NatSemiring.zero<suc)
+      | {suc y}, {suc z}, inP suc-y<=suc-z =>
+        \let p : ∃ {x} (x + y = z) => [=>] (inP (suc<=suc.conv suc-y<=suc-z))
         \in TruncP.map p (\lam p' => (p'.1, pmap suc p'.2))
 
     \func [<=] {y z : Nat} (p :  ∃ {x} (x + y = z)) : TruncP (y <= z)
-      | {y}, {z}, inP (0, y=z) => inP (rewrite y=z NatLE.<=-reflexive)
+      | {y}, {z}, inP (0, y=z) => inP (rewrite y=z NatSemiring.<=-reflexive)
       | {y}, {0}, inP (suc x, ())
       | {y}, {suc z}, inP (suc x, suc[x+y]=suc[z]) =>
         \let
           | p : TruncP (y <= z) => [<=] (inP (x, pmap pred suc[x+y]=suc[z]))
-          | q : z <= suc z => <=_0_+-right 1
-        \in TruncP.map p (NatLE.<=-transitive __ q)
+          | q : z <= suc z => NatSemiring.<=_+ (NatSemiring.<=-reflexive {z}) (zero<=_ {1})
+        \in TruncP.map p (NatSemiring.<=-transitive __ q)
   }
 ```
 
