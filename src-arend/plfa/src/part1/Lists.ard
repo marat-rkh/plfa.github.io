@@ -14,6 +14,7 @@ open import plfa.part1.Isomorphism using (_≃_; _⇔_)
 -Agda-}
 
 \import Paths (inv, *>, pmap, ==<, >==, qed)
+\import part1.Connectives (prod)
 \import util.Paths (=<>=)
 \import Data.Bool (Bool, true, false, So, and, or, not)
 \open Nat (+, *)
@@ -23,7 +24,7 @@ open import plfa.part1.Isomorphism using (_≃_; _⇔_)
 \import util.Logic (~, &&)
 \import Function (o)
 \import util.Equiv (=~)
-\import part1.Isomorphism (<=>)
+\import Logic (TruncP, inP, propExt, truncP)
 
 {-Agda-
 data List (A : Set) : Set where
@@ -852,7 +853,7 @@ data All {A : Set} (P : A → Set) : List A → Set where
   _∷_ : ∀ {x : A} {xs : List A} → P x → All P xs → All P (x ∷ xs)
 -Agda-}
 
-\data All {A : \Type} (P : A -> \Type) (xs : List A) \elim xs
+\data All {A : \Type} (P : A -> \Prop) (xs : List A) \elim xs
   | [] => []all \alias []∃
   | :: x xs => \infixr 7 ::all \alias \infixr 7 ::∀ (P x) (All P xs)
 
@@ -870,7 +871,7 @@ data Any {A : Set} (P : A → Set) : List A → Set where
   there : ∀ {x : A} {xs : List A} → Any P xs → Any P (x ∷ xs)
 -Agda-}
 
-\data Any {A : \Type} (P : A -> \Type) (xs : List A) \elim xs
+\truncated \data Any {A : \Type} (P : A -> \Prop) (xs : List A) : \Prop \elim xs
   | :: x xs => here (P x)
   | :: x xs => there (Any P xs)
 
@@ -884,9 +885,9 @@ _∉_ : ∀ {A : Set} (x : A) (xs : List A) → Set
 x ∉ xs = ¬ (x ∈ xs)
 -Agda-}
 
-\func in-list \alias \infix 4 ∈ {A : \Type} (x : A) (xs : List A) : \Type => Any (x =) xs
+\func in-list \alias \infix 4 ∈ {A : \Type} (x : A) (xs : List A) : \Prop => Any (\lam a => TruncP (x = a)) xs
 
-\func not-in-list \alias \infix 4 ∉ {A : \Type} (x : A) (xs : List A) : \Type => ~ (x ∈ xs)
+\func not-in-list \alias \infix 4 ∉ {A : \Type} (x : A) (xs : List A) : \Prop => ~ (x ∈ xs)
 
 {-Agda-
 _ : 0 ∈ [ 0 , 1 , 0 , 2 ]
@@ -896,9 +897,9 @@ _ : 0 ∈ [ 0 , 1 , 0 , 2 ]
 _ = there (there (here refl))
 -Agda-}
 
-\func example-in-list1 : 0 ∈ (0 :: 1 :: 0 :: 2 :: []) => here idp
+\func example-in-list1 : 0 ∈ (0 :: 1 :: 0 :: 2 :: []) => here (inP idp)
 
-\func example-in-list2 : 0 ∈ (0 :: 1 :: 0 :: 2 :: []) => there (there (here idp))
+\func example-in-list2 : 0 ∈ (0 :: 1 :: 0 :: 2 :: []) => there (there (here (inP idp)))
 
 {-Agda-
 not-in : 3 ∉ [ 0 , 1 , 0 , 2 ]
@@ -910,9 +911,50 @@ not-in (there (there (there (there ()))))
 -Agda-}
 
 \func example-not-in-list : 3 ∉ (0 :: 1 :: 0 :: 2 :: []) => \lam p => \case p \with {
-  | here ()
-  | there (here ())
-  | there (there (here ()))
-  | there (there (there (here ())))
+  | here (inP ())
+  | there (here (inP ()))
+  | there (there (here (inP ())))
+  | there (there (there (here (inP ()))))
   | there (there (there (there ())))
 }
+
+{-Agda-
+All-++-⇔ : ∀ {A : Set} {P : A → Set} (xs ys : List A) →
+  All P (xs ++ ys) ⇔ (All P xs × All P ys)
+All-++-⇔ xs ys =
+  record
+    { to       =  to xs ys
+    ; from     =  from xs ys
+    }
+  where
+
+  to : ∀ {A : Set} {P : A → Set} (xs ys : List A) →
+    All P (xs ++ ys) → (All P xs × All P ys)
+  to [] ys Pys = ⟨ [] , Pys ⟩
+  to (x ∷ xs) ys (Px ∷ Pxs++ys) with to xs ys Pxs++ys
+  ... | ⟨ Pxs , Pys ⟩ = ⟨ Px ∷ Pxs , Pys ⟩
+
+  from : ∀ { A : Set} {P : A → Set} (xs ys : List A) →
+    All P xs × All P ys → All P (xs ++ ys)
+  from [] ys ⟨ [] , Pys ⟩ = Pys
+  from (x ∷ xs) ys ⟨ Px ∷ Pxs , Pys ⟩ =  Px ∷ from xs ys ⟨ Pxs , Pys ⟩
+-Agda-}
+
+\func All-++-= {A : \Type} {P : A -> \Prop} (xs ys : List A) : All P (xs ++ ys) = All P xs && All P ys =>
+  propExt ([=>] xs ys) ([<=] xs ys)
+  \where {
+    \func [=>] {A : \Type} {P : A -> \Prop} (xs ys : List A) (all : All P (xs ++ ys)) : All P xs && All P ys \elim xs, all
+      | [], Pys => prod []∃ Pys
+      | :: x xs, ::∀ Px Pxs++ys => \case [=>] xs ys Pxs++ys \with {
+        | prod Pxs Pys => prod (Px ::∀ Pxs) Pys
+      }
+
+    \func [<=] {A : \Type} {P : A -> \Prop} (xs ys : List A) (both : All P xs && All P ys) : All P (xs ++ ys) \elim xs, both
+      | [], prod []∃ Pys => Pys
+      | :: x xs, prod (::∀ Px Pxs) Pys => Px ::∀ [<=] xs ys (prod Pxs Pys)
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
