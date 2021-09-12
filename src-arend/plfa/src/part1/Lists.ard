@@ -24,7 +24,7 @@ open import plfa.part1.Isomorphism using (_≃_; _⇔_)
 \import util.Logic (~, &&)
 \import Function (o)
 \import util.Equiv (=~)
-\import Logic (TruncP, inP, propExt, truncP)
+\import Logic (TruncP, absurd, inP, propExt, truncP)
 
 {-Agda-
 data List (A : Set) : Set where
@@ -958,3 +958,52 @@ All-++-⇔ xs ys =
 -- Your code goes here
 -Agda-}
 
+\import Logic (||, byLeft, byRight)
+
+\func Any-++-= {A : \Type} {P : A -> \Prop} (xs ys : List A) : Any P (xs ++ ys) = Any P xs || Any P ys =>
+  propExt ([=>] xs ys) ([<=] xs ys)
+  \where {
+    \func [=>] {A : \Type} {P : A -> \Prop} (xs ys : List A) (any : Any P (xs ++ ys)) : Any P xs || Any P ys \elim xs, any
+      | [], Pys => byRight Pys
+      | :: _ xs, here Px => byLeft (here Px)
+      | :: _ xs, there any => \case [=>] xs ys any \with {
+        | byLeft Pxs => byLeft (there Pxs)
+        | byRight Pys => byRight Pys
+      }
+
+    \func [<=] {A : \Type} {P : A -> \Prop} (xs ys : List A) (or : Any P xs || Any P ys) : Any P (xs ++ ys) \elim xs, or
+      | [], byLeft ()
+      | [], byRight Pys => Pys
+      | :: _ xs, byLeft (here Px) => here Px
+      | :: _ xs, byLeft (there Pxs) => there ([<=] xs ys (byLeft Pxs))
+      | :: _ xs, byRight Pys => there ([<=] xs ys (byRight Pys))
+  }
+
+\func in-list-++-= {A : \Type} (a : A) (xs ys : List A) : a ∈ (xs ++ ys) = a ∈ xs || a ∈ ys => Any-++-= xs ys
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- (!) We have already proven a more general case (equality) because our All is a proposition.
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import Logic.Meta (contradiction)
+
+\func ~Any=All~ {A : \Type} {P : A -> \Prop} (xs : List A) : (~ o Any P) xs = All (~ o P) xs =>
+  propExt ([=>] xs) ([<=] xs)
+  \where {
+    \func [=>] {A : \Type} {P : A -> \Prop} (xs : List A) (not-any : ~ (Any P xs)) : All (~ o P) xs \elim xs
+      | [] => []∃
+      | :: x xs => (\lam Px => not-any (here Px)) ::∀ ([=>] xs (\lam Pxs => not-any (there Pxs)))
+
+    \func [<=] {A : \Type} {P : A -> \Prop} (xs : List A) (all-not : All (~ o P) xs) : ~ (Any P xs)
+      | [], []∃ => contradiction
+      | :: x xs, ::∀ ~Px all-not => \lam any => \case any \with {
+        | here Px => ~Px Px
+        | there any => [<=] xs all-not any
+      }
+  }
