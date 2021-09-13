@@ -1011,3 +1011,9 @@ All-++-⇔ xs ys =
 -- `(~ o All P) xs = Any (~ o P) xs` doesn't hold as we need a double negation elimination to prove it.
 -- If we attempted to prove it constructively, we would need to construct `(x, p : (P x -> Empty))` at some point.
 -- But we only have `(All P xs -> Empty)`, and it is unclear how to get a requied proof out of is without DNE.
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- (!) We have already proven a more general case (equality) because our All and Any are propositions.
