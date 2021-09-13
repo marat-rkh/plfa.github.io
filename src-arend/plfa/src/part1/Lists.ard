@@ -1017,3 +1017,19 @@ All-++-⇔ xs ys =
 -Agda-}
 
 -- (!) We have already proven a more general case (equality) because our All and Any are propositions.
+
+{-Agda-
+-- You code goes here
+-Agda-}
+
+\func All-ForAll \alias All-∀ {A : \Type} {P : A -> \Prop} (xs : List A) : All P xs = (\Pi {x : A} (x ∈ xs) -> P x) =>
+  propExt ([=>] xs) ([<=] xs)
+  \where {
+    \func [=>] {A : \Type} {P : A -> \Prop} (xs : List A) (all : All P xs) {x : A} (in : x ∈ xs) : P x
+      | :: a xs, ::∀ Pa all, here (inP x=a) => rewrite x=a Pa
+      | :: a xs, ::∀ Pa all, there in => [=>] xs all in
+
+    \func [<=] {A : \Type} {P : A -> \Prop} (xs : List A) (p : \Pi {x : A} -> x ∈ xs -> P x) : All P xs \elim xs
+      | [] => []∃
+      | :: a xs => p (here (inP idp)) ::∀ ([<=] xs (\lam {x} x-in-xs => p (there x-in-xs)))
+  }
