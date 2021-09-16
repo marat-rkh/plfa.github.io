@@ -194,7 +194,7 @@ length (x ∷ xs)  =  suc (length xs)
 _ : length [ 0 , 1 , 2 ] ≡ 3
 _ =
   begin
-    length (0 ∷ 1 ∷ 2 ∷ [])
+    length (0 ∷ 1 ∷ 2 ∷ [])
   ≡⟨⟩
     suc (length (1 ∷ 2 ∷ []))
   ≡⟨⟩
