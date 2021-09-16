@@ -1033,3 +1033,24 @@ All-++-⇔ xs ys =
       | [] => []∃
       | :: a xs => p (here (inP idp)) ::∀ ([<=] xs (\lam {x} x-in-xs => p (there x-in-xs)))
   }
+
+{-Agda-
+-- You code goes here
+-Agda-}
+
+\import Logic.Meta (∃)
+
+\func Any-Exists \alias Any-∃ {A : \Type} {P : A -> \Prop} (xs : List A) : Any P xs = ∃ {x} (x ∈ xs && P x) =>
+  propExt ([=>] xs) ([<=] xs)
+  \where {
+    \func [=>] {A : \Type} {P : A -> \Prop} (xs : List A) (any : Any P xs) : ∃ {x} (x ∈ xs && P x)
+      | :: x xs, here Px => inP (x, prod (here (inP idp)) Px)
+      | :: x xs, there any =>
+        \let (inP (y, prod y-in-xs Py)) => [=>] xs any
+        \in inP (y, prod (there y-in-xs) Py)
+
+    \func [<=] {A : \Type} {P : A -> \Prop} (xs : List A) (p : ∃ {x} (x ∈ xs && P x)) : Any P xs
+      | [], inP (x, prod () b)
+      | :: x xs, inP (y, prod (here (inP y=x)) Py) => rewrite (inv y=x) (here Py)
+      | :: x xs, inP (y, prod (there any) Py) => there ([<=] xs (inP (y, prod any Py)))
+  }
