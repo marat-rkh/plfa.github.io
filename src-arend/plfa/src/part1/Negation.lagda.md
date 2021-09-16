@@ -346,11 +346,11 @@ but that when one holds the negation of the other two must also hold.
 
 \func eq=>not-less {m n : Nat} (m=n : m = n) : Not (m < n)
   | {0}, {0}, m=n => \lam z<z => \case z<z \with {}
-  | {suc m}, {suc n}, m=n => \lam sm<sn => eq=>not-less (pmap pred m=n) (m<n-pred sm<sn)
+  | {suc m}, {suc n}, m=n => \lam sm<sn => eq=>not-less {m} {n} (pmap pred m=n) (m<n-pred sm<sn)
 
 \func eq=>not-greater {m n : Nat} (m=n : m = n) : Not (n < m)
   | {0}, {0}, m=n => \lam z<z => \case z<z \with {}
-  | {suc m}, {suc n}, m=n => \lam sn<sm => eq=>not-greater (pmap pred m=n) (m<n-pred sn<sm)
+  | {suc m}, {suc n}, m=n => \lam sn<sm => eq=>not-greater {m} {n} (pmap pred m=n) (m<n-pred sn<sm)
 
 \func greater=>not-less {m n : Nat} (gt : n < m) : Not (m < n) => less=>not-greater gt
 
@@ -556,11 +556,11 @@ Philip Wadler, _International Conference on Functional Programming_, 2003.)
 
 Consider the following principles:
 
-  * Excluded Middle: `A ⊎ ¬ A`, for all `A`
-  * Double Negation Elimination: `¬ ¬ A → A`, for all `A`
-  * Peirce's Law: `((A → B) → A) → A`, for all `A` and `B`.
-  * Implication as disjunction: `(A → B) → ¬ A ⊎ B`, for all `A` and `B`.
-  * De Morgan: `¬ (¬ A × ¬ B) → A ⊎ B`, for all `A` and `B`.
+* Excluded Middle: `A ⊎ ¬ A`, for all `A`
+* Double Negation Elimination: `¬ ¬ A → A`, for all `A`
+* Peirce's Law: `((A → B) → A) → A`, for all `A` and `B`.
+* Implication as disjunction: `(A → B) → ¬ A ⊎ B`, for all `A` and `B`.
+* De Morgan: `¬ (¬ A × ¬ B) → A ⊎ B`, for all `A` and `B`.
 
 Show that each of these implies all the others.
 
