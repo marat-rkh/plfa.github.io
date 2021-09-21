@@ -184,7 +184,7 @@ data Dec (A : Set) : Set where
 ¬s≤s ¬m≤n (s≤s m≤n) = ¬m≤n m≤n
 -Agda-}
 
-\func ~s<=z {m : Nat} : ~ (suc m <= zero) => \lam s<=z => \case s<=z \with {}
+\func ~s<=z {m : Nat} : ~ (suc m <= zero) => \case __ \with {}
 
 \func ~s<=s {m n : Nat} (~m<=n : ~ (m <= n)) : ~ (suc m <= suc n) => \lam sm<=sn => \case sm<=sn \with {
   | s<=s m<=n => ~m<=n m<=n

@@ -102,9 +102,7 @@ data Tri : Set where
     | bb, eq => rewrite eq idp
     | cc, eq => rewrite eq idp
   })
-  | f_sec => \lam p => \case p \as p', idp : p = p' \with {
-    | x.prod a (x.prod b c), eq => rewrite eq idp
-  }
+  | f_sec => \lam (x.prod a (x.prod b c)) => idp
 
 {-Agda-
 data Σ (A : Set) (B : A → Set) : Set where
@@ -193,14 +191,10 @@ syntax ∃-syntax (λ x → B) = ∃[ x ] B
 
 \func Pi-Sigma-currying {A : \Type} {B : A -> \Type} {C : \Type} :
   (\Pi (x : A) -> B x -> C) =~ (\Sigma (x : A) (B x) -> C) \cowith
-  | f => \lam f' xy => \case xy \with {
-    | (x, y) => f' x y
-  }
+  | f => \lam f' (x, y) => f' x y
   | ret => \lam g x y => g (x, y)
   | ret_f => \lam f => idp
-  | f_sec => \lam g => extensionality (\lam xy => \case xy \as xy', idp : xy = xy' \with {
-    | (x, y), ab=ab' => rewrite ab=ab' idp
-  })
+  | f_sec => \lam g => extensionality (\lam (x, y) => idp)
 
 {-Agda-
 postulate
