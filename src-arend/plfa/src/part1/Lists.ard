@@ -1085,3 +1085,20 @@ All? P? (x ∷ xs) with P? x   | All? P? xs
     | no ~Px, _ => no (\lam (::∀ Px Pxs) => ~Px Px)
     | _, no ~Pxs => no (\lam (::∀ Px Pxs) => ~Pxs Pxs)
   }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func any {A : \Type} (p : A -> Bool) : List A -> Bool => (foldr (or) false) o (map p)
+
+\func Any? {A : \Type} {P : A -> \Prop} (P? : Decidable P) (xs : List A) : Dec (Any P xs) \elim xs
+  | [] => no (\case __ \with {})
+  | :: x xs => \case P? x, Any? P? xs \with {
+    | yes Px, _ => yes (here Px)
+    | _, yes Pxs => yes (there Pxs)
+    | no ~Px, no ~Pxs => no (\case __ \with {
+      | here Px => ~Px Px
+      | there Pxs => ~Pxs Pxs
+    })
+  }
