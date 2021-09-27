@@ -20,7 +20,7 @@ open import plfa.part1.Isomorphism using (_≃_; _⇔_)
 \open Nat (+, *)
 \import Order.PartialOrder (<=)
 \import Arith.Nat (-', NatSemiring, suc<=suc, zero<=_)
-\import part1.Decidable (~?, Dec, yes, no)
+\import Set (Dec, yes, no)
 \import util.Logic (~, &&)
 \import Function (o)
 \import util.Equiv (=~)
@@ -854,7 +854,7 @@ data All {A : Set} (P : A → Set) : List A → Set where
 -Agda-}
 
 \data All {A : \Type} (P : A -> \Prop) (xs : List A) \elim xs
-  | [] => []all \alias []∃
+  | [] => []all \alias []∀
   | :: x xs => \infixr 7 ::all \alias \infixr 7 ::∀ (P x) (All P xs)
 
 {-Agda-
@@ -863,7 +863,7 @@ _ = z≤n ∷ s≤s z≤n ∷ s≤s (s≤s z≤n) ∷ []
 -Agda-}
 
 \func example-all : All (__ <= 2) (0 :: 1 :: 2 :: []) =>
-  zero<=_ ::∀ suc<=suc zero<=_ ::∀ suc<=suc (suc<=suc zero<=_) ::∀ []∃
+  zero<=_ ::∀ suc<=suc zero<=_ ::∀ suc<=suc (suc<=suc zero<=_) ::∀ []∀
 
 {-Agda-
 data Any {A : Set} (P : A → Set) : List A → Set where
@@ -944,13 +944,13 @@ All-++-⇔ xs ys =
   propExt ([=>] xs ys) ([<=] xs ys)
   \where {
     \func [=>] {A : \Type} {P : A -> \Prop} (xs ys : List A) (all : All P (xs ++ ys)) : All P xs && All P ys \elim xs, all
-      | [], Pys => prod []∃ Pys
+      | [], Pys => prod []∀ Pys
       | :: x xs, ::∀ Px Pxs++ys => \case [=>] xs ys Pxs++ys \with {
         | prod Pxs Pys => prod (Px ::∀ Pxs) Pys
       }
 
     \func [<=] {A : \Type} {P : A -> \Prop} (xs ys : List A) (both : All P xs && All P ys) : All P (xs ++ ys) \elim xs, both
-      | [], prod []∃ Pys => Pys
+      | [], prod []∀ Pys => Pys
       | :: x xs, prod (::∀ Px Pxs) Pys => Px ::∀ [<=] xs ys (prod Pxs Pys)
   }
 
@@ -997,11 +997,11 @@ All-++-⇔ xs ys =
   propExt ([=>] xs) ([<=] xs)
   \where {
     \func [=>] {A : \Type} {P : A -> \Prop} (xs : List A) (not-any : ~ (Any P xs)) : All (~ o P) xs \elim xs
-      | [] => []∃
+      | [] => []∀
       | :: x xs => (\lam Px => not-any (here Px)) ::∀ ([=>] xs (\lam Pxs => not-any (there Pxs)))
 
     \func [<=] {A : \Type} {P : A -> \Prop} (xs : List A) (all-not : All (~ o P) xs) : ~ (Any P xs)
-      | [], []∃ => contradiction
+      | [], []∀ => contradiction
       | :: x xs, ::∀ ~Px all-not => \lam any => \case any \with {
         | here Px => ~Px Px
         | there any => [<=] xs all-not any
@@ -1030,7 +1030,7 @@ All-++-⇔ xs ys =
       | :: a xs, ::∀ Pa all, there in => [=>] xs all in
 
     \func [<=] {A : \Type} {P : A -> \Prop} (xs : List A) (p : \Pi {x : A} -> x ∈ xs -> P x) : All P xs \elim xs
-      | [] => []∃
+      | [] => []∀
       | :: a xs => p (here (inP idp)) ::∀ ([<=] xs (\lam {x} x-in-xs => p (there x-in-xs)))
   }
 
@@ -1053,4 +1053,35 @@ All-++-⇔ xs ys =
       | [], inP (x, prod () b)
       | :: x xs, inP (y, prod (here (inP y=x)) Py) => rewrite (inv y=x) (here Py)
       | :: x xs, inP (y, prod (there any) Py) => there ([<=] xs (inP (y, prod any Py)))
+  }
+
+{-Agda-
+all : ∀ {A : Set} → (A → Bool) → List A → Bool
+all p  =  foldr _∧_ true ∘ map p
+-Agda-}
+
+\func all {A : \Type} (p : A -> Bool) : List A -> Bool => (foldr (and) true) o (map p)
+
+{-Agda-
+Decidable : ∀ {A : Set} → (A → Set) → Set
+Decidable {A} P  =  ∀ (x : A) → Dec (P x)
+-Agda-}
+
+\func Decidable {A : \Type} (P : A -> \Prop) : \Prop => \Pi (x : A) -> Dec (P x)
+
+{-Agda-
+All? : ∀ {A : Set} {P : A → Set} → Decidable P → Decidable (All P)
+All? P? []                                 =  yes []
+All? P? (x ∷ xs) with P? x   | All? P? xs
+...                 | yes Px | yes Pxs     =  yes (Px ∷ Pxs)
+...                 | no ¬Px | _           =  no λ{ (Px ∷ Pxs) → ¬Px Px   }
+...                 | _      | no ¬Pxs     =  no λ{ (Px ∷ Pxs) → ¬Pxs Pxs }
+-Agda-}
+
+\func All? {A : \Type} {P : A -> \Prop} (P? : Decidable P) (xs : List A) : Dec (All P xs) \elim xs
+  | [] => yes []∀
+  | :: x xs => \case P? x, All? P? xs \with {
+    | yes Px, yes Pxs => yes (Px ::∀ Pxs)
+    | no ~Px, _ => no (\lam (::∀ Px Pxs) => ~Px Px)
+    | _, no ~Pxs => no (\lam (::∀ Px Pxs) => ~Pxs Pxs)
   }
