@@ -1081,7 +1081,6 @@ For example,
 ```
 _ : merge [ 1 , 4 ] [ 2 , 3 ] [ 1 , 2 , 3 , 4 ]
 _ = left-∷ (right-∷ (right-∷ (left-∷ [])))
-
 ```
 
 Given a decidable predicate and a list, we can split the list
