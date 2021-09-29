@@ -1102,3 +1102,50 @@ All? P? (x ∷ xs) with P? x   | All? P? xs
       | there Pxs => ~Pxs Pxs
     })
   }
+
+{-Agda-
+data merge {A : Set} : (xs ys zs : List A) → Set where
+
+  [] :
+      --------------
+      merge [] [] []
+
+  left-∷ : ∀ {x xs ys zs}
+    → merge xs ys zs
+      --------------------------
+    → merge (x ∷ xs) ys (x ∷ zs)
+
+  right-∷ : ∀ {y xs ys zs}
+    → merge xs ys zs
+      --------------------------
+    → merge xs (y ∷ ys) (y ∷ zs)
+-Agda-}
+
+-- TODO it there a better way that avoids explicit path parameters?
+
+\data merge {A : \Type} (_ _ _ : List A) \with
+  | [], [], [] => []m
+  | :: x xs, ys, :: z zs => left-:: (x = z) (merge xs ys zs)
+  | xs, :: y ys, :: z zs => right-:: (y = z) (merge xs ys zs)
+
+{-Agda-
+_ : merge [ 1 , 4 ] [ 2 , 3 ] [ 1 , 2 , 3 , 4 ]
+_ = left-∷ (right-∷ (right-∷ (left-∷ [])))
+-Agda-}
+
+\func example-merge : merge (1 :: 4 :: []) (2 :: 3 :: []) (1 :: 2 :: 3 :: 4 :: []) =>
+  left-:: idp (right-:: idp (right-:: idp (left-:: idp []m)))
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func split {A : \Type} {P : A -> \Prop} (P? : Decidable P) (zs : List A)
+  : \Sigma (xs ys : List A) (merge xs ys zs) (All P xs) (All (~ o P) ys) \elim zs
+  | [] => ([], [], []m, []∀, []∀)
+  | :: z zs =>
+    \let (xs, ys, merge-xs-ys-zs, Pxs, ~Pys) => split P? zs
+    \in \case P? z \with {
+      | yes Pz => (z :: xs, ys, left-:: idp merge-xs-ys-zs, Pz ::∀ Pxs, ~Pys)
+      | no ~Pz => (xs, z :: ys, right-:: idp merge-xs-ys-zs, Pxs, ~Pz ::∀ ~Pys)
+    }
