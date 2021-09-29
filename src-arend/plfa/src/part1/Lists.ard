@@ -1149,3 +1149,18 @@ _ = left-∷ (right-∷ (right-∷ (left-∷ [])))
       | yes Pz => (z :: xs, ys, left-:: idp merge-xs-ys-zs, Pz ::∀ Pxs, ~Pys)
       | no ~Pz => (xs, z :: ys, right-:: idp merge-xs-ys-zs, Pxs, ~Pz ::∀ ~Pys)
     }
+
+{-Agda-
+import Data.List using (List; _++_; length; reverse; map; foldr; downFrom)
+import Data.List.Relation.Unary.All using (All; []; _∷_)
+import Data.List.Relation.Unary.Any using (Any; here; there)
+import Data.List.Membership.Propositional using (_∈_)
+import Data.List.Properties
+  using (reverse-++-commute; map-compose; map-++-commute; foldr-++)
+  renaming (mapIsFold to map-is-foldr)
+import Algebra.Structures using (IsMonoid)
+import Relation.Unary using (Decidable)
+import Relation.Binary using (Decidable)
+-Agda-}
+
+\import Data.List (++, length, map, map_comp, ListMonoid)
