@@ -201,7 +201,7 @@ _ = λ()
 </details>
 
 ```tex
-\func [1/=2] : 1 /= 2 => \lam p => \case p \with {}
+\func [1/=2] : 1 /= 2 => \case __ \with {}
 ```
 This is our first use of an absurd pattern in a lambda expression.
 The type `M ≡ N` is occupied exactly when `M` and `N` simplify to
@@ -218,7 +218,7 @@ peano = λ()
 </details>
 
 ```tex
-\func peano {m : Nat} : 0 /= suc m => \lam p => \case p \with {}
+\func peano {m : Nat} : 0 /= suc m => \case __ \with {}
 ```
 The evidence is essentially the same, as the absurd pattern matches
 all possible evidence of type `zero ≡ suc m`.
@@ -259,7 +259,7 @@ id≡id′ = extensionality (λ())
 </details>
 
 ```tex
-\func id=id' : id = id' => extensionality (\lam p => \case p \with {})
+\func id=id' : id = id' => extensionality (\case __ \with {})
 ```
 By extensionality, `id ≡ id′` holds if for every
 `x` in their domain we have `id x ≡ id′ x`. But there
@@ -341,15 +341,15 @@ but that when one holds the negation of the other two must also hold.
   | {suc m}, {suc n}, s<s m<n => \lam sm=sn => less=>not-eq m<n (pmap pred sm=sn)
 
 \func less=>not-greater {m n : Nat} (le : m < n) : Not (n < m)
-  | {0}, {suc n}, z<s => \lam sn<0 => \case sn<0 \with {}
+  | {0}, {suc n}, z<s => \case __ \with {}
   | {suc m}, {suc n}, s<s m<n => \lam sn<sm => less=>not-greater m<n (m<n-pred sn<sm)
 
 \func eq=>not-less {m n : Nat} (m=n : m = n) : Not (m < n)
-  | {0}, {0}, m=n => \lam z<z => \case z<z \with {}
+  | {0}, {0}, m=n => \case __ \with {}
   | {suc m}, {suc n}, m=n => \lam sm<sn => eq=>not-less {m} {n} (pmap pred m=n) (m<n-pred sm<sn)
 
 \func eq=>not-greater {m n : Nat} (m=n : m = n) : Not (n < m)
-  | {0}, {0}, m=n => \lam z<z => \case z<z \with {}
+  | {0}, {0}, m=n => \case __ \with {}
   | {suc m}, {suc n}, m=n => \lam sn<sm => eq=>not-greater {m} {n} (pmap pred m=n) (m<n-pred sn<sm)
 
 \func greater=>not-less {m n : Nat} (gt : n < m) : Not (m < n) => less=>not-greater gt
@@ -625,9 +625,7 @@ Show that each of these implies all the others.
       }
 
     \func [<=] (dm : \Pi (A B : \Prop) -> Not (Not A && Not B) -> A || B) : \Pi (A : \Prop) -> A || Not A =>
-      \lam A => dm A (Not A) (\lam p => \case p \with {
-        | prod not-a not-not-a => not-not-a not-a
-      })
+      \lam A => dm A (Not A) (\lam (prod not-a not-not-a) => not-not-a not-a)
   }
 ```
 

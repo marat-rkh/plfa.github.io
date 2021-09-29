@@ -712,13 +712,11 @@ even-comm′ m n ev with   m + n  | +-comm m n
 </details>
 
 ```tex
--- TODO it would be nice if the IDE can generate the "signature" of \case when one writes `\case p \with | idp =>`
--- It could generate `\case a \as x, b \as y, p : x = y \return {?}` for `p : a = b`.
+\import Meta (cases)
 
-\func even-comm' (m n : Nat) (e : even (m + n)) : even (n + m) =>
-  \case n + m \as x, +-comm m n : m + n = x \return even x \with {
-    | _, idp => e
-  }
+\func even-comm' (m n : Nat) (e : even (m + n)) : even (n + m) => cases (n + m, +-comm m n) \with {
+  | _, idp => e
+}
 ```
 In general, one can follow `with` by any number of expressions,
 separated by bars, where each following equation has the same number

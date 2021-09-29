@@ -1070,20 +1070,11 @@ currying =
 </details>
 
 ```tex
--- TODO it looks like threre is no pattern matching on lambda parameters.
--- `idp` trick in \case helps, but looks obscure.
-
-\import Paths.Meta (rewrite)
-
 \func currying {A B C : \Type} : (A -> B -> C) =~ (A x B -> C) \cowith
-  | f => \lam f' ab => \case ab \with {
-    | prod a b => f' a b
-  }
+  | f => \lam f' (prod a b) => f' a b
   | ret => \lam g a b => g (prod a b)
   | ret_f => \lam f => idp
-  | f_sec => \lam g => extensionality (\lam ab => \case ab \as ab', idp : ab = ab' \with {
-    | prod a b, ab=ab' => rewrite ab=ab' idp
-  })
+  | f_sec => \lam g => extensionality (\lam (prod a b) => idp)
 ```
 
 Currying tells us that instead of a function that takes a pair of arguments,
@@ -1128,17 +1119,15 @@ is the same as the assertion that if `A` holds then `C` holds and if
 ```tex
 \func ->-distrib-u {A B C : \Type} : (A u B -> C) =~ ((A -> C) x (B -> C)) \cowith
   | f => \lam f' => prod (f' o inj1) (f' o inj2)
-  | ret => \lam gh ab => \case gh, ab \with {
-    | prod g _, inj1 x => g x
-    | prod _ h, inj2 y => h y
+  | ret => \lam (prod g h) ab => \case ab \with {
+    | inj1 x => g x
+    | inj2 y => h y
   }
-  | ret_f => \lam f => extensionality (\lam ab => \case ab \as ab', idp : ab = ab' \with {
-    | inj1 x, ab=ab' => rewrite ab=ab' idp
-    | inj2 y, ab=ab' => rewrite ab=ab' idp
+  | ret_f => \lam f => extensionality (\lam ab => \case \elim ab \with {
+    | inj1 x => idp
+    | inj2 y => idp
   })
-  | f_sec => \lam gh => \case gh \as gh', idp : gh = gh' \with {
-    | prod g h, gh=gh' => rewrite gh=gh' idp
-  }
+  | f_sec => \lam (prod g h) => idp
 ```
 
 Corresponding to the law

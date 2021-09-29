@@ -365,7 +365,7 @@ an inequality does not hold:
 </details>
 
 ```tex
-\func ~s<=z {m : Nat} : ~ (suc m <= zero) => \lam s<=z => \case s<=z \with {}
+\func ~s<=z {m : Nat} : ~ (suc m <= zero) => \case __ \with {}
 
 \func ~s<=s {m n : Nat} (~m<=n : ~ (m <= n)) : ~ (suc m <= suc n) => \lam sm<=sn => \case sm<=sn \with {
   | s<=s m<=n => ~m<=n m<=n
@@ -523,13 +523,12 @@ m ≤?′ n with m ≤ᵇ n | ≤ᵇ→≤ m n | ≤→≤ᵇ {m} {n}
 </details>
 
 ```tex
-\import Paths.Meta (rewrite)
+\import Meta (cases)
 
-\func \infix 4 <=?' (m n : Nat) : Dec (m <= n) =>
-  \case m <=b n \as q, ≤b->≤ m n : \Pi (T q) -> m <= n, ≤->≤b {m} {n} : \Pi (m <= n) -> T q \with {
-    | true, p, _ => yes (p tt)
-    | false, _, ~p => no ~p
-  }
+\func \infix 4 <=?' (m n : Nat) : Dec (m <= n) => cases (m <=b n, ≤b->≤ m n, ≤->≤b {m} {n}) \with {
+  | true, p, _ => yes (p tt)
+  | false, _, ~p => no ~p
+}
 ```
 If `m ≤ᵇ n` is true then `≤ᵇ→≤` yields a proof that `m ≤ n` holds,
 while if it is false then `≤→≤ᵇ` takes a proof that `m ≤ n` holds into a contradiction.

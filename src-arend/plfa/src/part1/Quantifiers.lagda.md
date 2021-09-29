@@ -196,23 +196,20 @@ data Tri : Set where
 \open Tri
 \import part1.Connectives (x, proj1 \as x-proj1, proj2 \as x-proj2)
 \import part1.Isomorphism (Pi-extensionality)
-\import Paths.Meta (rewrite)
 
 \func Pi-x {B : Tri -> \Type} : (\Pi (t : Tri) -> B t) =~ B aa x B bb x B cc \cowith
   | f => \lam p => x.prod (p aa) (x.prod (p bb) (p cc))
-  | ret => \lam p t => \case t \as t' \return B t' \with {
+  | ret => \lam p t => \case \elim t \with {
     | aa => x-proj1 p
     | bb => x-proj1 (x-proj2 p)
     | cc => x-proj2 (x-proj2 p)
   }
-  | ret_f => \lam p => Pi-extensionality {Tri} {B} (\lam x => \case x \as x', idp : x = x' \with {
-    | aa, eq => rewrite eq idp
-    | bb, eq => rewrite eq idp
-    | cc, eq => rewrite eq idp
+  | ret_f => \lam p => Pi-extensionality {Tri} {B} (\lam x => \case \elim x \with {
+    | aa => idp
+    | bb => idp
+    | cc => idp
   })
-  | f_sec => \lam p => \case p \as p', idp : p = p' \with {
-    | x.prod a (x.prod b c), eq => rewrite eq idp
-  }
+  | f_sec => \lam (x.prod a (x.prod b c)) => idp
 ```
 Let `B` be a type indexed by `Tri`, that is `B : Tri → Set`.
 Show that `∀ (x : Tri) → B x` is isomorphic to `B aa × B bb × B cc`.
@@ -405,14 +402,10 @@ Indeed, the converse also holds, and the two together form an isomorphism:
 ```tex
 \func Pi-Sigma-currying {A : \Type} {B : A -> \Type} {C : \Type} :
   (\Pi (x : A) -> B x -> C) =~ (\Sigma (x : A) (B x) -> C) \cowith
-  | f => \lam f' xy => \case xy \with {
-    | (x, y) => f' x y
-  }
+  | f => \lam f' (x, y) => f' x y
   | ret => \lam g x y => g (x, y)
   | ret_f => \lam f => idp
-  | f_sec => \lam g => extensionality (\lam xy => \case xy \as xy', idp : xy = xy' \with {
-    | (x, y), ab=ab' => rewrite ab=ab' idp
-  })
+  | f_sec => \lam g => extensionality (\lam (x, y) => idp)
 ```
 The result can be viewed as a generalisation of currying.  Indeed, the code to
 establish the isomorphism is identical to what we wrote when discussing
@@ -665,6 +658,7 @@ Show that `y ≤ z` holds if and only if there exists a `x` such that
 ```tex
 \import Order.PartialOrder (<=)
 \import Arith.Nat (NatSemiring, suc<=suc, zero<=_)
+\import Paths.Meta (rewrite)
 
 \func LEQ-lemma {y z : Nat} : TruncP (y <= z) = ∃ {x} (x + y = z) => propExt [=>] [<=]
   \where {
