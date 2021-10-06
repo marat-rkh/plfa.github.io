@@ -816,11 +816,12 @@ which is a corollary of `≡Can`.
   | ret (cb : \Sigma (b : Bin) (Can b)) => from cb.1
   | ret_f => from-to-id
   | f_sec (cb : \Sigma (b : Bin) (Can b)) : (to (from cb.1), to-Can) = {\Sigma (b : Bin) (Can b)} cb \elim cb {
-    | (b, c) => lemma1 (to-from-id-Can c)
+    | (b, c) => sigmaExt to-Can c (to-from-id-Can c)
   }
   \where {
-    \func lemma1 {cb cb' : \Sigma (b : Bin) (Can b)} (p : cb.1 = cb'.1) : cb = cb'
-        | {(b, cb)}, {(b', cb')}, p => {?}
+    \func sigmaExt {b b' : Bin} (cb : Can b) (cb' : Can b') (p : b = b')
+      : (b, cb) = {\Sigma (d : Bin) (Can d)} (b', cb') \elim p
+      | idp => rewrite (Can-b-isProp cb cb') idp
 
     \func Can-b-isProp {b : Bin} (cb cb' : Can b) : cb = cb'
       | {O <>}, zero-can, zero-can => idp
