@@ -109,8 +109,6 @@ module ≡-Reasoning {A : Set} where
 open ≡-Reasoning
 -Agda-}
 
--- TODO is there an analogue of module parameters in Arend?
-
 \module =-Reasoning \where {
   \func begin {A : \Type} {x y : A} (x=y : x = y) : x = y => x=y
 
@@ -178,8 +176,6 @@ postulate
 -Agda-}
 
 -- Arend doesn't have this. And we don't need them because the typechecker is smart enough.
-
--- TODO We can write `\open NatSemiring (+-assoc)` but not `\open NatSemiring (zro-left)`. Why?
 
 {-Agda-
 +-comm : ∀ (m n : ℕ) → m + n ≡ n + m

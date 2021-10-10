@@ -1118,8 +1118,6 @@ data merge {A : Set} : (xs ys zs : List A) → Set where
     → merge xs (y ∷ ys) (y ∷ zs)
 -Agda-}
 
--- TODO it there a better way that avoids explicit path parameters?
-
 \data merge {A : \Type} (_ _ _ : List A) \with
   | [], [], [] => []m
   | :: x xs, ys, :: z zs => left-:: (x = z) (merge xs ys zs)
