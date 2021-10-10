@@ -1164,6 +1164,7 @@ _ = refl
 \open -'+assoc ([n-'0=n])
 \import Function.Meta ($)
 \import Arith.Nat (-'id)
+\import Algebra.Meta (equation)
 
 \func sum-downFrom (n : Nat) : sum (downFrom n) * 2 = n * (n -' 1)
   | 0 => idp
@@ -1181,11 +1182,7 @@ _ = refl
       | {suc n} =>
         n + n + ((n -' 0) * n + (n -' 0)) + 2 ==< later rewrite ([n-'0=n] n) idp >==
         n + n + (n * n + (n -' 0)) + 2 ==< later rewrite ([n-'0=n] n) idp >==
-        -- TODO can we have a meta that applies comm and assoc until equation is solved?
-        (n + n) + (n * n + n) + 2 ==< later rewrite (inv NatSemiring.+-assoc) idp >==
-        ((n + n) + n * n) + n + 2 ==< later rewrite (NatSemiring.+-comm {n + n} {n * n}) idp >==
-        (n * n + n * 2) + n + 2 ==< later rewrite (NatSemiring.*-comm {n} {2} : n * 2 = 2 * n) idp >==
-        (n * n + 2 * n) + n + 2 ==< later rewrite (inv NatSemiring.rdistr) idp >==
+        (n + n) + (n * n + n) + 2 ==< equation >==
         (n + 2) * n + n + 2 `qed
   }
 ```
@@ -1889,8 +1886,6 @@ data merge {A : Set} : (xs ys zs : List A) → Set where
 </details>
 
 ```tex
--- TODO it there a better way that avoids explicit path parameters?
-
 \data merge {A : \Type} (_ _ _ : List A) \with
   | [], [], [] => []m
   | :: x xs, ys, :: z zs => left-:: (x = z) (merge xs ys zs)

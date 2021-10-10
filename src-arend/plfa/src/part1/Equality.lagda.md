@@ -277,15 +277,8 @@ open ≡-Reasoning
 </details>
 
 ```tex
--- TODO is there an analogue of module parameters in Arend?
-
 \module =-Reasoning \where {
-  -- TODO this is a hack that emulates prefix unary operator in operator sequence
-  -- This doesn't work: \func \fix 1 begin {A : \Type} {x y : A} (x=y : x = y) : x = y
-
-  \func \infix 10 begin => ()
-
-  \func \infix 1 with {A : \Type} {x y : A} (_ : \Sigma) (x=y : x = y) : x = y => x=y
+  \func begin {A : \Type} {x y : A} (x=y : x = y) : x = y => x=y
 
   \func \infixr 2 =<>= {A : \Type} (x : A) {y : A} (x=y : x = y) : x = y => x=y
 
@@ -329,13 +322,15 @@ trans′ {A} {x} {y} {z} x≡y y≡z =
 </details>
 
 ```tex
+\import Function.Meta ($)
+
 \func trans' {A : \Type} {x y z : A} (x=y : x = y) (y=z : y = z) : x = z =>
-  begin with
+  begin $
   x ==< x=y >==
   y ==< y=z >==
   z `qed
 
--- We will not use `begin with` below, it doesn't add much.
+-- We will not use `begin` below, it doesn't add much.
 ```
 According to the fixity declarations, the body parses as follows:
 
@@ -417,8 +412,6 @@ postulate
 
 ```tex
 -- Arend doesn't have this. And we don't need them because the typechecker is smart enough.
-
--- TODO We can write `\open NatSemiring (+-assoc)` but not `\open NatSemiring (zro-left)`. Why?
 ```
 This is our first use of a _postulate_.  A postulate specifies a
 signature for an identifier but no definition.  Here we postulate

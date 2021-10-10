@@ -991,6 +991,7 @@ _ = refl
 
 ```tex
 -- TODO doesn't work, Arend cannot infer the implicit argument
+-- Will be partially available in Arend 1.8
 -- \func [5-3]' : (5 - 3) = 2 => idp
 ```
 
