@@ -1,12 +1,12 @@
 <component name="libraryTable">
   <library name="arend-lib" type="Arend">
     <AREND_CONFIG>
-      <root url="jar://$USER_HOME$/.arend/libs/arend-lib.zip!/arend.yaml" />
+      <root url="file://$PROJECT_DIR$/../arend-lib/arend.yaml" />
     </AREND_CONFIG>
     <CLASSES />
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$USER_HOME$/.arend/libs/arend-lib.zip!/src" />
+      <root url="file://$PROJECT_DIR$/../arend-lib/src" />
     </SOURCES>
   </library>
 </component>

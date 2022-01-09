@@ -24,7 +24,8 @@
       </ArendPrintingOptions>
     </option>
     <option name="hierarchyViewType" value="Supertypes of {0}" />
-    <option name="librariesRoot" value="$USER_HOME$/.arend/libs" />
+    <option name="librariesRoot" value="$PROJECT_DIR$/.." />
+    <option name="showAllMessagesPanel" value="false" />
     <option name="showWarnings" value="false" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="corretto-11" project-jdk-type="JavaSDK">
