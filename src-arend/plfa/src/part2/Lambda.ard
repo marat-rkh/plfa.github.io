@@ -42,7 +42,7 @@ data Term : Set where
 \data Term
   | ref Id
   | lam Id Term
-  | \infixl 7 o' Term Term
+  | app \alias \infixl 7 ∙ Term Term
   | zero'
   | suc' Term
   | case (num : Term) (tzeroCase : Term) (tsucId : Id) (tsucCase : Term)
@@ -64,7 +64,7 @@ plus = μ "+" ⇒ ƛ "m" ⇒ ƛ "n" ⇒
 \func plus => fixpoint PLUS (lam M (lam N
     (case (ref M)
         (ref N)
-        M (suc' (ref PLUS o' ref M o' ref N))
+        M (suc' (ref PLUS ∙ ref M ∙ ref N))
     )
 ))
 
@@ -80,8 +80,8 @@ sucᶜ : Term
 sucᶜ = ƛ "n" ⇒ `suc (` "n")
  -}
 
-\func two-c => lam S (lam Z (ref S o' (ref S o' ref Z)))
+\func two-c => lam S (lam Z (ref S ∙ (ref S ∙ ref Z)))
 
-\func plus-c => lam M (lam N (lam S (lam Z (ref M o' ref S o' (ref N o' ref S o' ref Z)))))
+\func plus-c => lam M (lam N (lam S (lam Z (ref M ∙ ref S ∙ (ref N ∙ ref S ∙ ref Z)))))
 
 \func suc-c => lam N (suc' (ref N))
