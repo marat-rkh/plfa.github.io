@@ -57,7 +57,7 @@ plus = μ "+" ⇒ ƛ "m" ⇒ ƛ "n" ⇒
          case ` "m"
            [zero⇒ ` "n"
            |suc "m" ⇒ `suc (` "+" · ` "m" · ` "n") ]
- -}
+-Agda-}
 
 \func two => suc' (suc' zero')
 
@@ -78,10 +78,45 @@ plusᶜ =  ƛ "m" ⇒ ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒
 
 sucᶜ : Term
 sucᶜ = ƛ "n" ⇒ `suc (` "n")
- -}
+-Agda-}
 
 \func two-c => lam S (lam Z (ref S ∙ (ref S ∙ ref Z)))
 
 \func plus-c => lam M (lam N (lam S (lam Z (ref M ∙ ref S ∙ (ref N ∙ ref S ∙ ref Z)))))
 
 \func suc-c => lam N (suc' (ref N))
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func mul => fixpoint MUL (lam M (lam N
+    (case (ref M)
+        zero'
+        M (plus ∙ ref N ∙ (ref MUL ∙ ref M ∙ ref N))
+    )
+))
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func zero-c => lam S (lam Z (ref Z))
+
+\func mul-c1 => lam M (lam N (ref M ∙ (plus-c ∙ ref N) ∙ zero-c))
+
+\func mul-c2 => lam M (lam N (lam S (lam Z (ref M ∙ (ref N ∙ ref S) ∙ ref Z))))
+
+{-Agda-
+plus′ : Term
+plus′ = μ′ + ⇒ ƛ′ m ⇒ ƛ′ n ⇒
+          case′ m
+            [zero⇒ n
+            |suc m ⇒ `suc (+ · m · n) ]
+  where
+  +  =  ` "+"
+  m  =  ` "m"
+  n  =  ` "n"
+-Agda-}
+
+-- TODO

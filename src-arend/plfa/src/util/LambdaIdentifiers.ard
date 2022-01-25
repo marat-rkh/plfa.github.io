@@ -7,3 +7,5 @@
 \func S => 3
 
 \func Z => 4
+
+\func MUL => 5
