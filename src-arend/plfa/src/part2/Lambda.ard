@@ -11,6 +11,10 @@ open import Relation.Nullary.Negation using (¬?)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 -Agda-}
 
+\import Arith.Nat
+\import Function.Meta ($)
+\import Set
+
 {-Agda-
 Id : Set
 Id = String
@@ -108,6 +112,25 @@ sucᶜ = ƛ "n" ⇒ `suc (` "n")
 \func mul-c2 => lam M (lam N (lam S (lam Z (ref M ∙ (ref N ∙ ref S) ∙ ref Z))))
 
 {-Agda-
+ƛ′_⇒_ : Term → Term → Term
+ƛ′ (` x) ⇒ N  =  ƛ x ⇒ N
+ƛ′ _ ⇒ _      =  ⊥-elim impossible
+  where postulate impossible : ⊥
+
+case′_[zero⇒_|suc_⇒_] : Term → Term → Term → Term → Term
+case′ L [zero⇒ M |suc (` x) ⇒ N ]  =  case L [zero⇒ M |suc x ⇒ N ]
+case′ _ [zero⇒ _ |suc _ ⇒ _ ]      =  ⊥-elim impossible
+  where postulate impossible : ⊥
+
+μ′_⇒_ : Term → Term → Term
+μ′ (` x) ⇒ N  =  μ x ⇒ N
+μ′ _ ⇒ _      =  ⊥-elim impossible
+  where postulate impossible : ⊥
+-Agda-}
+
+-- TODO
+
+{-Agda-
 plus′ : Term
 plus′ = μ′ + ⇒ ƛ′ m ⇒ ƛ′ n ⇒
           case′ m
@@ -120,3 +143,118 @@ plus′ = μ′ + ⇒ ƛ′ m ⇒ ƛ′ n ⇒
 -Agda-}
 
 -- TODO
+
+{-Agda-
+data Value : Term → Set where
+
+  V-ƛ : ∀ {x N}
+      ---------------
+    → Value (ƛ x ⇒ N)
+
+  V-zero :
+      -----------
+      Value `zero
+
+  V-suc : ∀ {V}
+    → Value V
+      --------------
+    → Value (`suc V)
+-Agda-}
+
+\data Value (t : Term) \with
+  | lam x N => V-lam
+  | zero' => V-zero'
+  | suc' V => V-suc' (Value V)
+
+{-Agda-
+infix 9 _[_:=_]
+
+_[_:=_] : Term → Id → Term → Term
+(` x) [ y := V ] with x ≟ y
+... | yes _          =  V
+... | no  _          =  ` x
+(ƛ x ⇒ N) [ y := V ] with x ≟ y
+... | yes _          =  ƛ x ⇒ N
+... | no  _          =  ƛ x ⇒ N [ y := V ]
+(L · M) [ y := V ]   =  L [ y := V ] · M [ y := V ]
+(`zero) [ y := V ]   =  `zero
+(`suc M) [ y := V ]  =  `suc M [ y := V ]
+(case L [zero⇒ M |suc x ⇒ N ]) [ y := V ] with x ≟ y
+... | yes _          =  case L [ y := V ] [zero⇒ M [ y := V ] |suc x ⇒ N ]
+... | no  _          =  case L [ y := V ] [zero⇒ M [ y := V ] |suc x ⇒ N [ y := V ] ]
+(μ x ⇒ N) [ y := V ] with x ≟ y
+... | yes _          =  μ x ⇒ N
+... | no  _          =  μ x ⇒ N [ y := V ]
+-Agda-}
+
+\func subst \alias \infix 9 <<= (N : Term) (s : \Sigma Id Term) : Term
+  | ref x, (y, V) => \case decideEq x y \with {
+    | yes _ => V
+    | no _ => ref x
+  }
+  | lam x N, (y, V) => \case decideEq x y \with {
+    | yes _ => lam x N
+    | no _ => lam x $ N <<= (y, V)
+  }
+  | ∙ L M, (y, V) => L <<= (y, V) ∙ M <<= (y, V)
+  | zero', (y, V) => zero'
+  | suc' M, (y, V) => suc' $ M <<= (y, V)
+  | case L M x N, (y, V) => \case decideEq x y \with {
+    | yes _ => case (L <<= (y, V)) (M <<= (y, V)) x N
+    | no _ => case (L <<= (y, V)) (M <<= (y, V)) x (N <<= (y, V))
+  }
+  | fixpoint x N, (y, V) => \case decideEq x y \with {
+    | yes _ => fixpoint x N
+    | no _ => fixpoint x $ N <<= (y, V)
+  }
+
+{-Agda-
+_ : (ƛ "z" ⇒ ` "s" · (` "s" · ` "z")) [ "s" := sucᶜ ] ≡ ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")
+_ = refl
+
+_ : (sucᶜ · (sucᶜ · ` "z")) [ "z" := `zero ] ≡ sucᶜ · (sucᶜ · `zero)
+_ = refl
+
+_ : (ƛ "x" ⇒ ` "y") [ "y" := `zero ] ≡ ƛ "x" ⇒ `zero
+_ = refl
+
+_ : (ƛ "x" ⇒ ` "x") [ "x" := `zero ] ≡ ƛ "x" ⇒ ` "x"
+_ = refl
+
+_ : (ƛ "y" ⇒ ` "y") [ "x" := `zero ] ≡ ƛ "y" ⇒ ` "y"
+_ = refl
+-Agda-}
+
+\func example-subst1 : lam Z (ref S ∙ (ref S ∙ ref Z)) <<= (S, suc-c) = lam Z (suc-c ∙ (suc-c ∙ ref Z)) => idp
+
+\func example-subst2 : suc-c ∙ (suc-c ∙ ref Z) <<= (Z, zero') = suc-c ∙ (suc-c ∙ zero') => idp
+
+\func example-subst3 : lam X (ref Y) <<= (Y, zero') = lam X zero' => idp
+
+\func example-subst4 : lam X (ref X) <<= (X, zero') = lam X (ref X) => idp
+
+\func example-subst5 : lam Y (ref Y) <<= (X, zero') = lam Y (ref Y) => idp
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\module subst-refactoring \where {
+  \func subst \alias \infix 9 <<= (N : Term) (s : \Sigma Id Term) : Term
+    | ref x, (y, V) => \case decideEq x y \with {
+      | yes _ => V
+      | no _ => ref x
+    }
+    | lam x N, (y, V) => lam x $ N <<=-≠ (x, y, V)
+    | ∙ L M, (y, V) => L <<= (y, V) ∙ M <<= (y, V)
+    | zero', (y, V) => zero'
+    | suc' M, (y, V) => suc' $ M <<= (y, V)
+    | case L M x N, (y, V) => case (L <<= (y, V)) (M <<= (y, V)) x (N <<=-≠ (x, y, V))
+    | fixpoint x N, (y, V) => fixpoint x $ N <<=-≠ (x, y, V)
+
+  \func subst-if-not-equal \alias \infix 9 <<=-≠ (N : Term) (s : \Sigma Id Id Term) : Term \elim s
+    | (x, y, V) => \case decideEq x y \with {
+      | yes _ => N
+      | no _ => N <<= (y, V)
+    }
+}
