@@ -239,7 +239,7 @@ _ = refl
 -- Your code goes here
 -Agda-}
 
-\module subst-refactoring \where {
+\module SubstRefactoring \where {
   \func subst \alias \infix 9 <<= (N : Term) (s : \Sigma Id Term) : Term
     | ref x, (y, V) => \case decideEq x y \with {
       | yes _ => V
