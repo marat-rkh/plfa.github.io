@@ -304,12 +304,74 @@ data _—→_ : Term → Term → Set where
     → μ x ⇒ M —→ M [ x := μ x ⇒ M ]
 -Agda-}
 
-\data \infix 4 --> Term Term \with
-  | app L M, app L' M' => xi-app-1 (L --> L') (M = M')
-  | app V M, app V' M' => xi-app-2 (V = V') (Value V) (M --> M')
+\data \infix 4 ~~> Term Term \with
+  | app L M, app L' M' => xi-app-1 (L ~~> L') (M = M')
+  | app V M, app V' M' => xi-app-2 (V = V') (Value V) (M ~~> M')
   | app (lam x N) V, S => beta-lam (Value V) (S = N <<= (x, V))
-  | suc' M, suc' M' => xi-suc (M --> M')
-  | case L M x N, case L' M' x' N' => xi-case (L --> L') (M = M') (x = x') (N = N')
+  | suc' M, suc' M' => xi-suc (M ~~> M')
+  | case L M x N, case L' M' x' N' => xi-case (L ~~> L') (M = M') (x = x') (N = N')
   | case zero' M x N, M' => beta-zero (M = M')
   | case (suc' V) M x N, S => beta-suc (Value V) (S = N <<= (x, V))
   | fixpoint x M, S => beta-fixpoint (S = M <<= (x, fixpoint x M))
+
+{-Agda-
+infix  2 _—↠_
+infix  1 begin_
+infixr 2 _—→⟨_⟩_
+infix  3 _∎
+
+data _—↠_ : Term → Term → Set where
+  _∎ : ∀ M
+      ---------
+    → M —↠ M
+
+  _—→⟨_⟩_ : ∀ L {M N}
+    → L —→ M
+    → M —↠ N
+      ---------
+    → L —↠ N
+
+begin_ : ∀ {M N}
+  → M —↠ N
+    ------
+  → M —↠ N
+begin M—↠N = M—↠N
+-Agda-}
+
+\data \infix 2 ~~>> (L : Term) (N : Term)
+  | red-refl (L = N)
+  | red-trans {M : Term} (L ~~> M) (M ~~>> N)
+
+\func \fix 2 qed (a : Term) : a ~~>> a => red-refl idp
+
+\func \infix 2 ==< (a : Term) {a' : Term} (p : a ~~> a') : a ~~> a' => p
+
+\func \infixr 1 >== {a a' a'' : Term} (p : a ~~> a') (q : a' ~~>> a'') : a ~~>> a'' => red-trans p q
+
+{-Agda-
+data _—↠′_ : Term → Term → Set where
+
+  step′ : ∀ {M N}
+    → M —→ N
+      -------
+    → M —↠′ N
+
+  refl′ : ∀ {M}
+      -------
+    → M —↠′ M
+
+  trans′ : ∀ {L M N}
+    → L —↠′ M
+    → M —↠′ N
+      -------
+    → L —↠′ N
+-Agda-}
+
+\data \infix 2 ~~>>' (L : Term) (N : Term)
+  | red-step (L ~~> N)
+  | red-refl' (L = N)
+  | red-trans' {M : Term} (L ~~>>' M) (M ~~>>' N)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
