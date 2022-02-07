@@ -13,6 +13,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 
 \import Arith.Nat
 \import Function.Meta ($)
+\import Logic.Meta
 \import Set
 
 {-Agda-
@@ -375,3 +376,181 @@ data _—↠′_ : Term → Term → Set where
 {-Agda-
 -- Your code goes here
 -Agda-}
+
+-- TODO
+
+{-Agda-
+postulate
+  confluence : ∀ {L M N}
+    → ((L —↠ M) × (L —↠ N))
+      --------------------
+    → ∃[ P ] ((M —↠ P) × (N —↠ P))
+
+  diamond : ∀ {L M N}
+    → ((L —→ M) × (L —→ N))
+      --------------------
+    → ∃[ P ] ((M —↠ P) × (N —↠ P))
+-Agda-}
+
+\func confluence {L M N : Term} (_ : L ~~>> M) (_ : L ~~>> N) : ∃ {P} (M ~~>> P) (N ~~>> P) => {?}
+
+\func dimond {L M N : Term} (_ : L ~~> M) (_ : L ~~> N) : ∃ {P} (M ~~>> P) (N ~~>> P) => {?}
+
+{-Agda-
+postulate
+  deterministic : ∀ {L M N}
+    → L —→ M
+    → L —→ N
+      ------
+    → M ≡ N
+-Agda-}
+
+\func deterministics {L M N : Term} (_ : L ~~> M) (_ : L ~~> N) : M = N => {?}
+
+{-Agda-
+_ : twoᶜ · sucᶜ · `zero —↠ `suc `suc `zero
+_ =
+  begin
+    twoᶜ · sucᶜ · `zero
+  —→⟨ ξ-·₁ (β-ƛ V-ƛ) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · `zero
+  —→⟨ β-ƛ V-zero ⟩
+    sucᶜ · (sucᶜ · `zero)
+  —→⟨ ξ-·₂ V-ƛ (β-ƛ V-zero) ⟩
+    sucᶜ · `suc `zero
+  —→⟨ β-ƛ (V-suc V-zero) ⟩
+    `suc (`suc `zero)
+  ∎
+-Agda-}
+
+\func example-two-suc-zero : two-c ∙ suc-c ∙ zero' ~~>> suc' (suc' zero') =>
+  two-c ∙ suc-c ∙ zero' ==< xi-app-1 (beta-lam V-lam idp) idp >==
+  lam Z (suc-c ∙ (suc-c ∙ ref Z)) ∙ zero' ==< beta-lam V-zero' idp >==
+  suc-c ∙ (suc-c ∙ zero')  ==< xi-app-2 idp V-lam (beta-lam V-zero' idp) >==
+  suc-c ∙ suc' zero'  ==< beta-lam (V-suc' V-zero') idp >==
+  suc' (suc' zero') `qed
+
+{-Agda-
+_ : plus · two · two —↠ `suc `suc `suc `suc `zero
+_ =
+  begin
+    plus · two · two
+  —→⟨ ξ-·₁ (ξ-·₁ β-μ) ⟩
+    (ƛ "m" ⇒ ƛ "n" ⇒
+      case ` "m" [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · two · two
+  —→⟨ ξ-·₁ (β-ƛ (V-suc (V-suc V-zero))) ⟩
+    (ƛ "n" ⇒
+      case two [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+         · two
+  —→⟨ β-ƛ (V-suc (V-suc V-zero)) ⟩
+    case two [zero⇒ two |suc "m" ⇒ `suc (plus · ` "m" · two) ]
+  —→⟨ β-suc (V-suc V-zero) ⟩
+    `suc (plus · `suc `zero · two)
+  —→⟨ ξ-suc (ξ-·₁ (ξ-·₁ β-μ)) ⟩
+    `suc ((ƛ "m" ⇒ ƛ "n" ⇒
+      case ` "m" [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · `suc `zero · two)
+  —→⟨ ξ-suc (ξ-·₁ (β-ƛ (V-suc V-zero))) ⟩
+    `suc ((ƛ "n" ⇒
+      case `suc `zero [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · two)
+  —→⟨ ξ-suc (β-ƛ (V-suc (V-suc V-zero))) ⟩
+    `suc (case `suc `zero [zero⇒ two |suc "m" ⇒ `suc (plus · ` "m" · two) ])
+  —→⟨ ξ-suc (β-suc V-zero) ⟩
+    `suc `suc (plus · `zero · two)
+  —→⟨ ξ-suc (ξ-suc (ξ-·₁ (ξ-·₁ β-μ))) ⟩
+    `suc `suc ((ƛ "m" ⇒ ƛ "n" ⇒
+      case ` "m" [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · `zero · two)
+  —→⟨ ξ-suc (ξ-suc (ξ-·₁ (β-ƛ V-zero))) ⟩
+    `suc `suc ((ƛ "n" ⇒
+      case `zero [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · two)
+  —→⟨ ξ-suc (ξ-suc (β-ƛ (V-suc (V-suc V-zero)))) ⟩
+    `suc `suc (case `zero [zero⇒ two |suc "m" ⇒ `suc (plus · ` "m" · two) ])
+  —→⟨ ξ-suc (ξ-suc β-zero) ⟩
+    `suc (`suc (`suc (`suc `zero)))
+  ∎
+-Agda-}
+
+-- TODO
+
+{-Agda-
+_ : plusᶜ · twoᶜ · twoᶜ · sucᶜ · `zero —↠ `suc `suc `suc `suc `zero
+_ =
+  begin
+    (ƛ "m" ⇒ ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒ ` "m" · ` "s" · (` "n" · ` "s" · ` "z"))
+      · twoᶜ · twoᶜ · sucᶜ · `zero
+  —→⟨ ξ-·₁ (ξ-·₁ (ξ-·₁ (β-ƛ V-ƛ))) ⟩
+    (ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒ twoᶜ · ` "s" · (` "n" · ` "s" · ` "z"))
+      · twoᶜ · sucᶜ · `zero
+  —→⟨ ξ-·₁ (ξ-·₁ (β-ƛ V-ƛ)) ⟩
+    (ƛ "s" ⇒ ƛ "z" ⇒ twoᶜ · ` "s" · (twoᶜ · ` "s" · ` "z")) · sucᶜ · `zero
+  —→⟨ ξ-·₁ (β-ƛ V-ƛ) ⟩
+    (ƛ "z" ⇒ twoᶜ · sucᶜ · (twoᶜ · sucᶜ · ` "z")) · `zero
+  —→⟨ β-ƛ V-zero ⟩
+    twoᶜ · sucᶜ · (twoᶜ · sucᶜ · `zero)
+  —→⟨ ξ-·₁ (β-ƛ V-ƛ) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · (twoᶜ · sucᶜ · `zero)
+  —→⟨ ξ-·₂ V-ƛ (ξ-·₁ (β-ƛ V-ƛ)) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · ((ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · `zero)
+  —→⟨ ξ-·₂ V-ƛ (β-ƛ V-zero) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · (sucᶜ · (sucᶜ · `zero))
+  —→⟨ ξ-·₂ V-ƛ (ξ-·₂ V-ƛ (β-ƛ V-zero)) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · (sucᶜ · (`suc `zero))
+  —→⟨ ξ-·₂ V-ƛ (β-ƛ (V-suc V-zero)) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · (`suc `suc `zero)
+  —→⟨ β-ƛ (V-suc (V-suc V-zero)) ⟩
+    sucᶜ · (sucᶜ · `suc `suc `zero)
+  —→⟨ ξ-·₂ V-ƛ (β-ƛ (V-suc (V-suc V-zero))) ⟩
+    sucᶜ · (`suc `suc `suc `zero)
+  —→⟨ β-ƛ (V-suc (V-suc (V-suc V-zero))) ⟩
+   `suc (`suc (`suc (`suc `zero)))
+  ∎
+-Agda-}
+
+-- TODO
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func one => suc' zero'
+
+-- TODO is there a tactic that fills in all these constructor chains?
+--   Currently, everything between ==< and >== can be filled by calling "Replace with constructor" repeatedly.
+--   And this is tedious.
+
+\func example-one-plus-one : plus ∙ one ∙ one ~~>> suc' (suc' zero') =>
+  plus ∙ one ∙ one ==< xi-app-1 (xi-app-1 (beta-fixpoint idp) idp) idp >==
+  lam M (lam N
+      (case (ref M)
+          (ref N)
+          M (suc' (plus ∙ ref M ∙ ref N))
+      )
+  ) ∙ one ∙ one ==< xi-app-1 (beta-lam (V-suc' V-zero') idp) idp >==
+  lam N (case one
+      (ref N)
+      M (suc' (plus ∙ ref M ∙ ref N))
+  ) ∙ one ==< beta-lam (V-suc' V-zero') idp >==
+  case one
+      one
+      M (suc' (plus ∙ ref M ∙ one)) ==< beta-suc V-zero' idp >==
+  suc' (plus ∙ zero' ∙ one) ==< xi-suc (xi-app-1 (xi-app-1 (beta-fixpoint idp) idp) idp) >==
+  suc' (lam M (lam N
+      (case (ref M)
+          (ref N)
+          M (suc' (plus ∙ ref M ∙ ref N))
+      )
+  ) ∙ zero' ∙ one) ==< xi-suc (xi-app-1 (beta-lam V-zero' idp) idp) >==
+  suc' (lam N (case zero'
+      (ref N)
+      M (suc' (plus ∙ ref M ∙ ref N))
+  ) ∙ one) ==< xi-suc (beta-lam (V-suc' V-zero') idp) >==
+  suc' (case zero'
+      one
+      M (suc' (plus ∙ ref M ∙ one))) ==< xi-suc (beta-zero idp) >==
+  suc' (suc' zero') `qed
+
+\func one-c => lam S (lam Z (ref S ∙ ref Z))
