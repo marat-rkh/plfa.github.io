@@ -554,3 +554,26 @@ _ =
   suc' (suc' zero') `qed
 
 \func one-c => lam S (lam Z (ref S ∙ ref Z))
+
+\func example-one-plus-one-c : plus-c ∙ one-c ∙ one-c ∙ suc-c ∙ zero' ~~>> suc' (suc' zero') =>
+  plus-c ∙ one-c ∙ one-c ∙ suc-c ∙ zero'
+    ==< xi-app-1 (xi-app-1 (xi-app-1 (beta-lam V-lam idp) idp) idp) idp >==
+  lam N (lam S (lam Z (one-c ∙ ref S ∙ (ref N ∙ ref S ∙ ref Z)))) ∙ one-c ∙ suc-c ∙ zero'
+    ==< xi-app-1 (xi-app-1 (beta-lam V-lam idp) idp) idp >==
+  lam S (lam Z (one-c ∙ ref S ∙ (one-c ∙ ref S ∙ ref Z))) ∙ suc-c ∙ zero'
+    ==< xi-app-1 (beta-lam V-lam idp) idp >==
+  lam Z (one-c ∙ suc-c ∙ (one-c ∙ suc-c ∙ ref Z)) ∙ zero'
+    ==< beta-lam V-zero' idp >==
+  one-c ∙ suc-c ∙ (one-c ∙ suc-c ∙ zero')
+    ==< xi-app-1 (beta-lam V-lam idp) idp >==
+  lam Z (suc-c ∙ ref Z) ∙ (one-c ∙ suc-c ∙ zero')
+    ==< xi-app-2 idp V-lam (xi-app-1 (beta-lam V-lam idp) idp) >==
+  lam Z (suc-c ∙ ref Z) ∙ (lam Z (suc-c ∙ ref Z) ∙ zero')
+    ==< xi-app-2 idp V-lam (beta-lam V-zero' idp) >==
+  lam Z (suc-c ∙ ref Z) ∙ (suc-c ∙ zero')
+    ==< xi-app-2 idp V-lam (beta-lam V-zero' idp) >==
+  lam Z (suc-c ∙ ref Z) ∙ suc' zero'
+    ==< beta-lam (V-suc' V-zero') idp >==
+  suc-c ∙ suc' zero'
+    ==< beta-lam (V-suc' V-zero') idp >==
+  suc' (suc' zero') `qed
