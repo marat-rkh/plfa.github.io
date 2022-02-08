@@ -12,8 +12,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 -Agda-}
 
 \import Arith.Nat
+\import Data.List
+\import Equiv
 \import Function.Meta ($)
 \import Logic.Meta
+\import Paths.Meta
 \import Set
 
 {-Agda-
@@ -577,3 +580,49 @@ _ =
   suc-c ∙ suc' zero'
     ==< beta-lam (V-suc' V-zero') idp >==
   suc' (suc' zero') `qed
+
+{-Agda-
+infixr 7 _⇒_
+
+data Type : Set where
+  _⇒_ : Type → Type → Type
+  `ℕ : Type
+-Agda-}
+
+\data Type
+  | \infixr 7 ==> Type Type
+  | Nat'
+
+{-Agda-
+infixl 5  _,_⦂_
+
+data Context : Set where
+  ∅     : Context
+  _,_⦂_ : Context → Id → Type → Context
+-Agda-}
+
+\data Context
+  | nil-ctx \alias ∅
+  | const-ctx \alias \infixl 5 |: Context (\Sigma Id Type)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func Context-equiv-List : QEquiv {Context} {List (\Sigma Id Type)} \cowith
+  | f (ctx : Context) : List (\Sigma Id Type) \with {
+    | ∅ => nil
+    | |: ctx b => b :: f ctx
+  }
+  | ret (xs : List (\Sigma Id Type)) : Context \with {
+    | nil => ∅
+    | :: x xs => ret xs |: x
+  }
+  | ret_f (ctx : Context) : ret (f ctx) = ctx \with {
+    | ∅ => idp
+    | |: ctx b => rewrite (ret_f ctx) idp
+  }
+  | f_sec (xs : List (\Sigma Id Type)) : f (ret xs) = xs \with {
+    | nil => idp
+    | :: x xs => rewrite (f_sec xs) idp
+  }
