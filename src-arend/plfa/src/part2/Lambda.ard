@@ -15,6 +15,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 \import Data.List
 \import Equiv
 \import Function.Meta ($)
+\import Logic
 \import Logic.Meta
 \import Paths.Meta
 \import Set
@@ -590,7 +591,7 @@ data Type : Set where
 -Agda-}
 
 \data Type
-  | \infixr 7 ==> Type Type
+  | arr \alias \infixr 7 ==> Type Type
   | Nat'
 
 {-Agda-
@@ -626,3 +627,101 @@ data Context : Set where
     | nil => idp
     | :: x xs => rewrite (f_sec xs) idp
   }
+
+{-Agda-
+infix  4  _∋_⦂_
+
+data _∋_⦂_ : Context → Id → Type → Set where
+
+  Z : ∀ {Γ x A}
+      ------------------
+    → Γ , x ⦂ A ∋ x ⦂ A
+
+  S : ∀ {Γ x y A B}
+    → x ≢ y
+    → Γ ∋ x ⦂ A
+      ------------------
+    → Γ , y ⦂ B ∋ x ⦂ A
+-Agda-}
+
+\data InContext \alias \infix 4 ∋ Context (\Sigma Id Type) \with
+  | |: G (x, A), (x', A') => Here (x' = x) (A' = A)
+  | |: G (y, B), (x, A) => There (x /= y) (G ∋ (x, A))
+
+{-Agda-
+_ : ∅ , "x" ⦂ `ℕ ⇒ `ℕ , "y" ⦂ `ℕ , "z" ⦂ `ℕ ∋ "x" ⦂ `ℕ ⇒ `ℕ
+_ = S (λ()) (S (λ()) Z)
+-Agda-}
+
+\func example-InContext : ∅ |: (X, Nat' ==> Nat') |: (Y, Nat') |: (Z, Nat') ∋ (X, Nat' ==> Nat') =>
+  There (\case __) (There (\case __) (Here idp idp))
+
+{-Agda-
+S′ : ∀ {Γ x y A B}
+   → {x≢y : False (x ≟ y)}
+   → Γ ∋ x ⦂ A
+     ------------------
+   → Γ , y ⦂ B ∋ x ⦂ A
+
+S′ {x≢y = x≢y} x = S (toWitnessFalse x≢y) x
+-Agda-}
+
+-- TODO this doesn't work in Arend
+
+{-Agda-
+infix  4  _⊢_⦂_
+
+data _⊢_⦂_ : Context → Term → Type → Set where
+
+  -- Axiom
+  ⊢` : ∀ {Γ x A}
+    → Γ ∋ x ⦂ A
+      -----------
+    → Γ ⊢ ` x ⦂ A
+
+  -- ⇒-I
+  ⊢ƛ : ∀ {Γ x N A B}
+    → Γ , x ⦂ A ⊢ N ⦂ B
+      -------------------
+    → Γ ⊢ ƛ x ⇒ N ⦂ A ⇒ B
+
+  -- ⇒-E
+  _·_ : ∀ {Γ L M A B}
+    → Γ ⊢ L ⦂ A ⇒ B
+    → Γ ⊢ M ⦂ A
+      -------------
+    → Γ ⊢ L · M ⦂ B
+
+  -- ℕ-I₁
+  ⊢zero : ∀ {Γ}
+      --------------
+    → Γ ⊢ `zero ⦂ `ℕ
+
+  -- ℕ-I₂
+  ⊢suc : ∀ {Γ M}
+    → Γ ⊢ M ⦂ `ℕ
+      ---------------
+    → Γ ⊢ `suc M ⦂ `ℕ
+
+  -- ℕ-E
+  ⊢case : ∀ {Γ L M x N A}
+    → Γ ⊢ L ⦂ `ℕ
+    → Γ ⊢ M ⦂ A
+    → Γ , x ⦂ `ℕ ⊢ N ⦂ A
+      -------------------------------------
+    → Γ ⊢ case L [zero⇒ M |suc x ⇒ N ] ⦂ A
+
+  ⊢μ : ∀ {Γ x M A}
+    → Γ , x ⦂ A ⊢ M ⦂ A
+      -----------------
+    → Γ ⊢ μ x ⇒ M ⦂ A
+-Agda-}
+
+\data HasType \alias \infix 4 ⊢ Context (\Sigma Term Type) \with
+  | G, (ref x, A) => in-ctx-axiom (G ∋ (x, A))
+  | G, (lam x N, arr A B) => arr-intro (G |: (x, A) ⊢ (N, B))
+  | G, (app L M, B) => arr-elim {A B : Type} (G ⊢ (L, A ==> B)) (G ⊢ (M, A))
+  | G, (zero', Nat') => nat-intro1
+  | G, (suc' M, Nat') => nat-intro2 (G ⊢ (M, Nat'))
+  | G, (case L M x N, A) => nat-elim (G ⊢ (L, Nat')) (G ⊢ (M, A)) (G |: (x, Nat') ⊢ (N, A))
+  | G, (fixpoint x M, A) => fixpoint-axiom (G |: (x, A) ⊢ (M, A))
