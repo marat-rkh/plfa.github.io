@@ -18,6 +18,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 \import Logic
 \import Logic.Meta
 \import Meta
+\import Paths
 \import Paths.Meta
 \import Set
 
@@ -605,7 +606,7 @@ data Context : Set where
 
 \data Context
   | nil-ctx \alias ∅
-  | const-ctx \alias \infixl 5 |: Context (\Sigma Id Type)
+  | cons-ctx \alias \infixl 5 |: Context (\Sigma Id Type)
 
 {-Agda-
 -- Your code goes here
@@ -841,3 +842,41 @@ Ch A = (A ⇒ A) ⇒ A ⇒ A
 
 \func has-type-2+2-c : ∅ ⊢ (plus-c ∙ two-c ∙ two-c ∙ suc-c ∙ zero', Nat') =>
   arr-elim (arr-elim (arr-elim (arr-elim has-type-plus-c has-type-two-c) has-type-two-c) has-type-suc-c) nat-intro1
+
+{-Agda-
+∋-injective : ∀ {Γ x A B} → Γ ∋ x ⦂ A → Γ ∋ x ⦂ B → A ≡ B
+∋-injective Z        Z          =  refl
+∋-injective Z        (S x≢ _)   =  ⊥-elim (x≢ refl)
+∋-injective (S x≢ _) Z          =  ⊥-elim (x≢ refl)
+∋-injective (S _ ∋x) (S _ ∋x′)  =  ∋-injective ∋x ∋x′
+-Agda-}
+
+\func InContext-injective {G : Context} {x : Id} {A B : Type} (_ : G ∋ (x, A)) (_ : G ∋ (x, B)) : A = B
+  | {cons-ctx G ((_, C))}, Here _ A=C, Here _ B=C => A=C *> inv B=C
+  | {cons-ctx G ((y, _))}, Here x=y _, There x/=y _ => contradiction
+  | {cons-ctx G ((y, _))}, There x/=y _, Here x=y _ => contradiction
+  | {cons-ctx G ((y, C))}, There _ p1, There _ p2 => InContext-injective p1 p2
+
+{-Agda-
+nope₁ : ∀ {A} → ¬ (∅ ⊢ `zero · `suc `zero ⦂ A)
+nope₁ (() · _)
+-Agda-}
+
+\func nope1 {A : Type} : Not (∅ ⊢ (zero' ∙ suc' zero', A)) => \case __ \with {
+  | arr-elim () _
+}
+
+{-Agda-
+nope₂ : ∀ {A} → ¬ (∅ ⊢ ƛ "x" ⇒ ` "x" · ` "x" ⦂ A)
+nope₂ (⊢ƛ (⊢` ∋x · ⊢` ∋x′))  =  contradiction (∋-injective ∋x ∋x′)
+  where
+  contradiction : ∀ {A B} → ¬ (A ⇒ B ≡ A)
+  contradiction ()
+-Agda-}
+
+\func nope2 {A : Type} (_ : ∅ ⊢ (lam X (ref X ∙ ref X), A)) : Empty
+  | {arr A1 A2}, arr-intro (arr-elim (in-ctx-axiom h1) (in-ctx-axiom h2)) =>
+    arr-type-/=-type $ InContext-injective h1 h2
+  \where {
+    \func arr-type-/=-type {A B : Type} (p : A ==> B = A) : Empty => {?}
+  }
