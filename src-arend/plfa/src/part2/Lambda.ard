@@ -17,6 +17,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 \import Function.Meta ($)
 \import Logic
 \import Logic.Meta
+\import Meta
 \import Paths.Meta
 \import Set
 
@@ -720,8 +721,123 @@ data _⊢_⦂_ : Context → Term → Type → Set where
 \data HasType \alias \infix 4 ⊢ Context (\Sigma Term Type) \with
   | G, (ref x, A) => in-ctx-axiom (G ∋ (x, A))
   | G, (lam x N, arr A B) => arr-intro (G |: (x, A) ⊢ (N, B))
-  | G, (app L M, B) => arr-elim {A B : Type} (G ⊢ (L, A ==> B)) (G ⊢ (M, A))
+  | G, (app L M, B) => arr-elim {A : Type} (G ⊢ (L, A ==> B)) (G ⊢ (M, A))
   | G, (zero', Nat') => nat-intro1
   | G, (suc' M, Nat') => nat-intro2 (G ⊢ (M, Nat'))
   | G, (case L M x N, A) => nat-elim (G ⊢ (L, Nat')) (G ⊢ (M, A)) (G |: (x, Nat') ⊢ (N, A))
   | G, (fixpoint x M, A) => fixpoint-axiom (G |: (x, A) ⊢ (M, A))
+
+{-Agda-
+Ch : Type → Type
+Ch A = (A ⇒ A) ⇒ A ⇒ A
+
+⊢twoᶜ : ∀ {Γ A} → Γ ⊢ twoᶜ ⦂ Ch A
+⊢twoᶜ = ⊢ƛ (⊢ƛ (⊢` ∋s · (⊢` ∋s · ⊢` ∋z)))
+  where
+  ∋s = S′ Z
+  ∋z = Z
+-Agda-}
+
+\func Ch (A : Type) : Type => (A ==> A) ==> A ==> A
+
+\func has-type-two-c {G : Context} {A : Type} : G ⊢ (two-c, Ch A) =>
+  run {
+    arr-intro,
+    arr-intro,
+    arr-elim (in-ctx-axiom s-in-ctx) (arr-elim (in-ctx-axiom s-in-ctx) (in-ctx-axiom z-in-ctx))
+  }
+  \where {
+    \func s-in-ctx {G : Context} {A : Type} : G |: (S, A ==> A) |: (Z, A) ∋ (S, A ==> A) =>
+      There (\case __) (Here idp idp)
+
+    \func z-in-ctx {G : Context} {A : Type} : G |: (S, A ==> A) |: (Z, A) ∋ (Z, A) =>
+      Here idp idp
+  }
+
+{-Agda-
+⊢two : ∀ {Γ} → Γ ⊢ two ⦂ `ℕ
+⊢two = ⊢suc (⊢suc ⊢zero)
+
+⊢plus : ∀ {Γ} → Γ ⊢ plus ⦂ `ℕ ⇒ `ℕ ⇒ `ℕ
+⊢plus = ⊢μ (⊢ƛ (⊢ƛ (⊢case (⊢` ∋m) (⊢` ∋n)
+         (⊢suc (⊢` ∋+ · ⊢` ∋m′ · ⊢` ∋n′)))))
+  where
+  ∋+  = S′ (S′ (S′ Z))
+  ∋m  = S′ Z
+  ∋n  = Z
+  ∋m′ = Z
+  ∋n′ = S′ Z
+
+⊢2+2 : ∅ ⊢ plus · two · two ⦂ `ℕ
+⊢2+2 = ⊢plus · ⊢two · ⊢two
+-Agda-}
+
+\func has-type-two {G : Context} : G ⊢ (two, Nat') => nat-intro2 (nat-intro2 nat-intro1)
+
+\func has-type-plus {G : Context} : G ⊢ (plus, Nat' ==> Nat' ==> Nat') =>
+  run {
+    fixpoint-axiom,
+    arr-intro,
+    arr-intro,
+    nat-elim
+        (in-ctx-axiom (There (\case __) (Here idp idp)))
+        (in-ctx-axiom (Here idp idp))
+        (nat-intro2 (arr-elim
+            (arr-elim
+                (in-ctx-axiom (There (\case __) $ There (\case __) $ There (\case __) (Here idp idp)))
+                (in-ctx-axiom (Here idp idp)))
+            (in-ctx-axiom (There (\case __) (Here idp idp)))
+        ))
+  }
+
+\func has-type-2+2 : ∅ ⊢ (plus ∙ two ∙ two, Nat') =>
+  arr-elim (arr-elim has-type-plus has-type-two) has-type-two
+
+{-Agda-
+⊢plusᶜ : ∀ {Γ A} → Γ  ⊢ plusᶜ ⦂ Ch A ⇒ Ch A ⇒ Ch A
+⊢plusᶜ = ⊢ƛ (⊢ƛ (⊢ƛ (⊢ƛ (⊢` ∋m · ⊢` ∋s · (⊢` ∋n · ⊢` ∋s · ⊢` ∋z)))))
+  where
+  ∋m = S′ (S′ (S′ Z))
+  ∋n = S′ (S′ Z)
+  ∋s = S′ Z
+  ∋z = Z
+
+⊢sucᶜ : ∀ {Γ} → Γ ⊢ sucᶜ ⦂ `ℕ ⇒ `ℕ
+⊢sucᶜ = ⊢ƛ (⊢suc (⊢` ∋n))
+  where
+  ∋n = Z
+
+⊢2+2ᶜ : ∅ ⊢ plusᶜ · twoᶜ · twoᶜ · sucᶜ · `zero ⦂ `ℕ
+⊢2+2ᶜ = ⊢plusᶜ · ⊢twoᶜ · ⊢twoᶜ · ⊢sucᶜ · ⊢zero
+-Agda-}
+
+\func has-type-plus-c {G : Context} {A : Type} : G ⊢ (plus-c, Ch A ==> Ch A ==> Ch A) =>
+  run {
+    arr-intro,
+    arr-intro,
+    arr-intro,
+    arr-intro,
+    arr-elim
+        (arr-elim
+            (in-ctx-axiom (There (\case __) (There (\case __) (There (\case __) (Here idp idp)))))
+            (in-ctx-axiom (s-in-ctx A G)))
+        (arr-elim
+            (arr-elim
+                (in-ctx-axiom (There (\case __) (There (\case __) (Here idp idp))))
+                (in-ctx-axiom (s-in-ctx A G)))
+            (in-ctx-axiom (Here idp idp)))
+  }
+  \where {
+    \func s-in-ctx (A : Type) (G : Context) : G |: (M, Ch A) |: (N, Ch A) |: (S, A ==> A) |: (Z, A) ∋ (S, A ==> A) =>
+      There (\case __) (Here idp idp)
+  }
+
+\func has-type-suc-c {G : Context} : G ⊢ (suc-c, Nat' ==> Nat') =>
+  run {
+    arr-intro,
+    nat-intro2,
+    in-ctx-axiom (Here idp idp)
+  }
+
+\func has-type-2+2-c : ∅ ⊢ (plus-c ∙ two-c ∙ two-c ∙ suc-c ∙ zero', Nat') =>
+  arr-elim (arr-elim (arr-elim (arr-elim has-type-plus-c has-type-two-c) has-type-two-c) has-type-suc-c) nat-intro1
