@@ -11,6 +11,6 @@ the dev version of the [arend-lib](https://github.com/JetBrains/arend-lib), just
 
 Part 1: 10/10 sections completed.
 
-Part 2: 0/11 sections completed.
+Part 2: 1/11 sections completed.
 
 Part 3: 0/5 sections completed.

@@ -12,3 +12,7 @@
 - [Quantifiers](src/part1/Quantifiers.lagda.md): Universals and existentials
 - [Decidable](src/part1/Decidable.lagda.md): Booleans and decision procedures
 - [Lists](src/part1/Lists.lagda.md): Lists and higher-order functions
+
+## Part 2: Programming Language Foundations
+
+- [Lambda](src/part2/Lambda.lagda.md): Introduction to Lambda Calculus
