@@ -869,5 +869,47 @@ nope₂ (⊢ƛ (⊢` ∋x · ⊢` ∋x′))  =  contradiction (∋-injective ∋
   | {arr A1 A2}, arr-intro (arr-elim (in-ctx-axiom h1) (in-ctx-axiom h2)) =>
     arr-type-/=-type $ InContext-injective h1 h2
   \where {
+    -- TODO Arend cannot infer this
     \func arr-type-/=-type {A B : Type} (p : A ==> B = A) : Empty => {?}
   }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func has-type-mul {G : Context} : G ⊢ (mul, Nat' ==> Nat' ==> Nat') =>
+  run {
+    fixpoint-axiom,
+    arr-intro,
+    arr-intro,
+    nat-elim
+        (in-ctx-axiom (there here))
+        nat-intro1
+        (arr-elim
+            (arr-elim has-type-plus (in-ctx-axiom (there here)))
+            (arr-elim
+                (arr-elim
+                    (in-ctx-axiom (there (there (there here))))
+                    (in-ctx-axiom here))
+                (in-ctx-axiom (there here))))
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func has-type-mul-c {G : Context} {A : Type} : G ⊢ (mul-c2, Ch A ==> Ch A ==> Ch A) => run {
+  run {
+    arr-intro,
+    arr-intro,
+    arr-intro,
+    arr-intro,
+    arr-elim
+        (arr-elim
+            (in-ctx-axiom (there $ there $ there here))
+            (arr-elim
+                (in-ctx-axiom (there $ there here))
+                (in-ctx-axiom (there here))))
+        (in-ctx-axiom here)
+  }
+}
