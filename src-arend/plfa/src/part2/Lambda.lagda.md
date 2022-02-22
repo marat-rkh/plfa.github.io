@@ -1951,7 +1951,7 @@ showing that it is well typed.
 </details>
 
 ```tex
-\func has-type-mul-c {G : Context} {A : Type} : G ⊢ (mul-c2, Ch A ==> Ch A ==> Ch A) => run {
+\func has-type-mul-c {G : Context} {A : Type} : G ⊢ (mul-c2, Ch A ==> Ch A ==> Ch A) =>
   run {
     arr-intro,
     arr-intro,
@@ -1965,8 +1965,8 @@ showing that it is well typed.
                 (in-ctx-axiom (there here))))
         (in-ctx-axiom here)
   }
-}
 ```
+
 
 
 ## Unicode

@@ -898,7 +898,7 @@ nope₂ (⊢ƛ (⊢` ∋x · ⊢` ∋x′))  =  contradiction (∋-injective ∋
 -- Your code goes here
 -Agda-}
 
-\func has-type-mul-c {G : Context} {A : Type} : G ⊢ (mul-c2, Ch A ==> Ch A ==> Ch A) => run {
+\func has-type-mul-c {G : Context} {A : Type} : G ⊢ (mul-c2, Ch A ==> Ch A ==> Ch A) =>
   run {
     arr-intro,
     arr-intro,
@@ -912,4 +912,3 @@ nope₂ (⊢ƛ (⊢` ∋x · ⊢` ∋x′))  =  contradiction (∋-injective ∋
                 (in-ctx-axiom (there here))))
         (in-ctx-axiom here)
   }
-}
