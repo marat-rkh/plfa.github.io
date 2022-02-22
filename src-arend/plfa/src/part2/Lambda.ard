@@ -668,7 +668,9 @@ S′ : ∀ {Γ x y A B}
 S′ {x≢y = x≢y} x = S (toWitnessFalse x≢y) x
 -Agda-}
 
--- TODO this doesn't work in Arend
+\meta here => Here idp idp
+
+\meta there p => There (\case __) p
 
 {-Agda-
 infix  4  _⊢_⦂_
@@ -745,14 +747,7 @@ Ch A = (A ⇒ A) ⇒ A ⇒ A
   run {
     arr-intro,
     arr-intro,
-    arr-elim (in-ctx-axiom s-in-ctx) (arr-elim (in-ctx-axiom s-in-ctx) (in-ctx-axiom z-in-ctx))
-  }
-  \where {
-    \func s-in-ctx {G : Context} {A : Type} : G |: (S, A ==> A) |: (Z, A) ∋ (S, A ==> A) =>
-      There (\case __) (Here idp idp)
-
-    \func z-in-ctx {G : Context} {A : Type} : G |: (S, A ==> A) |: (Z, A) ∋ (Z, A) =>
-      Here idp idp
+    arr-elim (in-ctx-axiom (there here)) (arr-elim (in-ctx-axiom (there here)) (in-ctx-axiom here))
   }
 
 {-Agda-
@@ -781,13 +776,13 @@ Ch A = (A ⇒ A) ⇒ A ⇒ A
     arr-intro,
     arr-intro,
     nat-elim
-        (in-ctx-axiom (There (\case __) (Here idp idp)))
-        (in-ctx-axiom (Here idp idp))
+        (in-ctx-axiom (there here))
+        (in-ctx-axiom here)
         (nat-intro2 (arr-elim
             (arr-elim
-                (in-ctx-axiom (There (\case __) $ There (\case __) $ There (\case __) (Here idp idp)))
-                (in-ctx-axiom (Here idp idp)))
-            (in-ctx-axiom (There (\case __) (Here idp idp)))
+                (in-ctx-axiom (there $ there $ there here))
+                (in-ctx-axiom here))
+            (in-ctx-axiom (there here))
         ))
   }
 
@@ -820,24 +815,20 @@ Ch A = (A ⇒ A) ⇒ A ⇒ A
     arr-intro,
     arr-elim
         (arr-elim
-            (in-ctx-axiom (There (\case __) (There (\case __) (There (\case __) (Here idp idp)))))
-            (in-ctx-axiom (s-in-ctx A G)))
+            (in-ctx-axiom (there (there (there here))))
+            (in-ctx-axiom (there here)))
         (arr-elim
             (arr-elim
-                (in-ctx-axiom (There (\case __) (There (\case __) (Here idp idp))))
-                (in-ctx-axiom (s-in-ctx A G)))
-            (in-ctx-axiom (Here idp idp)))
-  }
-  \where {
-    \func s-in-ctx (A : Type) (G : Context) : G |: (M, Ch A) |: (N, Ch A) |: (S, A ==> A) |: (Z, A) ∋ (S, A ==> A) =>
-      There (\case __) (Here idp idp)
+                (in-ctx-axiom (there (there here)))
+                (in-ctx-axiom (there here)))
+            (in-ctx-axiom here))
   }
 
 \func has-type-suc-c {G : Context} : G ⊢ (suc-c, Nat' ==> Nat') =>
   run {
     arr-intro,
     nat-intro2,
-    in-ctx-axiom (Here idp idp)
+    in-ctx-axiom here
   }
 
 \func has-type-2+2-c : ∅ ⊢ (plus-c ∙ two-c ∙ two-c ∙ suc-c ∙ zero', Nat') =>
